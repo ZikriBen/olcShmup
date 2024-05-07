@@ -3,10 +3,17 @@
 #include "olcPixelGameEngine.h"
 
 #pragma once
-class Player : public olc::PixelGameEngine 
+struct sBullet {
+	olc::vf2d pos;
+	olc::vf2d vel;
+	bool remove = false;
+};
+
+class Player
 {
 public:
-	Player();
+	Player(olc::PixelGameEngine& pge);
+	olc::PixelGameEngine& pge;
 	void UpdatePosition(float);
 	void Draw();
 	olc::vf2d pos;
@@ -15,6 +22,8 @@ public:
 	olc::Sprite* sprPlayer;
 	float fGunReloadTimer;
 	float fGunReloadDelay;
+	bool bCanFire;
+	std::list<sBullet> listPlayerBullets;
 private:
 };
 
