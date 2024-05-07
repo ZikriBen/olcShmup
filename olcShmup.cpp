@@ -2,6 +2,7 @@
 ////
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
+#include "Player.h"
 
 constexpr double PI = 3.14159f;
 
@@ -11,25 +12,17 @@ public:
         sAppName = "Shmup";
     }
 
-    olc::vf2d vPlayerPos;
-    olc::Sprite* sprPlayer;
+
     std::array<olc::Sprite*, 3> sprEnemy;
 
-    float fPlayerSpeed = 200.f;
-    float fPlayerHealth = 100.0f;
     float fWorldSpeed = 40.0f;
     double dWorldPos = 0;
-    float fGunReloadTimer = 0.0f;
-    float fGunReloadDelay = 0.2f;
 
     std::array<olc::vf2d, 800> arrStars;
+
     struct sEnemy;
     
-    struct sBullet {
-        olc::vf2d pos;
-        olc::vf2d vel;
-        bool remove = false;
-    };
+
 
     struct sEnemyDefiniton {
         double dTriggerTime = 0.0f;
@@ -54,21 +47,19 @@ public:
             def.funcFire(*this, fElpasedTime, fScrollSpeed, b);
         }
     };
-
-    bool bCanFire = false;
+    
+    Player player{ *this };
     std::list<sEnemyDefiniton> listSpawns;
     std::list<sEnemy> listEnemies;
     std::list<sBullet> listBullets;
-    std::list<sBullet> listPlayerBullets;
     std::list<sBullet> listFragments;
 
 public:
     bool OnUserCreate() override {
-        sprPlayer = new olc::Sprite("assets//playerShip.png");
         sprEnemy[0] = new olc::Sprite("assets//enemyShip01.png");
         sprEnemy[1] = new olc::Sprite("assets//enemyShip01.png");
         sprEnemy[2] = new olc::Sprite("assets//enemyShip01.png");
-        vPlayerPos = { (float)ScreenWidth() / 2, (float)ScreenHeight() / 2 };
+        
 
         for (auto& star : arrStars) star = {(float)(rand() % ScreenWidth()), (float)(rand() % ScreenHeight())};
 
@@ -157,43 +148,38 @@ public:
         return true;
     }
 
+    void detectPlayerBulletCollision(float fElapsedTime, std::list<sBullet>& playerBullets, std::list<sEnemy>& listEnemies, std::list<sBullet>* listFragments) {
+        for (auto& b : playerBullets) {
+            b.pos += (b.vel + olc::vd2d(0.0f, fWorldSpeed)) * fElapsedTime;
+            for (auto& e : listEnemies) 
+                if ((b.pos - (e.pos + olc::vd2d(24, 24))).mag2() < 24.0f * 24.0f) { // Remove magic numbers!
+                    b.remove = true;
+                    e.def.fHealth -= 1.0f;
+                    if (e.def.fHealth <= 0) 
+                        for (int i = 0; i < 500; ++i) {
+                            float fAngle = ((float)rand() / (float)RAND_MAX) * 2.0f * PI;
+                            float fSpeed = ((float)rand() / (float)RAND_MAX) * 200.0f + 50.0f;
+                            listFragments->push_back({ e.pos + olc::vf2d(24,24), {fSpeed * cosf(fAngle), fSpeed * sinf(fAngle)} });
+                        }
+                }
+        }
+    }
+
     bool OnUserUpdate(float fElapsedTime) override {
-        
-        vPlayerPos.y += (fWorldSpeed * fElapsedTime) * 0.5;
+        Clear(olc::BLACK);
+        for (size_t i = 0; i < arrStars.size(); ++i) {
+            auto& star = arrStars[i];
 
-        //INPUT HANDLING
-        if (GetKey(olc::W).bHeld) vPlayerPos.y -= fPlayerSpeed * fElapsedTime;
-        if (GetKey(olc::S).bHeld) vPlayerPos.y += fPlayerSpeed * fElapsedTime;
-        if (GetKey(olc::A).bHeld) vPlayerPos.x -= fPlayerSpeed * fElapsedTime;
-        if (GetKey(olc::D).bHeld) vPlayerPos.x += fPlayerSpeed * fElapsedTime;
-        
-        if (vPlayerPos.x <= 0) vPlayerPos.x = 0;
-        if (vPlayerPos.y <= 0) vPlayerPos.x = 0;
-        
-        if (vPlayerPos.x + 48.0f >= (float)ScreenWidth()) vPlayerPos.x = (float)ScreenWidth() - 48.0f;
-        if (vPlayerPos.y + 48.0f >= (float)ScreenHeight()) vPlayerPos.y = (float)ScreenHeight() - 48.0f;
-            
-
-
-        fGunReloadTimer += fElapsedTime;
-
-        if (fGunReloadTimer >= fGunReloadDelay) {
-            bCanFire = true;
-            fGunReloadTimer -= fGunReloadDelay;
-        }
-
-        if (GetKey(olc::SPACE).bHeld || GetMouse(0).bHeld) {
-            if (bCanFire) {
-                sBullet b;
-                b.pos = { vPlayerPos.x + 24.0f, vPlayerPos.y };
-                b.vel = { 0.0f, -200.0f };
-                listPlayerBullets.push_back(b);
-                bCanFire = false;
+            star.y += fWorldSpeed * fElapsedTime * ((i < 200) ? 0.8f : 1.0f);
+            if (star.y > (float)ScreenHeight()) {
+                star = { (float)(rand() % ScreenWidth()), 0.0f };
             }
+            Draw(star, ((i < 200) ? olc::DARK_GREY : olc::WHITE));
         }
-
-        //GUBBINS
+        
         dWorldPos += fWorldSpeed * fElapsedTime;
+        player.UpdatePosition(fElapsedTime);
+
 
         while (!listSpawns.empty() && dWorldPos >= listSpawns.front().dTriggerTime) {
             sEnemy e;
@@ -206,73 +192,44 @@ public:
             listEnemies.push_back(e);
         }
 
-        //DRAW
-        Clear(olc::BLACK);
-
-        for (size_t i = 0; i < arrStars.size(); ++i) {
-            auto& star = arrStars[i];
-
-            star.y += fWorldSpeed * fElapsedTime * ((i < 200) ? 0.8f : 1.0f);
-            if (star.y > (float)ScreenHeight()) {
-                star = { (float)(rand() % ScreenWidth()), 0.0f };
-            }
-            Draw(star, ((i < 200) ? olc::DARK_GREY : olc::WHITE));
-        }
-        
-        //UPDATE
-
         for (auto& b : listFragments) {
             b.pos += (b.vel + olc::vd2d(0.0f, fWorldSpeed)) * fElapsedTime;
         }
 
         for (auto& e : listEnemies) e.Update(fElapsedTime, fWorldSpeed, listBullets);
+
         for (auto& b : listBullets) {
             b.pos += (b.vel + olc::vd2d(0.0f, fWorldSpeed)) * fElapsedTime;
-            if ((b.pos - (vPlayerPos + olc::vd2d(24, 24))).mag2() < 24.0f * 24.0f) { // Remove magic numbers!
+            if ((b.pos - (player.pos + olc::vd2d(24, 24))).mag2() < 24.0f * 24.0f) { // Remove magic numbers!
                 b.remove = true;
-                fPlayerHealth -= 1.0f;
+                player.health -= 1.0f;
             }
         }
 
-        for (auto& b : listPlayerBullets) {
-            b.pos += (b.vel + olc::vd2d(0.0f, fWorldSpeed)) * fElapsedTime;
-            for (auto& e : listEnemies) {
-                if ((b.pos - (e.pos + olc::vd2d(24, 24))).mag2() < 24.0f * 24.0f) { // Remove magic numbers!
-                    b.remove = true;
-                    e.def.fHealth -= 1.0f;
-                    if (e.def.fHealth <= 0) {
-                        for (int i = 0; i < 500; ++i) {
-                            float fAngle = ((float)rand() / (float)RAND_MAX) * 2.0f * PI;
-                            float fSpeed = ((float)rand() / (float)RAND_MAX) * 200.0f + 50.0f;
-                            listFragments.push_back({ e.pos + olc::vf2d(24,24), {fSpeed * cosf(fAngle), fSpeed * sinf(fAngle)}});
-                        }
-                    }
-                }
-            }
-            
-        }
+        detectPlayerBulletCollision(fElapsedTime, player.listPlayerBullets, listEnemies, &listFragments);
 
         listEnemies.remove_if([&](const sEnemy& e) {return e.pos.y >= ((float)ScreenHeight()) || e.def.fHealth <= 0; });
 
         listBullets.remove_if([&](const sBullet& b) {return b.pos.x < 0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
-        
-        listPlayerBullets.remove_if([&](const sBullet& b) {return b.pos.x<0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
+
         listFragments.remove_if([&](const sBullet& b) {return b.pos.x<0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
-       
+
         SetPixelMode(olc::Pixel::MASK);
-        DrawSprite(vPlayerPos, sprPlayer);
+        
+        //DRAW
+        player.Draw();
         
         for (auto& e : listEnemies) DrawSprite(e.pos, sprEnemy[e.def.nSpriteID], 1, olc::Sprite::Flip::VERT);
 
         for (auto& b : listBullets) FillCircle(b.pos, 3, olc::RED);
 
-        for (auto& b : listPlayerBullets) FillCircle(b.pos, 3, olc::CYAN);
+        for (auto& b : player.listPlayerBullets) FillCircle(b.pos, 3, olc::CYAN);
         for (auto& b : listFragments) Draw(b.pos, olc::YELLOW);
 
         //HUD
         DrawString(4, 4, "HEALTH:");
-        FillRect(60, 4, (fPlayerHealth / 100.0f * 576.0f), 8, olc::GREEN); // Remove magic numbers!
-        
+        FillRect(60, 4, (player.health / 100.0f * 576.0f), 8, olc::GREEN); // Remove magic numbers!
+       
         SetPixelMode(olc::Pixel::NORMAL);
 
         return true;
