@@ -1,0 +1,8 @@
+﻿  olcShmup.cpp
+C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(160,54): warning C4244: '+=': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(272,49): warning C4244: 'argument': conversion from 'float' to 'int32_t', possible loss of data
+  olcShmup.vcxproj -> C:\Users\user\source\repos\olcShmup\x64\Debug\olcShmup.exe
