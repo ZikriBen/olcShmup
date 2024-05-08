@@ -133,7 +133,9 @@ public:
                         for (int i = 0; i < 500; ++i) {
                             float fAngle = ((float)rand() / (float)RAND_MAX) * 2.0f * PI;
                             float fSpeed = ((float)rand() / (float)RAND_MAX) * 200.0f + 50.0f;
-                            listFragments->push_back({ e.pos + olc::vf2d(24,24), {fSpeed * cosf(fAngle), fSpeed * sinf(fAngle)} });
+                            
+                            listFragments->push_back({ e.pos + olc::vf2d(24, 24), {fSpeed * cosf(fAngle), fSpeed * sinf(fAngle)}, false, 255 });
+
                         }
                 }
         }
@@ -192,19 +194,23 @@ public:
         
         //DRAW
         player.Draw();
-        
         for (auto& e : listEnemies) DrawSprite(e.pos, sprEnemy[e.def.nSpriteID], 1, olc::Sprite::Flip::VERT);
+        
+        SetPixelMode(olc::Pixel::NORMAL);
 
         for (auto& b : listBullets) FillCircle(b.pos, 3, olc::RED);
 
         for (auto& b : player.listPlayerBullets) FillCircle(b.pos, 3, olc::CYAN);
-        for (auto& b : listFragments) Draw(b.pos, olc::YELLOW);
+        for (auto& b : listFragments) {
+            Draw(b.pos, olc::Pixel(255, 255, 0, b.alpha));
+            b.alpha -= (fElapsedTime * 0.006f);
+        }
 
         //HUD
         DrawString(4, 4, "HEALTH:");
         FillRect(60, 4, (player.health / 100.0f * 576.0f), 8, olc::GREEN); // Remove magic numbers!
        
-        SetPixelMode(olc::Pixel::NORMAL);
+        
 
         return true;
     }
