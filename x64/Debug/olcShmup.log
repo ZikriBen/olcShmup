@@ -1,8 +1,18 @@
-﻿  olcShmup.cpp
-C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(160,54): warning C4244: '+=': conversion from 'double' to 'T', possible loss of data
+﻿  Player.cpp
+C:\Users\user\source\repos\olcShmup\olcShmup\Player.cpp(16,34): warning C4244: '+=': conversion from 'double' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(272,49): warning C4244: 'argument': conversion from 'float' to 'int32_t', possible loss of data
+C:\Users\user\source\repos\olcShmup\olcShmup\Player.cpp(51,23): warning C4102: 'key': unreferenced label
+C:\Users\user\source\repos\olcShmup\olcShmup\Player.cpp(61,23): warning C4102: 'key': unreferenced label
+C:\Users\user\source\repos\olcShmup\olcShmup\Player.cpp(71,23): warning C4102: 'key': unreferenced label
+C:\Users\user\source\repos\olcShmup\olcShmup\Player.cpp(82,23): warning C4102: 'key': unreferenced label
+C:\Users\user\source\repos\olcShmup\olcShmup\Player.cpp(92,27): warning C4102: 'key': unreferenced label
+  olcShmup.cpp
+C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(79,36): warning C4305: 'initializing': truncation from 'double' to 'const float'
+C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(96,36): warning C4305: 'initializing': truncation from 'double' to 'const float'
+C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(134,42): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(205,49): warning C4244: 'argument': conversion from 'float' to 'int32_t', possible loss of data
+  Generating Code...
   olcShmup.vcxproj -> C:\Users\user\source\repos\olcShmup\x64\Debug\olcShmup.exe

@@ -1,14 +1,12 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include "olcPixelGameEngine.h"
+#include "Bullet.h"
 
 #pragma once
-struct sBullet {
-	olc::vf2d pos;
-	olc::vf2d vel;
-	bool remove = false;
-};
 
+class InputHandler;
+class Command;
 class Player
 {
 public:
@@ -24,7 +22,29 @@ public:
 	float fGunReloadDelay;
 	bool bCanFire;
 	std::list<sBullet> listPlayerBullets;
+	std::vector<std::tuple<Command*, float>> listPlayerCommands;
+	InputHandler *ih;
+
 private:
+};
+
+class Command
+{
+private:
+	char key;
+public:
+	Command(char key) : key(key) {}
+	virtual ~Command() {}
+	virtual void execute(Player &, float) = 0;
+	char getKey() const { return key; };
+};
+
+class InputHandler
+{
+public:
+	InputHandler(olc::PixelGameEngine& pge) : pge(pge) {}
+	Command* handleInput();
+	olc::PixelGameEngine& pge;
 };
 
 #endif // PLAYER_H

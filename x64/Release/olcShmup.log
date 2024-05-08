@@ -1,11 +1,12 @@
-﻿  olcShmup.cpp
-C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(105,36): warning C4305: 'initializing': truncation from 'double' to 'const float'
-C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(122,36): warning C4305: 'initializing': truncation from 'double' to 'const float'
-C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(160,42): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\user\source\repos\olcShmup\olcShmup\olcShmup.cpp(251,49): warning C4244: 'argument': conversion from 'float' to 'int32_t', possible loss of data
+﻿  Player.cpp
+C:\Users\user\source\repos\olcShmup\olcShmup\Player.cpp(16,34): warning C4244: '+=': conversion from 'double' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
   Generating code
-  2 of 2116 functions (<0.1%) were compiled, the rest were copied from previous compilation.
-    1 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
+  2 of 2180 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    199 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   olcShmup.vcxproj -> C:\Users\user\source\repos\olcShmup\x64\Release\olcShmup.exe

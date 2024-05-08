@@ -3,6 +3,8 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 #include "Player.h"
+#include "Enemy.h"
+#include "Bullet.h"
 
 constexpr double PI = 3.14159f;
 
@@ -20,34 +22,6 @@ public:
 
     std::array<olc::vf2d, 800> arrStars;
 
-    struct sEnemy;
-    
-
-
-    struct sEnemyDefiniton {
-        double dTriggerTime = 0.0f;
-        uint32_t nSpriteID = 0;
-        float fHealth = 0.0f;
-        float fOffset = 0.0f;
-
-        std::function<void(sEnemy&, float, float)> funcMove;
-        std::function<void(sEnemy&, float, float, std::list<sBullet>&)> funcFire;
-
-    };
-
-    struct sEnemy {
-        olc::vf2d pos;
-        sEnemyDefiniton def;
-
-        std::array<float, 4> dataMove{0};
-        std::array<float, 4> dataFire{0};
-
-        void Update(float fElpasedTime, float fScrollSpeed, std::list<sBullet> &b) {
-            def.funcMove(*this, fElpasedTime, fScrollSpeed);
-            def.funcFire(*this, fElpasedTime, fScrollSpeed, b);
-        }
-    };
-    
     Player player{ *this };
     std::list<sEnemyDefiniton> listSpawns;
     std::list<sEnemy> listEnemies;
@@ -246,12 +220,11 @@ int main()
 	return 0;
 }
 
-
+// make oop design
+// convert input handling to command design pattern
 // Optimize stars to initialization
 // add sprite stars/nebulas etc
 // add main menu
-// convert input handling to command design pattern
-// make player ship not go out of bounds
 // make the dataMove and dataFire as a calss member
 // Remove magic numbers!
 // add explosion sprite

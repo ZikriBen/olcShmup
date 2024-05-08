@@ -8,16 +8,12 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge) {
 	fGunReloadTimer = 0.0f;
 	fGunReloadDelay = 0.2f;
 	bCanFire = true;
+	ih  = new InputHandler(pge);
 }
 
 
 void Player::UpdatePosition(float fElapsedTime) {
 	pos.y += (40.0f * fElapsedTime) * 0.5;
-
-	if (pge.GetKey(olc::W).bHeld) pos.y -= speed * fElapsedTime;
-	if (pge.GetKey(olc::S).bHeld) pos.y += speed * fElapsedTime;
-	if (pge.GetKey(olc::A).bHeld) pos.x -= speed * fElapsedTime;
-	if (pge.GetKey(olc::D).bHeld) pos.x += speed * fElapsedTime;
 
 	if (pos.x <= 0) pos.x = 0;
 	if (pos.y <= 0) pos.x = 0;
@@ -31,15 +27,22 @@ void Player::UpdatePosition(float fElapsedTime) {
 		bCanFire = true;
 		fGunReloadTimer -= fGunReloadDelay;
 	}
-
-	if (pge.GetKey(olc::SPACE).bHeld || pge.GetMouse(0).bHeld) {
-		if (bCanFire) {
-			sBullet b;
-			b.pos = { pos.x + 24.0f, pos.y };
-			b.vel = { 0.0f, -200.0f };
-			listPlayerBullets.push_back(b);
-			bCanFire = false;
+	
+	/*if (pge.GetKey(olc::Q).bHeld) {
+		for (const auto& tuple : listPlayerCommands) {
+			Command* commandPtr = std::get<0>(tuple);
+			float time = std::get<1>(tuple);
+			char key = commandPtr->getKey();
+			std::cout << "Command key: " << commandPtr->getKey() << "time:" << time << std::endl;
 		}
+	}*/
+
+	Command* command = ih->handleInput();
+	if (command)
+	{
+		command->execute(*this, fElapsedTime);
+		delete command; // Release memory
+		//listPlayerCommands.push_back(std::tuple < Command*, float>{command, fElapsedTime});
 	}
 
 	listPlayerBullets.remove_if([&](const sBullet& b) {return b.pos.x<0 || b.pos.x>pge.ScreenWidth() || b.pos.y <0 || b.pos.y>pge.ScreenHeight() || b.remove; });
@@ -48,3 +51,74 @@ void Player::UpdatePosition(float fElapsedTime) {
 void Player::Draw() {
 	pge.DrawSprite(pos, sprPlayer);
 }
+
+class buttonW_ : public Command
+{
+public:
+	buttonW_(char key) : Command(key) {}
+	virtual void execute(Player& player, float fElapsedTime)
+	{
+		player.pos.y -= player.speed * fElapsedTime;
+	}
+};
+
+class buttonS_ : public Command
+{
+public:
+	buttonS_(char key) : Command(key) {}
+	virtual void execute(Player& player, float fElapsedTime)
+	{
+		player.pos.y += player.speed * fElapsedTime;
+	}
+};
+
+class buttonA_ : public Command
+{
+public:
+	buttonA_(char key) : Command(key) {}
+	virtual void execute(Player& player, float fElapsedTime)
+	{
+		player.pos.x -= player.speed * fElapsedTime;
+
+	}
+};
+
+class buttonD_ : public Command
+{
+public:
+	buttonD_(char key) : Command(key) {}
+	virtual void execute(Player& player, float fElapsedTime)
+	{
+		player.pos.x += player.speed * fElapsedTime;
+	}
+};
+
+class buttonSPACE_ : public Command
+{
+public:
+	buttonSPACE_(char key) : Command(key) {}
+	virtual void execute(Player& player, float fElapsedTime)
+	{
+		if (player.bCanFire) {
+			sBullet b;
+			b.pos = { player.pos.x + 24.0f, player.pos.y };
+			b.vel = { 0.0f, -200.0f };
+			player.listPlayerBullets.push_back(b);
+			player.bCanFire = false;
+		}
+	}
+};
+
+Command *InputHandler::handleInput()
+{
+	if (pge.GetKey(olc::W).bHeld) return new buttonW_('w');
+	if (pge.GetKey(olc::S).bHeld) return new buttonS_('s');
+	if (pge.GetKey(olc::A).bHeld) return new buttonA_('a');
+	if (pge.GetKey(olc::D).bHeld) return new buttonD_('d');
+	if (pge.GetKey(olc::SPACE).bHeld) return new buttonSPACE_(' ');
+
+	return nullptr;
+}
+
+
+
