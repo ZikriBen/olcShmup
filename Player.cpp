@@ -52,6 +52,14 @@ void Player::Draw() {
 	pge.DrawSprite(pos, sprPlayer);
 }
 
+float Player::getWidth() {
+	return sprPlayer->width;
+}
+
+float Player::getHeight() {
+	return sprPlayer->height;
+}
+
 class buttonW_ : public Command
 {
 public:

@@ -7,7 +7,7 @@ struct sEnemy;
 
 struct sEnemyDefiniton {
     double dTriggerTime = 0.0f;
-    uint32_t nSpriteID = 0;
+    olc::Sprite* sprEnemy;
     float fHealth = 0.0f;
     float fOffset = 0.0f;
 

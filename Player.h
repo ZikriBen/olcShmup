@@ -13,6 +13,8 @@ public:
 	Player(olc::PixelGameEngine& pge);
 	olc::PixelGameEngine& pge;
 	void UpdatePosition(float);
+	float getWidth();
+	float getHeight();
 	void Draw();
 	olc::vf2d pos;
 	float speed;

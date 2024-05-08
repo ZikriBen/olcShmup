@@ -14,9 +14,6 @@ public:
         sAppName = "Shmup";
     }
 
-
-    std::array<olc::Sprite*, 3> sprEnemy;
-
     float fWorldSpeed = 40.0f;
     double dWorldPos = 0;
 
@@ -30,9 +27,6 @@ public:
 
 public:
     bool OnUserCreate() override {
-        sprEnemy[0] = new olc::Sprite("assets//enemyShip01.png");
-        sprEnemy[1] = new olc::Sprite("assets//enemyShip01.png");
-        sprEnemy[2] = new olc::Sprite("assets//enemyShip01.png");
         
 
         for (auto& star : arrStars) star = {(float)(rand() % ScreenWidth()), (float)(rand() % ScreenHeight())};
@@ -67,7 +61,7 @@ public:
             if (e.dataFire[0] >= fDelay) {
                 e.dataFire[0] -= fDelay;
                 sBullet b;
-                b.pos = e.pos + (olc::vf2d(24, 48)); // Remove magic numbers!
+                b.pos = e.pos + (olc::vf2d(((float)e.def.sprEnemy->width / 2.0f), ((float)e.def.sprEnemy->height)));
                 b.vel = { 0.0f, 180.0f };
                 listBullets.push_back(b);
             }
@@ -83,7 +77,7 @@ public:
                 e.dataFire[0] -= fDelay;
                 for (int i = 0; i < nBullets; ++i) {
                     sBullet b;
-                    b.pos = e.pos + (olc::vf2d(24, 24)); // Remove magic numbers!
+                    b.pos = e.pos + (olc::vf2d(((float)e.def.sprEnemy->width / 2.0f), ((float)e.def.sprEnemy->height / 2.0f)));
                     b.vel = { 180.0f * cosf(fTetha * i), 180.0f * sinf(fTetha * i) };
                     listBullets.push_back(b);
                 }
@@ -107,16 +101,16 @@ public:
             }
         };
 
-
+        olc::Sprite *enemyShip01 = new olc::Sprite("assets/enemyShip01.png");
 
         listSpawns = {
-            {60.00, 0, 3.0f, 0.5f, Move_SinusoidWide, Fire_CirclePulse2},
-            {240.0, 0, 3.0f, 0.25f, Move_SinusoidNarrow, Fire_Straigt2},
-            {240.0, 0, 3.0f, 0.75f, Move_SinusoidNarrow, Fire_Straigt2},
-            {360.0, 0, 3.0f, 0.2f, Move_None, Fire_Straigt2},
-            {360.0, 0, 3.0f, 0.5f, Move_None, Fire_None},
-            {360.0, 0, 3.0f, 0.8f, Move_None, Fire_Straigt2},
-            {500, 0, 3.0f, 0.5f, Move_Fast, Fire_DeathSpiral}
+            {60.00, enemyShip01, 3.0f, 0.5f, Move_SinusoidWide, Fire_CirclePulse2},
+            {240.0, enemyShip01, 3.0f, 0.25f, Move_SinusoidNarrow, Fire_Straigt2},
+            {240.0, enemyShip01, 3.0f, 0.75f, Move_SinusoidNarrow, Fire_Straigt2},
+            {360.0, enemyShip01, 3.0f, 0.2f, Move_None, Fire_Straigt2},
+            {360.0, enemyShip01, 3.0f, 0.5f, Move_None, Fire_None},
+            {360.0, enemyShip01, 3.0f, 0.8f, Move_None, Fire_Straigt2},
+            {500.0, enemyShip01, 3.0f, 0.5f, Move_Fast, Fire_DeathSpiral}
         };
 
         return true;
@@ -126,7 +120,7 @@ public:
         for (auto& b : playerBullets) {
             b.pos += (b.vel + olc::vd2d(0.0f, fWorldSpeed)) * fElapsedTime;
             for (auto& e : listEnemies) 
-                if ((b.pos - (e.pos + olc::vd2d(24, 24))).mag2() < 24.0f * 24.0f) { // Remove magic numbers!
+                if ((b.pos - (e.pos + olc::vd2d(((float)e.def.sprEnemy->width / 2.0f), ((float)e.def.sprEnemy->width / 2.0f)))).mag2() <  powf(((float)e.def.sprEnemy->width / 2.0f), 2.0f)) { // Remove magic numbers!
                     b.remove = true;
                     e.def.fHealth -= 1.0f;
                     if (e.def.fHealth <= 0) 
@@ -161,8 +155,8 @@ public:
             sEnemy e;
             e.def = listSpawns.front();
             e.pos = {
-                e.def.fOffset * ((float)ScreenWidth()) - (((float)sprEnemy[e.def.nSpriteID]->width) / 2),
-                0.0f - ((float)sprEnemy[e.def.nSpriteID]->height)
+                e.def.fOffset * ((float)ScreenWidth()) - (((float)e.def.sprEnemy->width) / 2),
+                0.0f - ((float)e.def.sprEnemy->height)
             };
             listSpawns.pop_front();
             listEnemies.push_back(e);
@@ -176,7 +170,7 @@ public:
 
         for (auto& b : listBullets) {
             b.pos += (b.vel + olc::vd2d(0.0f, fWorldSpeed)) * fElapsedTime;
-            if ((b.pos - (player.pos + olc::vd2d(24, 24))).mag2() < 24.0f * 24.0f) { // Remove magic numbers!
+            if ((b.pos - (player.pos + olc::vd2d(((float)player.sprPlayer->width / 2.0f), ((float)player.sprPlayer->width / 2.0f)))).mag2() < powf(((float)player.sprPlayer->width / 2.0f), 2.0f)) {
                 b.remove = true;
                 player.health -= 1.0f;
             }
@@ -194,7 +188,7 @@ public:
         
         //DRAW
         player.Draw();
-        for (auto& e : listEnemies) DrawSprite(e.pos, sprEnemy[e.def.nSpriteID], 1, olc::Sprite::Flip::VERT);
+        for (auto& e : listEnemies) DrawSprite(e.pos, e.def.sprEnemy, 1, olc::Sprite::Flip::VERT);
         
         SetPixelMode(olc::Pixel::NORMAL);
 
@@ -203,7 +197,7 @@ public:
         for (auto& b : player.listPlayerBullets) FillCircle(b.pos, 3, olc::CYAN);
         for (auto& b : listFragments) {
             Draw(b.pos, olc::Pixel(255, 255, 0, b.alpha));
-            b.alpha -= (fElapsedTime * 0.006f);
+            b.alpha -= (fElapsedTime * 0.005f);
         }
 
         //HUD
@@ -227,7 +221,6 @@ int main()
 }
 
 // make oop design
-// convert input handling to command design pattern
 // Optimize stars to initialization
 // add sprite stars/nebulas etc
 // add main menu
