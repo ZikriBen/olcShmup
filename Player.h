@@ -12,22 +12,27 @@ class Player
 public:
 	Player(olc::PixelGameEngine& pge);
 	olc::PixelGameEngine& pge;
-	void UpdatePosition(float);
+	void Update(float);
+	void Draw();
 	float getWidth();
 	float getHeight();
-	void Draw();
 	olc::vf2d pos;
 	float speed;
 	float health;
-	olc::Sprite* sprPlayer;
+	olc::Sprite* sprPlayerSheet;
 	float fGunReloadTimer;
 	float fGunReloadDelay;
 	bool bCanFire;
 	std::list<sBullet> listPlayerBullets;
 	std::vector<std::tuple<Command*, float>> listPlayerCommands;
 	InputHandler *ih;
-
+	float fGraphicTimer;
+	int graphicCounter;
+	enum { NORTH = 0, EAST = 1, WEST = 2} facingDirection;
+	enum { STANDING, MOVING, DEAD } graphicState;
 private:
+	float fWidth;
+	float fHeight;
 };
 
 class Command

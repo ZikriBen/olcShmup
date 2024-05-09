@@ -1,18 +1,31 @@
 #include "Player.h"
 
 Player::Player(olc::PixelGameEngine& pge) : pge(pge) {
-	sprPlayer = new olc::Sprite("assets/playerShip.png");
+	sprPlayerSheet = new olc::Sprite("assets/PlayerSpritesheet.png");
 	pos = { (float)pge.ScreenWidth() / 2, (float)pge.ScreenHeight() / 2 };
 	speed = 200.f;
 	health = 100.0f;
 	fGunReloadTimer = 0.0f;
-	fGunReloadDelay = 0.2f;
+	fGunReloadDelay = 0.1f;
 	bCanFire = true;
 	ih  = new InputHandler(pge);
+	graphicState = STANDING;
+	facingDirection = NORTH;
+	fGraphicTimer = 0.0f;
+	graphicCounter = 0;
+	fWidth = 48.0f;
+	fHeight = 58.0f;
 }
 
 
-void Player::UpdatePosition(float fElapsedTime) {
+void Player::Update(float fElapsedTime) {
+	fGraphicTimer += fElapsedTime;
+	if (fGraphicTimer > 0.2f) {
+		fGraphicTimer -= 0.2f;
+		graphicCounter++;
+		graphicCounter %= 2;
+	}
+	
 	pos.y += (40.0f * fElapsedTime) * 0.5;
 
 	if (pos.x <= 0) pos.x = 0;
@@ -44,20 +57,43 @@ void Player::UpdatePosition(float fElapsedTime) {
 		delete command; // Release memory
 		//listPlayerCommands.push_back(std::tuple < Command*, float>{command, fElapsedTime});
 	}
+	else {
+		graphicState = STANDING;
+		facingDirection = NORTH;
+	}
 
 	listPlayerBullets.remove_if([&](const sBullet& b) {return b.pos.x<0 || b.pos.x>pge.ScreenWidth() || b.pos.y <0 || b.pos.y>pge.ScreenHeight() || b.remove; });
 }
 
 void Player::Draw() {
-	pge.DrawSprite(pos, sprPlayer);
+	int nSheetOffsetX = 0;
+	int nSheetOffsetY = 0;
+
+	switch (graphicState)
+	{
+	case Player::STANDING:
+		nSheetOffsetX = 0;
+		nSheetOffsetY = 0;
+		break;
+	case Player::MOVING:
+		nSheetOffsetX = graphicCounter * fWidth;
+		nSheetOffsetY = facingDirection * fHeight;
+		break;
+	case Player::DEAD:
+		break;
+	default:
+		break;
+	}
+
+	pge.DrawPartialSprite(pos.x, pos.y, sprPlayerSheet, nSheetOffsetX, nSheetOffsetY, (int)fWidth, (int)fHeight, 1, 0);
 }
 
 float Player::getWidth() {
-	return sprPlayer->width;
+	return fWidth;
 }
 
 float Player::getHeight() {
-	return sprPlayer->height;
+	return fHeight;
 }
 
 class buttonW_ : public Command
@@ -66,6 +102,8 @@ public:
 	buttonW_(char key) : Command(key) {}
 	virtual void execute(Player& player, float fElapsedTime)
 	{
+		player.graphicState = Player::MOVING;
+		player.facingDirection = Player::NORTH;
 		player.pos.y -= player.speed * fElapsedTime;
 	}
 };
@@ -76,6 +114,8 @@ public:
 	buttonS_(char key) : Command(key) {}
 	virtual void execute(Player& player, float fElapsedTime)
 	{
+		player.graphicState = Player::MOVING;
+		player.facingDirection = Player::NORTH;
 		player.pos.y += player.speed * fElapsedTime;
 	}
 };
@@ -86,6 +126,8 @@ public:
 	buttonA_(char key) : Command(key) {}
 	virtual void execute(Player& player, float fElapsedTime)
 	{
+		player.graphicState = Player::MOVING;
+		player.facingDirection = Player::WEST;
 		player.pos.x -= player.speed * fElapsedTime;
 
 	}
@@ -97,6 +139,8 @@ public:
 	buttonD_(char key) : Command(key) {}
 	virtual void execute(Player& player, float fElapsedTime)
 	{
+		player.graphicState = Player::MOVING;
+		player.facingDirection = Player::EAST;
 		player.pos.x += player.speed * fElapsedTime;
 	}
 };
@@ -109,7 +153,7 @@ public:
 	{
 		if (player.bCanFire) {
 			sBullet b;
-			b.pos = { player.pos.x + 24.0f, player.pos.y };
+			b.pos = { player.pos.x + ((float)player.getHeight() / 2.0f), player.pos.y };
 			b.vel = { 0.0f, -200.0f };
 			player.listPlayerBullets.push_back(b);
 			player.bCanFire = false;

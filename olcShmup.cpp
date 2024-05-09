@@ -148,7 +148,7 @@ public:
         }
         
         dWorldPos += fWorldSpeed * fElapsedTime;
-        player.UpdatePosition(fElapsedTime);
+        player.Update(fElapsedTime);
 
 
         while (!listSpawns.empty() && dWorldPos >= listSpawns.front().dTriggerTime) {
@@ -170,7 +170,7 @@ public:
 
         for (auto& b : listBullets) {
             b.pos += (b.vel + olc::vd2d(0.0f, fWorldSpeed)) * fElapsedTime;
-            if ((b.pos - (player.pos + olc::vd2d(((float)player.sprPlayer->width / 2.0f), ((float)player.sprPlayer->width / 2.0f)))).mag2() < powf(((float)player.sprPlayer->width / 2.0f), 2.0f)) {
+            if ((b.pos - (player.pos + olc::vd2d(((float)player.getWidth() / 2.0f), ((float)player.getWidth() / 2.0f)))).mag2() < powf(((float)player.getWidth() / 2.0f), 2.0f)) {
                 b.remove = true;
                 player.health -= 1.0f;
             }
@@ -224,8 +224,6 @@ int main()
 // Optimize stars to initialization
 // add sprite stars/nebulas etc
 // add main menu
-// make the dataMove and dataFire as a calss member
-// Remove magic numbers!
 // add explosion sprite
 // add score
 // particle fade away
