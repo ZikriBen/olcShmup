@@ -14,23 +14,28 @@ public:
 	olc::PixelGameEngine& pge;
 	void Update(float);
 	void Draw();
-	float getWidth();
-	float getHeight();
+	float getWidth() { return fWidth; };
+	float getHeight() { return fHeight; };
+	float getHealth() { return health; };
+	void setHealth(float newHealth) { health = newHealth; };
+	float getSpeed() { return speed; };
+
 	olc::vf2d pos;
-	float speed;
-	float health;
 	olc::Sprite* sprPlayerSheet;
 	float fGunReloadTimer;
 	float fGunReloadDelay;
 	bool bCanFire;
-	std::list<sBullet> listPlayerBullets;
+	std::list<Bullet> listPlayerBullets;
 	std::vector<std::tuple<Command*, float>> listPlayerCommands;
-	InputHandler *ih;
 	float fGraphicTimer;
 	int graphicCounter;
-	enum { NORTH = 0, EAST = 1, WEST = 2} facingDirection;
 	enum { STANDING, MOVING, DEAD } graphicState;
+	enum { NORTH = 0, EAST = 1, WEST = 2} facingDirection;
+	
 private:
+	float health;
+	float speed;
+	InputHandler *ih;
 	float fWidth;
 	float fHeight;
 };

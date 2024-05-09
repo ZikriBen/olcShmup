@@ -12,7 +12,7 @@ struct sEnemyDefiniton {
     float fOffset = 0.0f;
 
     std::function<void(sEnemy&, float, float)> funcMove;
-    std::function<void(sEnemy&, float, float, std::list<sBullet>&)> funcFire;
+    std::function<void(sEnemy&, float, float, std::list<Bullet>&)> funcFire;
 
 };
 
@@ -23,7 +23,7 @@ struct sEnemy {
     std::array<float, 4> dataMove{0};
     std::array<float, 4> dataFire{0};
 
-    void Update(float fElpasedTime, float fScrollSpeed, std::list<sBullet>& b) {
+    void Update(float fElpasedTime, float fScrollSpeed, std::list<Bullet>& b) {
         def.funcMove(*this, fElpasedTime, fScrollSpeed);
         def.funcFire(*this, fElpasedTime, fScrollSpeed, b);
     }

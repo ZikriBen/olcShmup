@@ -24,8 +24,8 @@ public:
     Background bg{ *this, fWorldSpeed, 200 };
     std::list<sEnemyDefiniton> listSpawns;
     std::list<sEnemy> listEnemies;
-    std::list<sBullet> listBullets;
-    std::list<sBullet> listFragments;
+    std::list<Bullet> listEnemyBullets;
+    std::list<Bullet> listFragments;
 
 public:
     bool OnUserCreate() override {
@@ -52,21 +52,21 @@ public:
             e.pos.x += 200.0f * cosf(e.dataMove[0]) * fElapsedTime;
         };
 
-        auto Fire_None = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed, std::list<sBullet>& b) {};
+        auto Fire_None = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {};
 
-        auto Fire_Straigt2 = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed, std::list<sBullet>& b) {
+        auto Fire_Straigt2 = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
             constexpr float fDelay = 0.2f;
             e.dataFire[0] += fElapsedTime;
             if (e.dataFire[0] >= fDelay) {
                 e.dataFire[0] -= fDelay;
-                sBullet b;
+                Bullet b;
                 b.pos = e.pos + (olc::vf2d(((float)e.def.sprEnemy->width / 2.0f), ((float)e.def.sprEnemy->height)));
                 b.vel = { 0.0f, 180.0f };
-                listBullets.push_back(b);
+                listEnemyBullets.push_back(b);
             }
         };
 
-        auto Fire_CirclePulse2 = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed, std::list<sBullet>& b) {
+        auto Fire_CirclePulse2 = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
             constexpr float fDelay = 2.0f;
             constexpr int nBullets = 10;
             constexpr float fTetha = PI * 2.0f / ((float)nBullets);
@@ -75,15 +75,15 @@ public:
             if (e.dataFire[0] >= fDelay) {
                 e.dataFire[0] -= fDelay;
                 for (int i = 0; i < nBullets; ++i) {
-                    sBullet b;
+                    Bullet b;
                     b.pos = e.pos + (olc::vf2d(((float)e.def.sprEnemy->width / 2.0f), ((float)e.def.sprEnemy->height / 2.0f)));
                     b.vel = { 180.0f * cosf(fTetha * i), 180.0f * sinf(fTetha * i) };
-                    listBullets.push_back(b);
+                    listEnemyBullets.push_back(b);
                 }
             }
         };
 
-        auto Fire_DeathSpiral = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed, std::list<sBullet>& b) {
+        auto Fire_DeathSpiral = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
             constexpr float fDelay = 0.01f;
             constexpr int nBullets = 50;
             constexpr float fTetha = PI * 2.0f / ((float)nBullets);
@@ -93,10 +93,10 @@ public:
                 e.dataFire[0] -= fDelay;
                 e.dataFire[1] += 0.1f;
 
-                sBullet b;
+                Bullet b;
                 b.pos = e.pos + (olc::vf2d(24, 24)); // Remove magic numbers!
                 b.vel = { 180.0f * cosf(e.dataFire[1]), 180.0f * sinf(e.dataFire[1])};
-                listBullets.push_back(b);
+                listEnemyBullets.push_back(b);
             }
         };
 
@@ -115,7 +115,7 @@ public:
         return true;
     }
 
-    void detectPlayerBulletCollision(float fElapsedTime, std::list<sBullet>& playerBullets, std::list<sEnemy>& listEnemies, std::list<sBullet>* listFragments) {
+    void detectPlayerBulletCollision(float fElapsedTime, std::list<Bullet>& playerBullets, std::list<sEnemy>& listEnemies, std::list<Bullet>* listFragments) {
         for (auto& b : playerBullets) {
             b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
             for (auto& e : listEnemies) 
@@ -134,10 +134,18 @@ public:
         }
     }
 
+    void cleanUp() {
+        listEnemies.remove_if([&](const sEnemy& e) {return e.pos.y >= ((float)ScreenHeight()) || e.def.fHealth <= 0; });
+
+        listEnemyBullets.remove_if([&](const Bullet& b) {return b.pos.x < 0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
+
+        listFragments.remove_if([&](const Bullet& b) {return b.pos.x<0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
+    }
+
     bool OnUserUpdate(float fElapsedTime) override {
         Clear(olc::BLACK);
-        bg.Update(fElapsedTime);
         dWorldPos += fWorldSpeed * fElapsedTime;
+        bg.Update(fElapsedTime);
         player.Update(fElapsedTime);
 
 
@@ -156,36 +164,27 @@ public:
             b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
         }
 
-        for (auto& e : listEnemies) e.Update(fElapsedTime, fWorldSpeed, listBullets);
+        for (auto& e : listEnemies) {
+            e.Update(fElapsedTime, fWorldSpeed, listEnemyBullets);
+        }
 
-        for (auto& b : listBullets) {
-            b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
-            if ((b.pos - (player.pos + olc::vf2d(((float)player.getWidth() / 2.0f), ((float)player.getWidth() / 2.0f)))).mag2() < powf(((float)player.getWidth() / 2.0f), 2.0f)) {
-                b.remove = true;
-                player.health -= 1.0f;
-            }
+        for (auto& b : listEnemyBullets) {
+            b.Update(fElapsedTime, fWorldSpeed, player);
         }
 
         detectPlayerBulletCollision(fElapsedTime, player.listPlayerBullets, listEnemies, &listFragments);
 
-        listEnemies.remove_if([&](const sEnemy& e) {return e.pos.y >= ((float)ScreenHeight()) || e.def.fHealth <= 0; });
-
-        listBullets.remove_if([&](const sBullet& b) {return b.pos.x < 0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
-
-        listFragments.remove_if([&](const sBullet& b) {return b.pos.x<0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
-
-        SetPixelMode(olc::Pixel::MASK);
         
         //DRAW
         bg.Draw();
         player.Draw();
+
+        SetPixelMode(olc::Pixel::MASK);
         for (auto& e : listEnemies) DrawSprite(e.pos, e.def.sprEnemy, 1, olc::Sprite::Flip::VERT);
-        
         SetPixelMode(olc::Pixel::NORMAL);
 
-        for (auto& b : listBullets) FillCircle(b.pos, 3, olc::RED);
-
-        for (auto& b : player.listPlayerBullets) FillCircle(b.pos, 3, olc::CYAN);
+        for (auto& b : listEnemyBullets) FillCircle(b.pos, 3, olc::RED);
+        
         for (auto& b : listFragments) {
             Draw(b.pos, olc::Pixel(255, 255, 0, b.alpha));
             b.alpha -= (fElapsedTime * 0.005f);
@@ -193,10 +192,9 @@ public:
 
         //HUD
         DrawString(4, 4, "HEALTH:");
-        FillRect(60, 4, (player.health / 100.0f * 576.0f), 8, olc::GREEN); // Remove magic numbers!
+        FillRect(60, 4, (player.getHealth() / 100.0f * 576.0f), 8, olc::GREEN); // Remove magic numbers!
        
-        
-
+        cleanUp();
         return true;
     }
 };
@@ -211,10 +209,9 @@ int main()
 	return 0;
 }
 
-// make oop design
-// Optimize stars to initialization
-// add sprite stars/nebulas etc
 // add main menu
 // add explosion sprite
 // add score
 // add player death
+// add different projectiles
+// add power ups

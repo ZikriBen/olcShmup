@@ -62,7 +62,7 @@ void Player::Update(float fElapsedTime) {
 		facingDirection = NORTH;
 	}
 
-	listPlayerBullets.remove_if([&](const sBullet& b) {return b.pos.x<0 || b.pos.x>pge.ScreenWidth() || b.pos.y <0 || b.pos.y>pge.ScreenHeight() || b.remove; });
+	listPlayerBullets.remove_if([&](const Bullet& b) {return b.pos.x<0 || b.pos.x>pge.ScreenWidth() || b.pos.y <0 || b.pos.y>pge.ScreenHeight() || b.remove; });
 }
 
 void Player::Draw() {
@@ -84,17 +84,15 @@ void Player::Draw() {
 	default:
 		break;
 	}
-
+	pge.SetPixelMode(olc::Pixel::MASK);
 	pge.DrawPartialSprite(pos.x, pos.y, sprPlayerSheet, nSheetOffsetX, nSheetOffsetY, (int)fWidth, (int)fHeight, 1, 0);
+	
+	pge.SetPixelMode(olc::Pixel::NORMAL);
+	
+	for (auto& b : listPlayerBullets) 
+		pge.FillCircle(b.pos, 3, olc::CYAN);
 }
 
-float Player::getWidth() {
-	return fWidth;
-}
-
-float Player::getHeight() {
-	return fHeight;
-}
 
 class buttonW_ : public Command
 {
@@ -104,7 +102,7 @@ public:
 	{
 		player.graphicState = Player::MOVING;
 		player.facingDirection = Player::NORTH;
-		player.pos.y -= player.speed * fElapsedTime;
+		player.pos.y -= player.getSpeed() * fElapsedTime;
 	}
 };
 
@@ -116,7 +114,7 @@ public:
 	{
 		player.graphicState = Player::MOVING;
 		player.facingDirection = Player::NORTH;
-		player.pos.y += player.speed * fElapsedTime;
+		player.pos.y += player.getSpeed() * fElapsedTime;
 	}
 };
 
@@ -128,7 +126,7 @@ public:
 	{
 		player.graphicState = Player::MOVING;
 		player.facingDirection = Player::WEST;
-		player.pos.x -= player.speed * fElapsedTime;
+		player.pos.x -= player.getSpeed() * fElapsedTime;
 
 	}
 };
@@ -141,7 +139,7 @@ public:
 	{
 		player.graphicState = Player::MOVING;
 		player.facingDirection = Player::EAST;
-		player.pos.x += player.speed * fElapsedTime;
+		player.pos.x += player.getSpeed() * fElapsedTime;
 	}
 };
 
@@ -152,8 +150,8 @@ public:
 	virtual void execute(Player& player, float fElapsedTime)
 	{
 		if (player.bCanFire) {
-			sBullet b;
-			b.pos = { player.pos.x + ((float)player.getHeight() / 2.0f), player.pos.y };
+			Bullet b;
+			b.pos = { player.pos.x + ((float)player.getWidth() / 2.0f), player.pos.y };
 			b.vel = { 0.0f, -200.0f };
 			player.listPlayerBullets.push_back(b);
 			player.bCanFire = false;

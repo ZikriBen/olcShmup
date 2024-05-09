@@ -3,7 +3,7 @@
 #include "olcPixelGameEngine.h"
 #include "Artifact.h"
 
-
+constexpr auto NUM_STARS = 800;
 #pragma once
 class Background
 {
@@ -18,7 +18,7 @@ public:
 	int nFarStars;
 	float fFarStarsSpeed;
 	float fNebulaeSpacer;
-	std::array<olc::vf2d, 800> arrStars;
+	std::array<olc::vf2d, NUM_STARS> arrStars;
 	std::list<Artifact *> nebulas;
 	
 };

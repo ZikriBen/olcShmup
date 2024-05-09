@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="Artifact.cpp" />
     <ClCompile Include="Background.cpp" />
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="olcShmup.cpp" />
     <ClCompile Include="Player.cpp" />

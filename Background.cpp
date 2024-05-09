@@ -15,13 +15,15 @@ void Background::populateStart(){
 }
 
 void Background::Draw() {
+    pge.SetPixelMode(olc::Pixel::MASK);
     for (size_t i = 0; i < arrStars.size(); ++i) {
         auto& star = arrStars[i];
         pge.Draw(star, ((i < nFarStars) ? olc::DARK_GREY : olc::WHITE));
     }
     for (auto& nebula : nebulas) {
-        pge.DrawSprite(nebula->pos, nebula->spr, nebula->scale, nebula->flip);
+        pge.DrawSprite(nebula->pos, nebula->spr, nebula->scale, nebula->flip);           
     }
+    pge.SetPixelMode(olc::Pixel::NORMAL);
 }
 
 void Background::Update(float fElapsedTime) {
