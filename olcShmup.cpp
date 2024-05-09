@@ -5,6 +5,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Bullet.h"
+#include "Background.h"
 
 constexpr double PI = 3.14159f;
 
@@ -17,9 +18,10 @@ public:
     float fWorldSpeed = 40.0f;
     double dWorldPos = 0;
 
-    std::array<olc::vf2d, 800> arrStars;
+    
 
     Player player{ *this };
+    Background bg{ *this, fWorldSpeed, 200 };
     std::list<sEnemyDefiniton> listSpawns;
     std::list<sEnemy> listEnemies;
     std::list<sBullet> listBullets;
@@ -27,10 +29,7 @@ public:
 
 public:
     bool OnUserCreate() override {
-        
-
-        for (auto& star : arrStars) star = {(float)(rand() % ScreenWidth()), (float)(rand() % ScreenHeight())};
-
+        bg.populateStart();
         // Movement Patterns
         auto Move_None = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed) {
             e.pos.y += fScrollSpeed * fElapsedTime;
@@ -118,9 +117,9 @@ public:
 
     void detectPlayerBulletCollision(float fElapsedTime, std::list<sBullet>& playerBullets, std::list<sEnemy>& listEnemies, std::list<sBullet>* listFragments) {
         for (auto& b : playerBullets) {
-            b.pos += (b.vel + olc::vd2d(0.0f, fWorldSpeed)) * fElapsedTime;
+            b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
             for (auto& e : listEnemies) 
-                if ((b.pos - (e.pos + olc::vd2d(((float)e.def.sprEnemy->width / 2.0f), ((float)e.def.sprEnemy->width / 2.0f)))).mag2() <  powf(((float)e.def.sprEnemy->width / 2.0f), 2.0f)) { // Remove magic numbers!
+                if ((b.pos - (e.pos + olc::vf2d(((float)e.def.sprEnemy->width / 2.0f), ((float)e.def.sprEnemy->width / 2.0f)))).mag2() <  powf(((float)e.def.sprEnemy->width / 2.0f), 2.0f)) { // Remove magic numbers!
                     b.remove = true;
                     e.def.fHealth -= 1.0f;
                     if (e.def.fHealth <= 0) 
@@ -137,16 +136,7 @@ public:
 
     bool OnUserUpdate(float fElapsedTime) override {
         Clear(olc::BLACK);
-        for (size_t i = 0; i < arrStars.size(); ++i) {
-            auto& star = arrStars[i];
-
-            star.y += fWorldSpeed * fElapsedTime * ((i < 200) ? 0.8f : 1.0f);
-            if (star.y > (float)ScreenHeight()) {
-                star = { (float)(rand() % ScreenWidth()), 0.0f };
-            }
-            Draw(star, ((i < 200) ? olc::DARK_GREY : olc::WHITE));
-        }
-        
+        bg.Update(fElapsedTime);
         dWorldPos += fWorldSpeed * fElapsedTime;
         player.Update(fElapsedTime);
 
@@ -163,14 +153,14 @@ public:
         }
 
         for (auto& b : listFragments) {
-            b.pos += (b.vel + olc::vd2d(0.0f, fWorldSpeed)) * fElapsedTime;
+            b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
         }
 
         for (auto& e : listEnemies) e.Update(fElapsedTime, fWorldSpeed, listBullets);
 
         for (auto& b : listBullets) {
-            b.pos += (b.vel + olc::vd2d(0.0f, fWorldSpeed)) * fElapsedTime;
-            if ((b.pos - (player.pos + olc::vd2d(((float)player.getWidth() / 2.0f), ((float)player.getWidth() / 2.0f)))).mag2() < powf(((float)player.getWidth() / 2.0f), 2.0f)) {
+            b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
+            if ((b.pos - (player.pos + olc::vf2d(((float)player.getWidth() / 2.0f), ((float)player.getWidth() / 2.0f)))).mag2() < powf(((float)player.getWidth() / 2.0f), 2.0f)) {
                 b.remove = true;
                 player.health -= 1.0f;
             }
@@ -187,6 +177,7 @@ public:
         SetPixelMode(olc::Pixel::MASK);
         
         //DRAW
+        bg.Draw();
         player.Draw();
         for (auto& e : listEnemies) DrawSprite(e.pos, e.def.sprEnemy, 1, olc::Sprite::Flip::VERT);
         
@@ -226,5 +217,4 @@ int main()
 // add main menu
 // add explosion sprite
 // add score
-// particle fade away
 // add player death
