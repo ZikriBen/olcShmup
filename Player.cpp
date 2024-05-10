@@ -4,7 +4,7 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge) {
 	sprPlayerSheet = new olc::Sprite("assets/PlayerSpritesheet.png");
 	pos = { (float)pge.ScreenWidth() / 2, (float)pge.ScreenHeight() / 2 };
 	speed = 200.f;
-	health = 3.0f;
+	health = 100.0f;
 	fGunReloadTimer = 0.0f;
 	fGunReloadDelay = 0.1f;
 	bCanFire = true;
@@ -57,14 +57,53 @@ void Player::Update(float fElapsedTime) {
 		}
 	}*/
 
-	Command* command = ih->handleInput();
-	if (command)
-	{
-		command->execute(*this, fElapsedTime);
-		delete command; // Release memory
-		//listPlayerCommands.push_back(std::tuple < Command*, float>{command, fElapsedTime});
+	//Command* command = ih->handleInput();
+	//if (command)
+	//{
+	//	command->execute(*this, fElapsedTime);
+	//	delete command; // Release memory
+	//	//listPlayerCommands.push_back(std::tuple < Command*, float>{command, fElapsedTime});
+	//}
+	//else {
+	//	graphicState = STANDING;
+	//	facingDirection = NORTH;
+	//}
+
+	ih->handleInput();
+
+	// Check if specific keys are pressed and execute corresponding commands
+	if (ih->isKeyPressed('W')) {
+		graphicState = Player::MOVING;
+		facingDirection = Player::NORTH;
+		pos.y -= getSpeed() * fElapsedTime;
 	}
-	else {
+	if (ih->isKeyPressed('S')) {
+		graphicState = Player::MOVING;
+		facingDirection = Player::NORTH;
+		pos.y += getSpeed() * fElapsedTime;
+	}
+	if (ih->isKeyPressed('A')) {
+		graphicState = Player::MOVING;
+		facingDirection = Player::WEST;
+		pos.x -= getSpeed() * fElapsedTime;
+	}
+	if (ih->isKeyPressed('D')) {
+		graphicState = Player::MOVING;
+		facingDirection = Player::EAST;
+		pos.x += getSpeed() * fElapsedTime;
+	}
+	if (ih->isKeyPressed(' ')) {
+		if (bCanFire) {
+			Bullet b;
+			b.pos = { pos.x + ((float)fWidth / 2.0f), pos.y };
+			b.vel = { 0.0f, -200.0f };
+			listPlayerBullets.push_back(b);
+			bCanFire = false;
+		}
+	}
+
+	// If no command is executed, set default states
+	if (!ih->isKeyPressed('W') && !ih->isKeyPressed('S') && !ih->isKeyPressed('A') && !ih->isKeyPressed('D') && !ih->isKeyPressed(' ')) {
 		graphicState = STANDING;
 		facingDirection = NORTH;
 	}
@@ -166,7 +205,7 @@ public:
 	}
 };
 
-Command *InputHandler::handleInput()
+/*ommand *InputHandler::handleInput()
 {
 	if (pge.GetKey(olc::W).bHeld) return new buttonW_('w');
 	if (pge.GetKey(olc::S).bHeld) return new buttonS_('s');
@@ -175,7 +214,7 @@ Command *InputHandler::handleInput()
 	if (pge.GetKey(olc::SPACE).bHeld) return new buttonSPACE_(' ');
 
 	return nullptr;
-}
+}*/
 
 
 

@@ -2,6 +2,7 @@
 #define PLAYER_H
 #include "olcPixelGameEngine.h"
 #include "Bullet.h"
+#include <unordered_set>
 
 #pragma once
 
@@ -55,12 +56,32 @@ public:
 	char getKey() const { return key; };
 };
 
-class InputHandler
-{
+class InputHandler {
 public:
 	InputHandler(olc::PixelGameEngine& pge) : pge(pge) {}
-	Command* handleInput();
+
+	void handleInput() {
+		// Clear the set of currently pressed keys
+		pressedKeys.clear();
+
+		// Check for key press events and add the pressed keys to the set
+		if (pge.GetKey(olc::W).bHeld) pressedKeys.insert('W');
+		if (pge.GetKey(olc::S).bHeld) pressedKeys.insert('S');
+		if (pge.GetKey(olc::A).bHeld) pressedKeys.insert('A');
+		if (pge.GetKey(olc::D).bHeld) pressedKeys.insert('D');
+		if (pge.GetKey(olc::SPACE).bHeld) pressedKeys.insert(' ');
+
+		// Handle other input events as needed
+	}
+
+	// Check if a specific key is currently pressed
+	bool isKeyPressed(char key) const {
+		return pressedKeys.count(key) > 0;
+	}
+
+private:
 	olc::PixelGameEngine& pge;
+	std::unordered_set<char> pressedKeys; // Set to store currently pressed keys
 };
 
 #endif // PLAYER_H
