@@ -23,10 +23,7 @@ struct sEnemy {
     std::array<float, 4> dataMove{0};
     std::array<float, 4> dataFire{0};
 
-    void Update(float fElpasedTime, float fScrollSpeed, std::list<Bullet>& b) {
-        def.funcMove(*this, fElpasedTime, fScrollSpeed);
-        def.funcFire(*this, fElpasedTime, fScrollSpeed, b);
-    }
+    void Update(float fElpasedTime, float fScrollSpeed, std::list<Bullet>& b);
 };
 
 #endif // ENEMY_H

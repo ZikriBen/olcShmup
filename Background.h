@@ -9,7 +9,7 @@ class Background
 {
 public:
 	Background(olc::PixelGameEngine&, float, int);
-	void populateStart();
+	void populateStars();
 	void Update(float);
 	void Draw();
 

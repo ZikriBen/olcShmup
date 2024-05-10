@@ -3,7 +3,7 @@
 Background::Background(olc::PixelGameEngine& pge, float fWorldSpeed, int nFarStars) : pge(pge), fWorldSpeed(fWorldSpeed), nFarStars(nFarStars), fNebulaeSpacer(1.5f), fFarStarsSpeed(0.2f){
 }
 
-void Background::populateStart(){
+void Background::populateStars(){
     for (auto& star : arrStars) 
         star = { (float)(rand() % pge.ScreenWidth()), (float)(rand() % pge.ScreenHeight()) };
 

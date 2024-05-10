@@ -19,6 +19,8 @@ public:
 	float getHealth() { return health; };
 	void setHealth(float newHealth) { health = newHealth; };
 	float getSpeed() { return speed; };
+	void kill() { dead = false; };
+	bool isDead() { return dead; };
 
 	olc::vf2d pos;
 	olc::Sprite* sprPlayerSheet;
@@ -29,10 +31,12 @@ public:
 	std::vector<std::tuple<Command*, float>> listPlayerCommands;
 	float fGraphicTimer;
 	int graphicCounter;
-	enum { STANDING, MOVING, DEAD } graphicState;
+	enum { STANDING, MOVING } graphicState;
+	enum { ALIVE, DYING, DEAD } lifeState;
 	enum { NORTH = 0, EAST = 1, WEST = 2} facingDirection;
 	
 private:
+	bool dead;
 	float health;
 	float speed;
 	InputHandler *ih;

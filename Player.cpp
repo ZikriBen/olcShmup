@@ -4,7 +4,7 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge) {
 	sprPlayerSheet = new olc::Sprite("assets/PlayerSpritesheet.png");
 	pos = { (float)pge.ScreenWidth() / 2, (float)pge.ScreenHeight() / 2 };
 	speed = 200.f;
-	health = 100.0f;
+	health = 3.0f;
 	fGunReloadTimer = 0.0f;
 	fGunReloadDelay = 0.1f;
 	bCanFire = true;
@@ -15,10 +15,17 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge) {
 	graphicCounter = 0;
 	fWidth = 48.0f;
 	fHeight = 58.0f;
+	dead = false;
 }
 
 
 void Player::Update(float fElapsedTime) {
+	if (health <= 0) {
+		dead = true;
+		lifeState = Player::DYING;
+		return;
+	}
+	
 	fGraphicTimer += fElapsedTime;
 	if (fGraphicTimer > 0.2f) {
 		fGraphicTimer -= 0.2f;
