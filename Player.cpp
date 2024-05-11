@@ -1,6 +1,7 @@
 #include "Player.h"
+#include "CommandFactory.h"
 
-Player::Player(olc::PixelGameEngine& pge) : pge(pge) {
+Player::Player(olc::PixelGameEngine& pge) : pge(pge), lifeState(Player::ALIVE) {
 	sprPlayerSheet = new olc::Sprite("assets/PlayerSpritesheet.png");
 	pos = { (float)pge.ScreenWidth() / 2, (float)pge.ScreenHeight() / 2 };
 	speed = 200.f;
@@ -8,7 +9,6 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge) {
 	fGunReloadTimer = 0.0f;
 	fGunReloadDelay = 0.1f;
 	bCanFire = true;
-	ih  = new InputHandler(pge);
 	graphicState = STANDING;
 	facingDirection = NORTH;
 	fGraphicTimer = 0.0f;
@@ -16,6 +16,8 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge) {
 	fWidth = 48.0f;
 	fHeight = 58.0f;
 	dead = false;
+	factory = new ConcreteCommandFactory();
+	ih  = new InputHandler(pge, *factory);
 }
 
 
@@ -47,67 +49,9 @@ void Player::Update(float fElapsedTime) {
 		bCanFire = true;
 		fGunReloadTimer -= fGunReloadDelay;
 	}
+
+	ih->handleInput(*this, fElapsedTime);
 	
-	/*if (pge.GetKey(olc::Q).bHeld) {
-		for (const auto& tuple : listPlayerCommands) {
-			Command* commandPtr = std::get<0>(tuple);
-			float time = std::get<1>(tuple);
-			char key = commandPtr->getKey();
-			std::cout << "Command key: " << commandPtr->getKey() << "time:" << time << std::endl;
-		}
-	}*/
-
-	//Command* command = ih->handleInput();
-	//if (command)
-	//{
-	//	command->execute(*this, fElapsedTime);
-	//	delete command; // Release memory
-	//	//listPlayerCommands.push_back(std::tuple < Command*, float>{command, fElapsedTime});
-	//}
-	//else {
-	//	graphicState = STANDING;
-	//	facingDirection = NORTH;
-	//}
-
-	ih->handleInput();
-
-	// Check if specific keys are pressed and execute corresponding commands
-	if (ih->isKeyPressed('W')) {
-		graphicState = Player::MOVING;
-		facingDirection = Player::NORTH;
-		pos.y -= getSpeed() * fElapsedTime;
-	}
-	if (ih->isKeyPressed('S')) {
-		graphicState = Player::MOVING;
-		facingDirection = Player::NORTH;
-		pos.y += getSpeed() * fElapsedTime;
-	}
-	if (ih->isKeyPressed('A')) {
-		graphicState = Player::MOVING;
-		facingDirection = Player::WEST;
-		pos.x -= getSpeed() * fElapsedTime;
-	}
-	if (ih->isKeyPressed('D')) {
-		graphicState = Player::MOVING;
-		facingDirection = Player::EAST;
-		pos.x += getSpeed() * fElapsedTime;
-	}
-	if (ih->isKeyPressed(' ')) {
-		if (bCanFire) {
-			Bullet b;
-			b.pos = { pos.x + ((float)fWidth / 2.0f), pos.y };
-			b.vel = { 0.0f, -200.0f };
-			listPlayerBullets.push_back(b);
-			bCanFire = false;
-		}
-	}
-
-	// If no command is executed, set default states
-	if (!ih->isKeyPressed('W') && !ih->isKeyPressed('S') && !ih->isKeyPressed('A') && !ih->isKeyPressed('D') && !ih->isKeyPressed(' ')) {
-		graphicState = STANDING;
-		facingDirection = NORTH;
-	}
-
 	listPlayerBullets.remove_if([&](const Bullet& b) {return b.pos.x<0 || b.pos.x>pge.ScreenWidth() || b.pos.y <0 || b.pos.y>pge.ScreenHeight() || b.remove; });
 }
 
@@ -138,83 +82,4 @@ void Player::Draw() {
 	for (auto& b : listPlayerBullets) 
 		pge.FillCircle(b.pos, 3, olc::CYAN);
 }
-
-
-class buttonW_ : public Command
-{
-public:
-	buttonW_(char key) : Command(key) {}
-	virtual void execute(Player& player, float fElapsedTime)
-	{
-		player.graphicState = Player::MOVING;
-		player.facingDirection = Player::NORTH;
-		player.pos.y -= player.getSpeed() * fElapsedTime;
-	}
-};
-
-class buttonS_ : public Command
-{
-public:
-	buttonS_(char key) : Command(key) {}
-	virtual void execute(Player& player, float fElapsedTime)
-	{
-		player.graphicState = Player::MOVING;
-		player.facingDirection = Player::NORTH;
-		player.pos.y += player.getSpeed() * fElapsedTime;
-	}
-};
-
-class buttonA_ : public Command
-{
-public:
-	buttonA_(char key) : Command(key) {}
-	virtual void execute(Player& player, float fElapsedTime)
-	{
-		player.graphicState = Player::MOVING;
-		player.facingDirection = Player::WEST;
-		player.pos.x -= player.getSpeed() * fElapsedTime;
-
-	}
-};
-
-class buttonD_ : public Command
-{
-public:
-	buttonD_(char key) : Command(key) {}
-	virtual void execute(Player& player, float fElapsedTime)
-	{
-		player.graphicState = Player::MOVING;
-		player.facingDirection = Player::EAST;
-		player.pos.x += player.getSpeed() * fElapsedTime;
-	}
-};
-
-class buttonSPACE_ : public Command
-{
-public:
-	buttonSPACE_(char key) : Command(key) {}
-	virtual void execute(Player& player, float fElapsedTime)
-	{
-		if (player.bCanFire) {
-			Bullet b;
-			b.pos = { player.pos.x + ((float)player.getWidth() / 2.0f), player.pos.y };
-			b.vel = { 0.0f, -200.0f };
-			player.listPlayerBullets.push_back(b);
-			player.bCanFire = false;
-		}
-	}
-};
-
-/*ommand *InputHandler::handleInput()
-{
-	if (pge.GetKey(olc::W).bHeld) return new buttonW_('w');
-	if (pge.GetKey(olc::S).bHeld) return new buttonS_('s');
-	if (pge.GetKey(olc::A).bHeld) return new buttonA_('a');
-	if (pge.GetKey(olc::D).bHeld) return new buttonD_('d');
-	if (pge.GetKey(olc::SPACE).bHeld) return new buttonSPACE_(' ');
-
-	return nullptr;
-}*/
-
-
 

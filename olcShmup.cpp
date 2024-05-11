@@ -235,7 +235,7 @@ int main()
 	return 0;
 }
 
-// add main menu
-// add score
-// add different projectiles
-// add power ups
+// 2. add power ups
+// 3. add score
+// 4. add different projectiles
+// 5. add main menu

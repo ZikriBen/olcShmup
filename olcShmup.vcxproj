@@ -130,6 +130,7 @@
     <ClCompile Include="Artifact.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="CommandFactory.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="olcShmup.cpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="Artifact.h" />
     <ClInclude Include="Background.h" />
     <ClInclude Include="Bullet.h" />
+    <ClInclude Include="CommandFactory.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
