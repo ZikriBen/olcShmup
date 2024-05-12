@@ -122,7 +122,7 @@ public:
             {360.0, enemyShip01, 3.0f, 0.2f, Move_None, Fire_Straigt2},
             {360.0, enemyShip01, 3.0f, 0.5f, Move_None, Fire_CirclePulse2},
             {360.0, enemyShip01, 3.0f, 0.8f, Move_None, Fire_Straigt2},
-            {500.0, enemyShip01, 3.0f, 0.5f, Move_Fast, Fire_DeathSpiral}
+            {500.0, enemyShip01, 3.0f, 0.5f, Move_Fast, Fire_DeathSpiral},
         };
 
         listPowerUp = {
