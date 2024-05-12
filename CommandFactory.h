@@ -73,10 +73,39 @@ public:
 	virtual void execute(Player& player, float fElapsedTime)
 	{
 		if (player.bCanFire) {
-			Bullet b;
-			b.pos = { player.pos.x + ((float)player.getWidth() / 2.0f), player.pos.y };
-			b.vel = { 0.0f, -200.0f };
-			player.listPlayerBullets.push_back(b);
+			
+			if (player.powerUpLevel == 1) {
+				Bullet b;
+				b.pos = { player.pos.x + ((float)player.getWidth() / 2.0f), player.pos.y };
+				b.vel = { 0.0f, -200.0f };
+				player.listPlayerBullets.push_back(b);
+			}
+			else if (player.powerUpLevel == 2) {
+				Bullet b;
+				b.pos = { (player.pos.x + ((float)player.getWidth() / 2.0f)) - 10.f, player.pos.y };
+				b.vel = { 0.0f, -200.0f };
+				player.listPlayerBullets.push_back(b);
+
+				Bullet b2;
+				b2.pos = { 10 + (player.pos.x + ((float)player.getWidth() / 2.0f)), player.pos.y };
+				b2.vel = { 0.0f, -200.0f };
+				player.listPlayerBullets.push_back(b2);
+			}
+			else {
+				Bullet b;
+				b.pos = { player.pos.x + ((float)player.getWidth() / 2.0f), player.pos.y };
+				b.vel = { 0.0f, -200.0f };
+				player.listPlayerBullets.push_back(b);
+
+				Bullet b2;
+				b2.pos = { 10 + (player.pos.x + ((float)player.getWidth() / 2.0f)), player.pos.y };
+				b2.vel = { 20.0f, -200.0f };
+				player.listPlayerBullets.push_back(b2);
+				Bullet b3;
+				b3.pos = { (player.pos.x + ((float)player.getWidth() / 2.0f)) - 10, player.pos.y };
+				b3.vel = { -20.0f, -200.0f };
+				player.listPlayerBullets.push_back(b3);
+			}
 			player.bCanFire = false;
 		}
 	}

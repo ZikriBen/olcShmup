@@ -22,9 +22,11 @@ public:
     std::array<float, 4> dataMove{0};
     std::array<float, 4> dataFire{0};
     olc::vf2d velocity;
+    
     float fWidth, fHeight;
     float fSpeed;
     bool remove = false;
+    bool bBlink = false;
     virtual void dummy() const {}
 };
 
