@@ -1,20 +1,8 @@
 #ifndef ENEMY_H
 #define ENEMY_H
+#include "Spawn.h"
+
 #pragma once
-#include "Bullet.h"
-
-struct sEnemy;
-
-struct sEnemyDefiniton {
-    double dTriggerTime = 0.0f;
-    olc::Sprite* sprEnemy;
-    float fHealth = 0.0f;
-    float fOffset = 0.0f;
-
-    std::function<void(sEnemy&, float, float)> funcMove;
-    std::function<void(sEnemy&, float, float, std::list<Bullet>&)> funcFire;
-
-};
 
 struct sEnemy {
     olc::vf2d pos;

@@ -7,6 +7,8 @@
 #include "Bullet.h"
 #include "Background.h"
 #include "Explosion.h"
+#include "PowerUp.h"
+
 constexpr double PI = 3.14159f;
 
 class Shmup : public olc::PixelGameEngine {
@@ -23,11 +25,13 @@ public:
     Player player{ *this };
     Background bg{ *this, fWorldSpeed, 200 };
     Explosion *exp = nullptr;
+    PowerUp* con;
     std::list<sEnemyDefiniton> listSpawns;
     std::list<sEnemy> listEnemies;
     std::list<Bullet> listEnemyBullets;
     std::list<Bullet> listFragments;
     std::list<Explosion *> listExplosions;
+    std::list<PowerUp*> listPowerUp;
 
 public:
     bool OnUserCreate() override {
@@ -42,6 +46,7 @@ public:
         auto Move_None = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed) {
             e.pos.y += fScrollSpeed * fElapsedTime;
         };
+
 
         auto Move_Fast = [&](sEnemy& e, float fElapsedTime, float fScrollSpeed) {
             e.pos.y += fScrollSpeed * fElapsedTime * 3.0f;
@@ -68,7 +73,7 @@ public:
             if (e.dataFire[0] >= fDelay) {
                 e.dataFire[0] -= fDelay;
                 Bullet b;
-                b.pos = e.pos + (olc::vf2d(((float)e.def.sprEnemy->width / 2.0f), ((float)e.def.sprEnemy->height)));
+                b.pos = e.pos + (olc::vf2d(((float)e.def.spr->width / 2.0f), ((float)e.def.spr->height)));
                 b.vel = { 0.0f, 180.0f };
                 listEnemyBullets.push_back(b);
             }
@@ -84,7 +89,7 @@ public:
                 e.dataFire[0] -= fDelay;
                 for (int i = 0; i < nBullets; ++i) {
                     Bullet b;
-                    b.pos = e.pos + (olc::vf2d(((float)e.def.sprEnemy->width / 2.0f), ((float)e.def.sprEnemy->height / 2.0f)));
+                    b.pos = e.pos + (olc::vf2d(((float)e.def.spr->width / 2.0f), ((float)e.def.spr->height / 2.0f)));
                     b.vel = { 180.0f * cosf(fTetha * i), 180.0f * sinf(fTetha * i) };
                     listEnemyBullets.push_back(b);
                 }
@@ -109,7 +114,7 @@ public:
         };
 
         olc::Sprite *enemyShip01 = new olc::Sprite("assets/enemyShip01.png");
-        
+
         listSpawns = {
             {60.00, enemyShip01, 3.0f, 0.5f, Move_SinusoidWide, Fire_Straigt2},
             {240.0, enemyShip01, 3.0f, 0.25f, Move_SinusoidNarrow, Fire_Straigt2},
@@ -120,6 +125,10 @@ public:
             {500.0, enemyShip01, 3.0f, 0.5f, Move_Fast, Fire_DeathSpiral}
         };
 
+        listPowerUp = {
+            new PowerUp(*this, new olc::Sprite("assets/powerup.png"), rand() % ScreenWidth(), rand() % ScreenHeight(), 120.0f, 60.0),
+        };
+
         return true;
     }
 
@@ -127,7 +136,7 @@ public:
         for (auto& b : playerBullets) {
             b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
             for (auto& e : listEnemies) 
-                if ((b.pos - (e.pos + olc::vf2d(((float)e.def.sprEnemy->width / 2.0f), ((float)e.def.sprEnemy->width / 2.0f)))).mag2() <  powf(((float)e.def.sprEnemy->width / 2.0f), 2.0f)) { // Remove magic numbers!
+                if ((b.pos - (e.pos + olc::vf2d(((float)e.def.spr->width / 2.0f), ((float)e.def.spr->width / 2.0f)))).mag2() <  powf(((float)e.def.spr->width / 2.0f), 2.0f)) { // Remove magic numbers!
                     b.remove = true;
                     e.def.fHealth -= 1.0f;
                     if (e.def.fHealth <= 0)  {
@@ -160,16 +169,22 @@ public:
         exp->Update(fElapsedTime, player);
         
         
-        
         while (!listSpawns.empty() && dWorldPos >= listSpawns.front().dTriggerTime) {
             sEnemy e;
             e.def = listSpawns.front();
             e.pos = {
-                e.def.fOffset * ((float)ScreenWidth()) - (((float)e.def.sprEnemy->width) / 2),
-                0.0f - ((float)e.def.sprEnemy->height)
+                e.def.fOffset * ((float)ScreenWidth()) - (((float)e.def.spr->width) / 2),
+                0.0f - ((float)e.def.spr->height)
             };
             listSpawns.pop_front();
             listEnemies.push_back(e);
+        }
+
+        while (!listPowerUp.empty() && dWorldPos >= listPowerUp.front()->fTriggerTime) {
+            PowerUp *c = listPowerUp.front();
+            listPowerUp.pop_front();
+            c->Update(fElapsedTime);
+            c->Draw();
         }
 
         for (auto& b : listFragments) {
@@ -204,7 +219,7 @@ public:
         }
 
         SetPixelMode(olc::Pixel::MASK);
-        for (auto& e : listEnemies) DrawSprite(e.pos, e.def.sprEnemy, 1, olc::Sprite::Flip::VERT);
+        for (auto& e : listEnemies) DrawSprite(e.pos, e.def.spr, 1, olc::Sprite::Flip::VERT);
         SetPixelMode(olc::Pixel::NORMAL);
 
         for (auto& b : listEnemyBullets) FillCircle(b.pos, 3, olc::RED);
@@ -235,7 +250,7 @@ int main()
 	return 0;
 }
 
-// 2. add power ups
+// 2. add power ups use sEnemy, or create parent class for both enemy and powerups then append to list spawns
 // 3. add score
 // 4. add different projectiles
 // 5. add main menu

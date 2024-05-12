@@ -62,7 +62,7 @@ void Player::Draw() {
 	switch (graphicState)
 	{
 	case Player::STANDING:
-		nSheetOffsetX = 0;
+		nSheetOffsetX = graphicCounter * fWidth;
 		nSheetOffsetY = 0;
 		break;
 	case Player::MOVING:
