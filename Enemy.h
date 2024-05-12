@@ -4,14 +4,19 @@
 
 #pragma once
 
-struct sEnemy {
-    olc::vf2d pos;
-    sEnemyDefiniton def;
+struct sEnemy : public sSpawn {
+    
+    sEnemy(): sSpawn() {};
+    sEnemy(sEnemyDefiniton *def) : def(def) {};
+    sEnemyDefiniton* def;
 
-    std::array<float, 4> dataMove{0};
-    std::array<float, 4> dataFire{0};
+    
 
-    void Update(float fElpasedTime, float fScrollSpeed, std::list<Bullet>& b);
+    void Update(float fElpasedTime, float fScrollSpeed, std::list<Bullet>& b) {
+        def->funcMove(*this, fElpasedTime, fScrollSpeed);
+        def->funcFire(*this, fElpasedTime, fScrollSpeed, b);
+    }
+    virtual void dummy() const {}
 };
 
 #endif // ENEMY_H

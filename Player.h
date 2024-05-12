@@ -21,9 +21,11 @@ public:
 	float getHeight() { return fHeight; };
 	float getHealth() { return health; };
 	void setHealth(float newHealth) { health = newHealth; };
+	void setPoerUpLeve(int change) { powerUpLevel = std::max(1, std::min(powerUpCap, powerUpLevel + change)); };
 	float getSpeed() { return speed; };
 	void kill() { dead = false; };
 	bool isDead() { return dead; };
+	int powerUpLevel = 1;
 
 	olc::vf2d pos;
 	olc::Sprite* sprPlayerSheet;
@@ -40,6 +42,7 @@ public:
 	enum { NORTH = 0, EAST = 1, WEST = 2} facingDirection;
 	
 private:
+	int powerUpCap = 3;
 	bool dead;
 	float health;
 	float speed;
