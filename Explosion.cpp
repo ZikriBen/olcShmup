@@ -23,7 +23,6 @@ void Explosion::Update(float fElapsedTime, Player &player)
 
 void Explosion::Draw()
 {
-	std::cout << "Draw" << std::endl;
 	int nSheetOffsetX = 0;
 	nSheetOffsetX = graphicCounter * width;
 	pge.SetPixelMode(olc::Pixel::MASK);

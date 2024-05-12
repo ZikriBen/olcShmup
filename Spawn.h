@@ -6,39 +6,51 @@
 #pragma once
 
 enum class SpawnType {
+    SPAWN,
     ENEMY,
     POWERUP
 };
 
 struct sEnemy;
 
+class sSpawn {
+public:
+    sSpawn() : pos({ 0.0f, 0.0f }), velocity({ 0.0f, 0.0f }), fWidth(0.0f), fHeight(0.0f), fSpeed(120.0f){
+        velocity = { fSpeed, fSpeed };
+    };
+    olc::vf2d pos;
+    std::array<float, 4> dataMove{0};
+    std::array<float, 4> dataFire{0};
+    olc::vf2d velocity;
+    float fWidth, fHeight;
+    float fSpeed;
+    bool remove = false;
+    virtual void dummy() const {}
+};
+
 class Spawn
 {
 public:
-    olc::Sprite* spr;
+    Spawn() : dTriggerTime(0.0f), spr(nullptr), fOffset(0.0f), type(SpawnType::SPAWN), funcMove(nullptr), funcFire(nullptr) {}
+    Spawn(double dTriggerTime, olc::Sprite* spr, float fOffset, SpawnType type, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire) :
+        dTriggerTime(dTriggerTime), spr(spr), fOffset(fOffset), type(type), funcMove(funcMove), funcFire(funcFire) {}
     double dTriggerTime = 0.0f;
+    olc::Sprite* spr;
     float fOffset = 0.0f;
     SpawnType type;
-    std::function<void(sEnemy&, float, float)> funcMove;
-    std::function<void(sEnemy&, float, float, std::list<Bullet>&)> funcFire;
+    std::function<void(sSpawn&, float, float)> funcMove;
+    std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire;
+    virtual void dummy() const {}
 };
 
 class sEnemyDefiniton : public Spawn {
 public:
     float fHealth = 0.0f;
-    SpawnType type = SpawnType::ENEMY;
     
-    sEnemyDefiniton() {
-        dTriggerTime = 0.0f;
-        spr = nullptr;
-        fHealth = 0.0f;
-        fOffset = 0.0f;
-        funcMove = nullptr;
-        funcFire = nullptr;
-    }
+    sEnemyDefiniton() : Spawn(0.0f, nullptr, 0.0f, SpawnType::ENEMY, nullptr, nullptr), fHealth(0.0f) {}
     
-    sEnemyDefiniton(double triggerTime, olc::Sprite* spr, float health, float offset, std::function<void(sEnemy&, float, float)> funcMove, std::function<void(sEnemy&, float, float, std::list<Bullet>&)> funcFire)
-        : Spawn{ spr, triggerTime, offset, SpawnType::ENEMY, funcMove, funcFire }, fHealth(health)
+    sEnemyDefiniton(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health)
+        : Spawn{ triggerTime, spr, offset, SpawnType::ENEMY, funcMove, funcFire }, fHealth(health)
     {}
     
     sEnemyDefiniton& operator=(const sEnemyDefiniton& other) {
@@ -56,15 +68,21 @@ public:
 
 class sPowerUpDefiniton : public Spawn {
 public:
-    sPowerUpDefiniton(double triggerTime, olc::Sprite* spr,  float offset, std::function<void(sEnemy&, float, float)> funcMove, std::function<void(sEnemy&, float, float, std::list<Bullet>&)> funcFire)
-        : Spawn{ spr, triggerTime, offset, SpawnType::ENEMY, funcMove, funcFire }
+    sPowerUpDefiniton() : Spawn(0.0f, nullptr, 0.0f, SpawnType::POWERUP, nullptr, nullptr) {}
+
+    sPowerUpDefiniton(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health)
+        : Spawn{ triggerTime, spr, offset, SpawnType::POWERUP, funcMove, funcFire }
     {}
-    sPowerUpDefiniton() {
-        dTriggerTime = 0.0f;
-        spr = nullptr;
-        fOffset = 0.0f;
-        funcMove = nullptr;
-        funcFire = nullptr;
+
+    sPowerUpDefiniton& operator=(const sPowerUpDefiniton& other) {
+        if (this != &other) {
+            dTriggerTime = other.dTriggerTime;
+            spr = other.spr;
+            fOffset = other.fOffset;
+            funcMove = other.funcMove;
+            funcFire = other.funcFire;
+        }
+        return *this;
     }
 };
 
