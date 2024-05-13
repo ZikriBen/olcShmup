@@ -315,6 +315,6 @@ int main()
 	return 0;
 }
 
-// 3. add score
-// 4. add different projectiles sprites
-// 5. add main menu
+// 1. add boss
+// 2. add score
+// 3. add main menu
