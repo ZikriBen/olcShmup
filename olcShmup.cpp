@@ -30,16 +30,84 @@ public:
     std::list<Bullet> listFragments;
     std::list<Explosion *> listExplosions;
     std::list<PowerUp> listPowerUp;
+    olc::Sprite *spr;
+    olc::vf2d pos;
 
 public:
+    
+
+    void detectPlayerBulletCollision(float fElapsedTime, std::list<Bullet>& playerBullets, std::list<sEnemy>& listEnemies, std::list<Bullet>* listFragments) {
+        for (auto& b : playerBullets) {
+            b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
+            for (auto& e : listEnemies) 
+                if ((b.pos - (e.pos + olc::vf2d(((float)e.def->spr->width / 2.0f), ((float)e.def->spr->width / 2.0f)))).mag2() <  powf(((float)e.def->spr->width / 2.0f), 2.0f)) { // Remove magic numbers!
+                    b.remove = true;
+                    e.def->fHealth -= 1.0f;
+                    if (e.def->fHealth <= 0)  {
+                        
+                        for (int i = 0; i < 500; ++i) {
+                            float fAngle = ((float)rand() / (float)RAND_MAX * 2.0f * PI);
+                            float fSpeed = ((float)rand() / (float)RAND_MAX * 200.0f + 50.0f);
+                            listFragments->push_back({ e.pos + olc::vf2d(24, 24), {fSpeed * cosf(fAngle), fSpeed * sinf(fAngle)}, false, 255 });
+                        }
+                    }
+                }
+        }
+    }
+
+    void detectPlayerPowerUpCollision(float fElapsedTime, Player &player, std::list<PowerUp>& listPowerUp) {
+        for (auto& p : listPowerUp) {
+                if ((p.pos - (player.pos + olc::vf2d(((float)player.getWidth() / 2.0f), ((float)player.getWidth() / 2.0f)))).mag2() < powf(((float)player.getWidth() / 2.0f), 2.0f)) {
+                    if (p.def->type == powerUpType::DEFAULT)
+                        player.setPoerUpLeve(1);
+                    else if (p.def->type == powerUpType::GREEN)
+                        player.ProjectileType = Bullet::GREEN;
+                    else if (p.def->type == powerUpType::BLUE)
+                        player.ProjectileType = Bullet::BLUE;
+                    p.remove = true;
+                }
+        }
+    }
+
+    void cleanUp() {
+        listEnemies.remove_if([&](const sEnemy& e) {return e.pos.y >= ((float)ScreenHeight()) || e.def->fHealth <= 0; });
+
+        listEnemyBullets.remove_if([&](const Bullet& b) {return b.pos.x < 0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
+
+        listFragments.remove_if([&](const Bullet& b) {return b.pos.x<0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
+
+        listExplosions.remove_if([&](const Explosion* e) {return  e->remove; });
+
+        listPowerUp.remove_if([&](const PowerUp& p) {return p.remove; });
+    }
+
     bool OnUserCreate() override {
+        spr = new olc::Sprite("assets/MainScreen640x480noText.png");
+        olc::vf2d pos = olc::vf2d(0,0);
+        return true;
+    }
+
+    bool OnUserUpdate(float fElapsedTime) override {
+        Clear(olc::BLACK);
+        dWorldPos += fWorldSpeed * fElapsedTime;
+
+        DrawSprite(pos, spr);
+        DrawString((ScreenWidth() / 2) - 80, ScreenWidth() - 240, "Start Game", olc::WHITE, 2);
+        DrawString((ScreenWidth() / 2) - 50, ScreenWidth() - 220, "Options", olc::WHITE, 2);
+        DrawString((ScreenWidth() / 2) - 40, ScreenWidth() - 200, "About", olc::WHITE, 2);
+        DrawString((ScreenWidth() / 2) - 35, ScreenWidth() - 180, "Exit", olc::WHITE, 2);
+        return true;
+    }
+
+
+    bool GameCreate() {
         player.pos = olc::vf2d(((float)ScreenWidth() / 2.0f) - player.getWidth() / 2.0f, ((float)ScreenHeight() - player.getHeight() - 50.0f));
         player.lifeState = Player::ALIVE;
         bg.populateStars();
         exp = new Explosion(*this);
         exp->spriteSheet = new olc::Sprite("assets/explosion-spritesheet2.png");
-        
-        
+
+
         // Movement Patterns
         auto Move_None = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
             e.pos.y += fScrollSpeed * fElapsedTime;
@@ -48,24 +116,24 @@ public:
 
         auto Move_Fast = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
             e.pos.y += fScrollSpeed * fElapsedTime * 3.0f;
-            
+
         };
 
-       auto Move_SinusoidNarrow = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
+        auto Move_SinusoidNarrow = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
             e.pos.y += fScrollSpeed * fElapsedTime * 1.0f;
             e.dataMove[0] += fElapsedTime;
             e.pos.x += 50.0f * cosf(e.dataMove[0]) * fElapsedTime;
         };
 
-       auto Move_SinusoidWide = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
+        auto Move_SinusoidWide = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
             e.pos.y += fScrollSpeed * fElapsedTime * 1.0f;
             e.dataMove[0] += fElapsedTime;
             e.pos.x += 200.0f * cosf(e.dataMove[0]) * fElapsedTime;
         };
-        
+
         auto Move_Bounce = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
             // Update position based on velocity
-            
+
             e.pos += e.velocity * fElapsedTime;
 
             // Check collision with screen boundaries
@@ -134,13 +202,13 @@ public:
 
                 Bullet b;
                 b.pos = e.pos + (olc::vf2d(24, 24)); // Remove magic numbers!
-                b.vel = { 180.0f * cosf(e.dataFire[1]), 180.0f * sinf(e.dataFire[1])};
+                b.vel = { 180.0f * cosf(e.dataFire[1]), 180.0f * sinf(e.dataFire[1]) };
                 listEnemyBullets.push_back(b);
             }
         };
 
-        olc::Sprite *enemyShip01 = new olc::Sprite("assets/enemyShip01.png");
-        olc::Sprite* powerSpr   = new olc::Sprite("assets/powerupSheet.png");
+        olc::Sprite* enemyShip01 = new olc::Sprite("assets/enemyShip01.png");
+        olc::Sprite* powerSpr = new olc::Sprite("assets/powerupSheet.png");
         olc::Sprite* powerSprProj1 = new olc::Sprite("assets/powerupProjectile1.png");
         olc::Sprite* powerSprProj2 = new olc::Sprite("assets/powerupProjectile2.png");
 
@@ -154,66 +222,22 @@ public:
             new sEnemyDefiniton(360.0, enemyShip01, 0.2f, Move_None, Fire_Straigt2, 3.0f),
             new sEnemyDefiniton(360.0, enemyShip01, 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
             new sEnemyDefiniton(360.0, enemyShip01, 0.8f, Move_None, Fire_Straigt2, 3.0f),
-            new sEnemyDefiniton(500.0, enemyShip01, 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f), 
+            new sEnemyDefiniton(500.0, enemyShip01, 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
         };
 
 
         return true;
     }
 
-    void detectPlayerBulletCollision(float fElapsedTime, std::list<Bullet>& playerBullets, std::list<sEnemy>& listEnemies, std::list<Bullet>* listFragments) {
-        for (auto& b : playerBullets) {
-            b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
-            for (auto& e : listEnemies) 
-                if ((b.pos - (e.pos + olc::vf2d(((float)e.def->spr->width / 2.0f), ((float)e.def->spr->width / 2.0f)))).mag2() <  powf(((float)e.def->spr->width / 2.0f), 2.0f)) { // Remove magic numbers!
-                    b.remove = true;
-                    e.def->fHealth -= 1.0f;
-                    if (e.def->fHealth <= 0)  {
-                        
-                        for (int i = 0; i < 500; ++i) {
-                            float fAngle = ((float)rand() / (float)RAND_MAX * 2.0f * PI);
-                            float fSpeed = ((float)rand() / (float)RAND_MAX * 200.0f + 50.0f);
-                            listFragments->push_back({ e.pos + olc::vf2d(24, 24), {fSpeed * cosf(fAngle), fSpeed * sinf(fAngle)}, false, 255 });
-                        }
-                    }
-                }
-        }
-    }
+    bool GameUpdate(float fElapsedTime) {
 
-    void detectPlayerPowerUpCollision(float fElapsedTime, Player &player, std::list<PowerUp>& listPowerUp) {
-        for (auto& p : listPowerUp) {
-                if ((p.pos - (player.pos + olc::vf2d(((float)player.getWidth() / 2.0f), ((float)player.getWidth() / 2.0f)))).mag2() < powf(((float)player.getWidth() / 2.0f), 2.0f)) {
-                    if (p.def->type == powerUpType::DEFAULT)
-                        player.setPoerUpLeve(1);
-                    else if (p.def->type == powerUpType::GREEN)
-                        player.ProjectileType = Bullet::GREEN;
-                    else if (p.def->type == powerUpType::BLUE)
-                        player.ProjectileType = Bullet::BLUE;
-                    p.remove = true;
-                }
-        }
-    }
-
-    void cleanUp() {
-        listEnemies.remove_if([&](const sEnemy& e) {return e.pos.y >= ((float)ScreenHeight()) || e.def->fHealth <= 0; });
-
-        listEnemyBullets.remove_if([&](const Bullet& b) {return b.pos.x < 0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
-
-        listFragments.remove_if([&](const Bullet& b) {return b.pos.x<0 || b.pos.x>ScreenWidth() || b.pos.y <0 || b.pos.y>ScreenHeight() || b.remove; });
-
-        listExplosions.remove_if([&](const Explosion* e) {return  e->remove; });
-
-        listPowerUp.remove_if([&](const PowerUp& p) {return p.remove; });
-    }
-
-    bool OnUserUpdate(float fElapsedTime) override {
         Clear(olc::BLACK);
         dWorldPos += fWorldSpeed * fElapsedTime;
         bg.Update(fElapsedTime);
         player.Update(fElapsedTime);
         exp->Update(fElapsedTime, player);
-        
-        
+
+
         while (!listSpawns.empty() && dWorldPos >= listSpawns.front()->dTriggerTime) {
             Spawn* currentSpawn = listSpawns.front();
             if (SpawnType::ENEMY == currentSpawn->type) {
@@ -232,7 +256,7 @@ public:
                 p.fWidth = ((int)p.def->spr->width) / 3; // remove magice numbers
                 p.fHeight = ((int)p.def->spr->height);
                 p.pos = {
-                    ((float) (rand() % ScreenWidth())), 
+                    ((float)(rand() % ScreenWidth())),
                     ((float)(rand() % ScreenHeight()))
                 };
                 listSpawns.pop_front();
@@ -264,7 +288,7 @@ public:
         switch (player.lifeState)
         {
         case Player::ALIVE:
-            player.Draw(); 
+            player.Draw();
             break;
         case Player::DYING:
             exp->pos = olc::vf2d(player.pos.x, player.pos.y);
@@ -290,7 +314,7 @@ public:
         for (auto& b : listEnemyBullets) FillCircle(b.pos, 3, olc::RED);
 
         for (auto& e : listExplosions) e->Draw();
-        
+
         for (auto& f : listFragments) {
             Draw(f.pos, olc::Pixel(255, 255, 0, f.alpha));
             f.alpha -= (fElapsedTime * 0.005f);
@@ -299,11 +323,12 @@ public:
         //HUD
         DrawString(4, 4, "HEALTH:");
         FillRect(60, 4, ((int)(player.getHealth() / 100.0f * 576.0f)), 8, olc::GREEN); // Remove magic numbers!
-       
+
         cleanUp();
         return true;
     }
 };
+
 
 
 int main()
