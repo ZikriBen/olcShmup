@@ -12,7 +12,7 @@ public:
     float fBlinkDelay = 8;
     float fBlinkTimer = 0.0f;
     int blinkCounter = 20;
-    float blinkInterval = 0.2;
+    float blinkInterval = 0.2f;
     float fGraphicTimer = 0.0f;
     int graphicCounter = 0;
  
@@ -48,9 +48,7 @@ public:
     }
 
     void Draw(olc::PixelGameEngine& pge) {
-
-        pge.SetPixelMode(olc::Pixel::MASK);
-        pge.DrawPartialSprite(pos.x, pos.y, def->spr, graphicCounter * fWidth, 0, fWidth, fHeight, 1, 0);
+        pge.DrawPartialSprite(((int)pos.x), ((int)pos.y), def->spr, graphicCounter * fWidth, 0, fWidth, fHeight, 1, 0);
     }
 };
 

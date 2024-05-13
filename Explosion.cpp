@@ -23,9 +23,7 @@ void Explosion::Update(float fElapsedTime, Player &player)
 
 void Explosion::Draw()
 {
-	int nSheetOffsetX = 0;
-	nSheetOffsetX = graphicCounter * width;
 	pge.SetPixelMode(olc::Pixel::MASK);
-	pge.DrawPartialSprite(pos.x, pos.y, spriteSheet, nSheetOffsetX, 0, width, height, 1, 0);
+	pge.DrawPartialSprite(((int)pos.x), ((int)pos.y), spriteSheet, graphicCounter * width, 0, width, height, 1, 0);
 	pge.SetPixelMode(olc::Pixel::NORMAL);
 }

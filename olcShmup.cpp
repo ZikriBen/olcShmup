@@ -9,7 +9,7 @@
 #include "Explosion.h"
 #include "PowerUp.h"
 
-constexpr double PI = 3.14159f;
+constexpr float PI = 3.14159f;
 
 class Shmup : public olc::PixelGameEngine {
 public:
@@ -74,7 +74,7 @@ public:
                 e.velocity.x *= -1;
             }
             else if (e.pos.x + e.fWidth > ScreenWidth()) {
-                e.pos.x = ScreenWidth() - e.fWidth;
+                e.pos.x = ((float)ScreenWidth() - e.fWidth);
                 e.velocity.x *= -1;
             }
 
@@ -83,7 +83,7 @@ public:
                 e.velocity.y *= -1;
             }
             else if (e.pos.y + e.fHeight > ScreenHeight()) {
-                e.pos.y = ScreenHeight() - e.fHeight;
+                e.pos.y = ((float)ScreenHeight() - e.fHeight);
                 e.velocity.y *= -1;
             }
         };
@@ -107,7 +107,7 @@ public:
             sEnemy& e = *dynamic_cast<sEnemy*>(&s);
             constexpr float fDelay = 2.0f;
             constexpr int nBullets = 10;
-            constexpr float fTetha = PI * 2.0f / ((float)nBullets);
+            constexpr float fTetha = ((float)PI * 2.0f / nBullets);
 
             e.dataFire[0] += fElapsedTime;
             if (e.dataFire[0] >= fDelay) {
@@ -125,7 +125,7 @@ public:
             sEnemy& e = *dynamic_cast<sEnemy*>(&s);
             constexpr float fDelay = 0.01f;
             constexpr int nBullets = 50;
-            constexpr float fTetha = PI * 2.0f / ((float)nBullets);
+            constexpr float fTetha = ((float)PI * 2.0f / nBullets);
 
             e.dataFire[0] += fElapsedTime;
             if (e.dataFire[0] >= fDelay) {
@@ -171,8 +171,8 @@ public:
                     if (e.def->fHealth <= 0)  {
                         
                         for (int i = 0; i < 500; ++i) {
-                            float fAngle = ((float)rand() / (float)RAND_MAX) * 2.0f * PI;
-                            float fSpeed = ((float)rand() / (float)RAND_MAX) * 200.0f + 50.0f;
+                            float fAngle = ((float)rand() / (float)RAND_MAX * 2.0f * PI);
+                            float fSpeed = ((float)rand() / (float)RAND_MAX * 200.0f + 50.0f);
                             listFragments->push_back({ e.pos + olc::vf2d(24, 24), {fSpeed * cosf(fAngle), fSpeed * sinf(fAngle)}, false, 255 });
                         }
                     }
@@ -229,8 +229,8 @@ public:
             if (SpawnType::POWERUP == currentSpawn->type) {
                 PowerUp p;
                 p.def = dynamic_cast<sPowerUpDefiniton*>(currentSpawn);
-                p.fHeight = ((float)p.def->spr->height);
-                p.fWidth = 19.0; // remove magice numbers
+                p.fWidth = ((int)p.def->spr->width) / 3; // remove magice numbers
+                p.fHeight = ((int)p.def->spr->height);
                 p.pos = {
                     ((float) (rand() % ScreenWidth())), 
                     ((float)(rand() % ScreenHeight()))
@@ -291,14 +291,14 @@ public:
 
         for (auto& e : listExplosions) e->Draw();
         
-        for (auto& b : listFragments) {
-            Draw(b.pos, olc::Pixel(255, 255, 0, b.alpha));
-            b.alpha -= (fElapsedTime * 0.005f);
+        for (auto& f : listFragments) {
+            Draw(f.pos, olc::Pixel(255, 255, 0, f.alpha));
+            f.alpha -= (fElapsedTime * 0.005f);
         }
 
         //HUD
         DrawString(4, 4, "HEALTH:");
-        FillRect(60, 4, (player.getHealth() / 100.0f * 576.0f), 8, olc::GREEN); // Remove magic numbers!
+        FillRect(60, 4, ((int)(player.getHealth() / 100.0f * 576.0f)), 8, olc::GREEN); // Remove magic numbers!
        
         cleanUp();
         return true;

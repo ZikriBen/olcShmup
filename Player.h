@@ -16,9 +16,9 @@ public:
 	ProjectileDef(olc::Sprite* spr, int type) : spr(spr), type(type) {};
 	olc::Sprite* spr;
 	int type = Bullet::DEFAULT;
-	float offsetX = 0.0f;
-	float offsetY = 0.0f;
-	float fireRate = 0.2;
+	int offsetX = 0;
+	int offsetY = 0;
+	float fireRate = 0.2f;
 };
 
 class Player

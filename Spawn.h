@@ -21,7 +21,7 @@ struct sEnemy;
 
 class sSpawn {
 public:
-    sSpawn() : pos({ 0.0f, 0.0f }), velocity({ 0.0f, 0.0f }), fWidth(0.0f), fHeight(0.0f), fSpeed(120.0f){
+    sSpawn() : pos({ 0.0f, 0.0f }), velocity({ 0.0f, 0.0f }), fWidth(0), fHeight(0), fSpeed(120.0f){
         velocity = { fSpeed, fSpeed };
     };
     olc::vf2d pos;
@@ -29,7 +29,7 @@ public:
     std::array<float, 4> dataFire{0};
     olc::vf2d velocity;
     
-    float fWidth, fHeight;
+    int fWidth, fHeight;
     float fSpeed;
     bool remove = false;
     bool bBlink = false;

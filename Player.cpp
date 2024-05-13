@@ -23,11 +23,11 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge), lifeState(Player::ALIVE) {
 	listProjectileDef.push_back({ new olc::Sprite("assets/projectile_2.png"), 2 });
 	
 	for (int i = 0; i < listProjectileDef.size(); ++i) {
-		listProjectileDef[i].offsetX = ((float)fWidth / 2.0f);
+		listProjectileDef[i].offsetX = ((int)fWidth / 2);
 		
 		if (listProjectileDef[i].spr) {
-			listProjectileDef[i].offsetX -=  (listProjectileDef[i].spr->width / 2.0f);
-			listProjectileDef[i].offsetY = ((float)listProjectileDef[i].spr->height / 2);
+			listProjectileDef[i].offsetX -= ((int)listProjectileDef[i].spr->width / 2);
+			listProjectileDef[i].offsetY = ((int)listProjectileDef[i].spr->height / 2);
 		}
 	}
 }
@@ -47,7 +47,7 @@ void Player::Update(float fElapsedTime) {
 		graphicCounter %= 2;
 	}
 	
-	pos.y += (40.0f * fElapsedTime) * 0.5;
+	pos.y += (40.0f * fElapsedTime) * 0.5f;
 
 	if (pos.x <= 0) pos.x = 0;
 	if (pos.y <= 0) pos.x = 0;
@@ -74,12 +74,12 @@ void Player::Draw() {
 	switch (graphicState)
 	{
 	case Player::STANDING:
-		nSheetOffsetX = graphicCounter * fWidth;
+		nSheetOffsetX = ((int)fWidth) * graphicCounter;
 		nSheetOffsetY = 0;
 		break;
 	case Player::MOVING:
-		nSheetOffsetX = graphicCounter * fWidth;
-		nSheetOffsetY = facingDirection * fHeight;
+		nSheetOffsetX = ((int)fWidth) * graphicCounter;
+		nSheetOffsetY = ((int)fHeight) *facingDirection;
 		break;
 	case Player::DEAD:
 		break;
@@ -87,7 +87,7 @@ void Player::Draw() {
 		break;
 	}
 	pge.SetPixelMode(olc::Pixel::MASK);
-	pge.DrawPartialSprite(pos.x, pos.y, sprPlayerSheet, nSheetOffsetX, nSheetOffsetY, (int)fWidth, (int)fHeight, 1, 0);
+	pge.DrawPartialSprite(((int)pos.x), ((int)pos.y), sprPlayerSheet, nSheetOffsetX, nSheetOffsetY, (int)fWidth, (int)fHeight, 1, 0);
 	
 	
 	/*for (auto& b : listPlayerBullets) 
