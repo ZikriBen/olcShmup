@@ -103,8 +103,6 @@ public:
             }
         };
 
-
-
         auto Fire_CirclePulse2 = [&](sSpawn& s, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
             sEnemy& e = *dynamic_cast<sEnemy*>(&s);
             constexpr float fDelay = 2.0f;
@@ -142,17 +140,21 @@ public:
         };
 
         olc::Sprite *enemyShip01 = new olc::Sprite("assets/enemyShip01.png");
-        olc::Sprite* powerSpr   = new olc::Sprite("assets/powerup.png");
+        olc::Sprite* powerSpr   = new olc::Sprite("assets/powerupSheet.png");
+        olc::Sprite* powerSprProj1 = new olc::Sprite("assets/powerupProjectile1.png");
+        olc::Sprite* powerSprProj2 = new olc::Sprite("assets/powerupProjectile2.png");
 
         listSpawns = {
             new sEnemyDefiniton(60.00, enemyShip01, 0.5f, Move_SinusoidWide, Fire_Straigt2, 3.0f),
-            new sPowerUpDefiniton(120.00, powerSpr, 0.5f, Move_Bounce, Fire_None, 3.0),
+            new sPowerUpDefiniton(30.00, powerSprProj1, 0.5f, Move_Bounce, Fire_None, powerUpType::GREEN),
+            new sPowerUpDefiniton(120.00, powerSpr, 0.5f, Move_Bounce, Fire_None, powerUpType::DEFAULT),
+            new sPowerUpDefiniton(240.00, powerSprProj2, 0.5f, Move_Bounce, Fire_None, powerUpType::BLUE),
             new sEnemyDefiniton(240.0, enemyShip01,  0.25f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
             new sEnemyDefiniton(240.0, enemyShip01, 0.75f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
             new sEnemyDefiniton(360.0, enemyShip01, 0.2f, Move_None, Fire_Straigt2, 3.0f),
             new sEnemyDefiniton(360.0, enemyShip01, 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
             new sEnemyDefiniton(360.0, enemyShip01, 0.8f, Move_None, Fire_Straigt2, 3.0f),
-            new sEnemyDefiniton(500.0, enemyShip01, 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
+            new sEnemyDefiniton(500.0, enemyShip01, 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f), 
         };
 
 
@@ -181,9 +183,13 @@ public:
     void detectPlayerPowerUpCollision(float fElapsedTime, Player &player, std::list<PowerUp>& listPowerUp) {
         for (auto& p : listPowerUp) {
                 if ((p.pos - (player.pos + olc::vf2d(((float)player.getWidth() / 2.0f), ((float)player.getWidth() / 2.0f)))).mag2() < powf(((float)player.getWidth() / 2.0f), 2.0f)) {
-                    player.setPoerUpLeve(1);
+                    if (p.def->type == powerUpType::DEFAULT)
+                        player.setPoerUpLeve(1);
+                    else if (p.def->type == powerUpType::GREEN)
+                        player.ProjectileType = Bullet::GREEN;
+                    else if (p.def->type == powerUpType::BLUE)
+                        player.ProjectileType = Bullet::BLUE;
                     p.remove = true;
-                    std::cout << player.powerUpLevel << std::endl;
                 }
         }
     }
@@ -223,7 +229,8 @@ public:
             if (SpawnType::POWERUP == currentSpawn->type) {
                 PowerUp p;
                 p.def = dynamic_cast<sPowerUpDefiniton*>(currentSpawn);
-                p.fHeight = p.fWidth = ((float)p.def->spr->width);
+                p.fHeight = ((float)p.def->spr->height);
+                p.fWidth = 19.0; // remove magice numbers
                 p.pos = {
                     ((float) (rand() % ScreenWidth())), 
                     ((float)(rand() % ScreenHeight()))
@@ -275,7 +282,8 @@ public:
 
         for (auto& p : listPowerUp) {
             if (p.bBlink) {
-                DrawSprite(p.pos, p.def->spr);
+                //DrawSprite(p.pos, p.def->spr);
+                p.Draw(*this);
             }
         }
 

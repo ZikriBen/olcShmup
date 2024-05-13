@@ -10,6 +10,17 @@ class InputHandler;
 class Command;
 class CommandFactory;
 
+class ProjectileDef {
+public:
+	ProjectileDef() : spr(nullptr), type(0) {};
+	ProjectileDef(olc::Sprite* spr, int type) : spr(spr), type(type) {};
+	olc::Sprite* spr;
+	int type = Bullet::DEFAULT;
+	float offsetX = 0.0f;
+	float offsetY = 0.0f;
+	float fireRate = 0.2;
+};
+
 class Player
 {
 public:
@@ -25,14 +36,15 @@ public:
 	float getSpeed() { return speed; };
 	void kill() { dead = false; };
 	bool isDead() { return dead; };
+	int ProjectileType = 0;
 	int powerUpLevel = 1;
-
 	olc::vf2d pos;
 	olc::Sprite* sprPlayerSheet;
 	float fGunReloadTimer;
 	float fGunReloadDelay;
 	bool bCanFire;
 	std::list<Bullet> listPlayerBullets;
+	std::vector<ProjectileDef> listProjectileDef;
 	std::vector<std::tuple<Command*, float>> listPlayerCommands;
 	float fGraphicTimer;
 	int graphicCounter;

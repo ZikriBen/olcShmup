@@ -73,36 +73,38 @@ public:
 	virtual void execute(Player& player, float fElapsedTime)
 	{
 		if (player.bCanFire) {
-			
+			int offsetX = player.listProjectileDef[player.ProjectileType].offsetX;
+			int offsetY = player.listProjectileDef[player.ProjectileType].offsetY;
 			if (player.powerUpLevel == 1) {
 				Bullet b;
-				b.pos = { player.pos.x + ((float)player.getWidth() / 2.0f), player.pos.y };
+				
+				b.pos = { player.pos.x + offsetX, player.pos.y - offsetY };
 				b.vel = { 0.0f, -200.0f };
 				player.listPlayerBullets.push_back(b);
 			}
 			else if (player.powerUpLevel == 2) {
 				Bullet b;
-				b.pos = { (player.pos.x + ((float)player.getWidth() / 2.0f)) - 10.f, player.pos.y };
+				b.pos = { (player.pos.x + offsetX) - 10.f, player.pos.y - offsetY };
 				b.vel = { 0.0f, -200.0f };
 				player.listPlayerBullets.push_back(b);
 
 				Bullet b2;
-				b2.pos = { 10 + (player.pos.x + ((float)player.getWidth() / 2.0f)), player.pos.y };
+				b2.pos = { 10 + (player.pos.x + offsetX), player.pos.y - offsetY };
 				b2.vel = { 0.0f, -200.0f };
 				player.listPlayerBullets.push_back(b2);
 			}
 			else {
 				Bullet b;
-				b.pos = { player.pos.x + ((float)player.getWidth() / 2.0f), player.pos.y };
+				b.pos = { player.pos.x + offsetX, player.pos.y - offsetY };
 				b.vel = { 0.0f, -200.0f };
 				player.listPlayerBullets.push_back(b);
 
 				Bullet b2;
-				b2.pos = { 10 + (player.pos.x + ((float)player.getWidth() / 2.0f)), player.pos.y };
+				b2.pos = { 10 + (player.pos.x + offsetX), player.pos.y - offsetY };
 				b2.vel = { 20.0f, -200.0f };
 				player.listPlayerBullets.push_back(b2);
 				Bullet b3;
-				b3.pos = { (player.pos.x + ((float)player.getWidth() / 2.0f)) - 10, player.pos.y };
+				b3.pos = { (player.pos.x + offsetX) - 10, player.pos.y - offsetY };
 				b3.vel = { -20.0f, -200.0f };
 				player.listPlayerBullets.push_back(b3);
 			}
@@ -121,7 +123,6 @@ public:
 			Command* commandPtr = std::get<0>(tuple);
 			float time = std::get<1>(tuple);
 			char key = commandPtr->getKey();
-			std::cout << "Command key: " << commandPtr->getKey() << "time:" << time << std::endl;
 		}
 	}
 };

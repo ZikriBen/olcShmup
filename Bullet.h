@@ -10,6 +10,7 @@ public:
 	olc::vf2d vel;
 	bool remove = false;
 	uint16_t alpha;
+	enum { DEFAULT = 0, GREEN = 1, BLUE = 2 } bulletType;
 	void Update(const float fElapsedTime, const float fWorldSpeed, Player& player);
 };
 

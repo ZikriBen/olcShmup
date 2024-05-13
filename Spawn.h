@@ -11,6 +11,12 @@ enum class SpawnType {
     POWERUP
 };
 
+enum class powerUpType {
+    DEFAULT = 0,
+    GREEN = 1,
+    BLUE = 2
+};
+
 struct sEnemy;
 
 class sSpawn {
@@ -70,10 +76,14 @@ public:
 
 class sPowerUpDefiniton : public Spawn {
 public:
-    sPowerUpDefiniton() : Spawn(0.0f, nullptr, 0.0f, SpawnType::POWERUP, nullptr, nullptr) {}
+    powerUpType type;
 
-    sPowerUpDefiniton(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health)
-        : Spawn{ triggerTime, spr, offset, SpawnType::POWERUP, funcMove, funcFire }
+    sPowerUpDefiniton() : Spawn(0.0f, nullptr, 0.0f, SpawnType::POWERUP, nullptr, nullptr), type(powerUpType::DEFAULT) {
+        
+    }
+
+    sPowerUpDefiniton(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, powerUpType type)
+        : Spawn{ triggerTime, spr, offset, SpawnType::POWERUP, funcMove, funcFire}, type(type)
     {}
 
     sPowerUpDefiniton& operator=(const sPowerUpDefiniton& other) {
@@ -83,6 +93,7 @@ public:
             fOffset = other.fOffset;
             funcMove = other.funcMove;
             funcFire = other.funcFire;
+            type = other.type;
         }
         return *this;
     }

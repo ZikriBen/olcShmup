@@ -7,7 +7,7 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge), lifeState(Player::ALIVE) {
 	speed = 200.f;
 	health = 100.0f;
 	fGunReloadTimer = 0.0f;
-	fGunReloadDelay = 0.1f;
+	fGunReloadDelay = 0.3f;
 	bCanFire = true;
 	graphicState = STANDING;
 	facingDirection = NORTH;
@@ -18,6 +18,18 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge), lifeState(Player::ALIVE) {
 	dead = false;
 	factory = new ConcreteCommandFactory();
 	ih  = new InputHandler(pge, *factory);
+	listProjectileDef.push_back(ProjectileDef());
+	listProjectileDef.push_back({ new olc::Sprite("assets/projectile_1-small.png"), 1 });
+	listProjectileDef.push_back({ new olc::Sprite("assets/projectile_2.png"), 2 });
+	
+	for (int i = 0; i < listProjectileDef.size(); ++i) {
+		listProjectileDef[i].offsetX = ((float)fWidth / 2.0f);
+		
+		if (listProjectileDef[i].spr) {
+			listProjectileDef[i].offsetX -=  (listProjectileDef[i].spr->width / 2.0f);
+			listProjectileDef[i].offsetY = ((float)listProjectileDef[i].spr->height / 2);
+		}
+	}
 }
 
 
@@ -77,9 +89,17 @@ void Player::Draw() {
 	pge.SetPixelMode(olc::Pixel::MASK);
 	pge.DrawPartialSprite(pos.x, pos.y, sprPlayerSheet, nSheetOffsetX, nSheetOffsetY, (int)fWidth, (int)fHeight, 1, 0);
 	
-	pge.SetPixelMode(olc::Pixel::NORMAL);
 	
-	for (auto& b : listPlayerBullets) 
-		pge.FillCircle(b.pos, 3, olc::CYAN);
+	/*for (auto& b : listPlayerBullets) 
+		pge.FillCircle(b.pos, 3, olc::CYAN);*/
+	for (auto& b : listPlayerBullets)
+		if (ProjectileType != 0) {
+			pge.DrawSprite(b.pos, listProjectileDef[ProjectileType].spr);
+		}
+		else {
+			pge.FillCircle(b.pos, 3, olc::CYAN);
+		}
+	
+	pge.SetPixelMode(olc::Pixel::NORMAL);
 }
 
