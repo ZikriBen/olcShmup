@@ -3,7 +3,7 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 #include "Screen.h"
-
+#include <unordered_map>
 
 
 class Shmup : public olc::PixelGameEngine {
@@ -16,7 +16,8 @@ public:
     MenuScreen *menuScreen;
     GameScreen* gameScreen;
     Screen *currentScreen;
-    
+    std::string currentScreenStr;
+    std::unordered_map<std::string, Screen*> screenMap;
 
 public:
 
@@ -27,14 +28,17 @@ public:
         menuScreen->Create();
         gameScreen = new GameScreen(*this);
         gameScreen->Create();
-        
-        
+        screenMap["menu"] = menuScreen;
+        screenMap["game"] = menuScreen;
+
         currentScreen = gameScreen;
+        currentScreenStr = "menu";
+
         return true;
     }
 
     bool OnUserUpdate(float fElapsedTime) override {
-        return currentScreen->Run(fElapsedTime);
+        return screenMap[currentScreenStr]->Run(fElapsedTime);
         /*if (!gameStart) {
             
             return true;

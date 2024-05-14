@@ -28,6 +28,7 @@ public:
 		lines.push_back(Text("Start Game", 316));
 		lines.push_back(Text("Options", 220));
 		lines.push_back(Text("About", 152));
+		lines.push_back(Text("Exit", 120));
 
 
 		olc::vf2d pos = olc::vf2d(0, 0);
@@ -47,11 +48,13 @@ public:
 
 		for (int i = 0; i < lines.size(); ++i) {
 			p = i == currentSelection ? olc::YELLOW : olc::WHITE;
-			pge.DrawString(mid - (lines[i].getSize() / 4), offsetY + (i * 25), lines[i].sText, p, 2);
+			pge.DrawString(mid - (lines[i].getSize() / 4), offsetY + (i * 20), lines[i].sText, p, 2);
 		}
 
-		InputHandling();
 		pge.SetPixelMode(olc::Pixel::NORMAL);
+		if (!InputHandling()) {
+			return false;
+		}
 
 		return true;
 	};
@@ -61,7 +64,7 @@ public:
 		lines.clear();
 	};
 
-	void InputHandling() {
+	bool InputHandling() {
 		if (pge.GetKey(olc::W).bPressed || pge.GetKey(olc::UP).bPressed) currentSelection = (currentSelection - 1 + lines.size()) % lines.size();
 		if (pge.GetKey(olc::S).bPressed || pge.GetKey(olc::DOWN).bPressed) currentSelection = (currentSelection + 1) % lines.size();
 		if (pge.GetKey(olc::SPACE).bPressed || pge.GetKey(olc::ENTER).bPressed) {
@@ -69,10 +72,11 @@ public:
 				std::cout << "Start Game" << std::endl;
 			}
 			else if (currentSelection == lines.size() - 1) {
-				std::cout << "ASD" << std::endl;
+				return false;
 			}
 		}
 
+		return true;
 	}
 
 	olc::PixelGameEngine& pge;
