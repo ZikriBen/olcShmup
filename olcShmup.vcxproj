@@ -136,6 +136,7 @@
     <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="olcShmup.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Spawn.cpp" />
     <ClCompile Include="Text.cpp" />
   </ItemGroup>
@@ -149,6 +150,7 @@
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Screen.h" />
     <ClInclude Include="Spawn.h" />
     <ClInclude Include="Text.h" />
   </ItemGroup>
