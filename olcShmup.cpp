@@ -8,6 +8,7 @@
 #include "Background.h"
 #include "Explosion.h"
 #include "PowerUp.h"
+#include "Text.h"
 
 constexpr float PI = 3.14159f;
 
@@ -30,11 +31,14 @@ public:
     std::list<Bullet> listFragments;
     std::list<Explosion *> listExplosions;
     std::list<PowerUp> listPowerUp;
-    olc::Sprite *spr;
+    olc::Sprite *sprBG;
+    olc::Decal* iconDecal;
     olc::vf2d pos;
+    std::vector<Text> lines;
+    int currentSelection = 0;
+    bool gameStart = false;
 
 public:
-    
 
     void detectPlayerBulletCollision(float fElapsedTime, std::list<Bullet>& playerBullets, std::list<sEnemy>& listEnemies, std::list<Bullet>* listFragments) {
         for (auto& b : playerBullets) {
@@ -82,23 +86,64 @@ public:
     }
 
     bool OnUserCreate() override {
-        spr = new olc::Sprite("assets/MainScreen640x480noText.png");
+        GameCreate();
+        sprBG = new olc::Sprite("assets/MainScreen640x480noText.png");
+        iconDecal = new olc::Decal(new olc::Sprite("assets/iconShip.png"));
+        
+        lines.push_back(Text("Start Game", 316));
+        lines.push_back(Text("Options", 220));
+        lines.push_back(Text("About", 152));
+        
+        
         olc::vf2d pos = olc::vf2d(0,0);
+        
         return true;
     }
 
     bool OnUserUpdate(float fElapsedTime) override {
-        Clear(olc::BLACK);
-        dWorldPos += fWorldSpeed * fElapsedTime;
+        if (!gameStart) {
+            Clear(olc::BLACK);
+            dWorldPos += fWorldSpeed * fElapsedTime;
+            int mid = (ScreenWidth() / 2);
+            int offsetY = (ScreenHeight() / 2 + 160);
 
-        DrawSprite(pos, spr);
-        DrawString((ScreenWidth() / 2) - 80, ScreenWidth() - 240, "Start Game", olc::WHITE, 2);
-        DrawString((ScreenWidth() / 2) - 50, ScreenWidth() - 220, "Options", olc::WHITE, 2);
-        DrawString((ScreenWidth() / 2) - 40, ScreenWidth() - 200, "About", olc::WHITE, 2);
-        DrawString((ScreenWidth() / 2) - 35, ScreenWidth() - 180, "Exit", olc::WHITE, 2);
-        return true;
+            DrawSprite(pos, sprBG);
+
+            SetPixelMode(olc::Pixel::NORMAL);
+
+            olc::Pixel p = olc::WHITE;
+
+            for (int i = 0; i < lines.size(); ++i) {
+                p = i == currentSelection ? olc::YELLOW : olc::WHITE;
+                DrawString(mid - (lines[i].getSize() / 4), offsetY + (i * 25), lines[i].sText, p, 2);
+            }
+
+            InputHandling();
+            SetPixelMode(olc::Pixel::NORMAL);
+            return true;
+        }
+        else {
+            GameUpdate(fElapsedTime);
+        }
     }
 
+
+    void InputHandling() {
+        if (GetKey(olc::W).bPressed || GetKey(olc::UP).bPressed) currentSelection = (currentSelection - 1 + lines.size()) % lines.size();
+        if (GetKey(olc::S).bPressed || GetKey(olc::DOWN).bPressed) currentSelection = (currentSelection + 1) % lines.size();
+        if (GetKey(olc::SPACE).bPressed || GetKey(olc::ENTER).bPressed) {
+            if (currentSelection == 0) startGame();
+            else if (currentSelection == lines.size() - 1) {
+                std::cout << "ASD" << std::endl;
+            }
+        }
+        
+    }
+
+    void startGame() {
+        
+        gameStart = true;
+    }
 
     bool GameCreate() {
         player.pos = olc::vf2d(((float)ScreenWidth() / 2.0f) - player.getWidth() / 2.0f, ((float)ScreenHeight() - player.getHeight() - 50.0f));
@@ -211,18 +256,18 @@ public:
         olc::Sprite* powerSpr = new olc::Sprite("assets/powerupSheet.png");
         olc::Sprite* powerSprProj1 = new olc::Sprite("assets/powerupProjectile1.png");
         olc::Sprite* powerSprProj2 = new olc::Sprite("assets/powerupProjectile2.png");
-
+        float coldTime = 120.0f;
         listSpawns = {
-            new sEnemyDefiniton(60.00, enemyShip01, 0.5f, Move_SinusoidWide, Fire_Straigt2, 3.0f),
-            new sPowerUpDefiniton(30.00, powerSprProj1, 0.5f, Move_Bounce, Fire_None, powerUpType::GREEN),
-            new sPowerUpDefiniton(120.00, powerSpr, 0.5f, Move_Bounce, Fire_None, powerUpType::DEFAULT),
-            new sPowerUpDefiniton(240.00, powerSprProj2, 0.5f, Move_Bounce, Fire_None, powerUpType::BLUE),
-            new sEnemyDefiniton(240.0, enemyShip01,  0.25f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
-            new sEnemyDefiniton(240.0, enemyShip01, 0.75f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
-            new sEnemyDefiniton(360.0, enemyShip01, 0.2f, Move_None, Fire_Straigt2, 3.0f),
-            new sEnemyDefiniton(360.0, enemyShip01, 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
-            new sEnemyDefiniton(360.0, enemyShip01, 0.8f, Move_None, Fire_Straigt2, 3.0f),
-            new sEnemyDefiniton(500.0, enemyShip01, 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
+            new sEnemyDefiniton(coldTime + 60.00, enemyShip01, 0.5f, Move_SinusoidWide, Fire_Straigt2, 3.0f),
+            new sPowerUpDefiniton(coldTime + 30.00, powerSprProj1, 0.5f, Move_Bounce, Fire_None, powerUpType::GREEN),
+            new sPowerUpDefiniton(coldTime + 120.00, powerSpr, 0.5f, Move_Bounce, Fire_None, powerUpType::DEFAULT),
+            new sPowerUpDefiniton(coldTime + 240.00, powerSprProj2, 0.5f, Move_Bounce, Fire_None, powerUpType::BLUE),
+            new sEnemyDefiniton(coldTime + 240.0, enemyShip01,  0.25f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
+            new sEnemyDefiniton(coldTime + 240.0, enemyShip01, 0.75f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
+            new sEnemyDefiniton(coldTime + 360.0, enemyShip01, 0.2f, Move_None, Fire_Straigt2, 3.0f),
+            new sEnemyDefiniton(coldTime + 360.0, enemyShip01, 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
+            new sEnemyDefiniton(coldTime + 360.0, enemyShip01, 0.8f, Move_None, Fire_Straigt2, 3.0f),
+            new sEnemyDefiniton(coldTime + 500.0, enemyShip01, 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
         };
 
 
