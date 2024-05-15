@@ -7,7 +7,7 @@
 #include "Background.h"
 #include "Explosion.h"
 #include "PowerUp.h"
-#include "Text.h"
+
 constexpr float PI = 3.14159f;
 #pragma once
 class Screen
@@ -388,6 +388,7 @@ class IntroScreen : public Screen {
 public:
 	IntroScreen(olc::PixelGameEngine& pge) : pge(pge) {};
 	
+	olc::PixelGameEngine& pge;
 	int printIndex = 0;
 	float printSpeed = 20.0f; // 10 characters per second
 	float timeAccumulator = 0.0f;
@@ -400,6 +401,9 @@ public:
 	float fEndDelayTimer = 0.0;
 	float fEndDelay = 2.0f;
 	std::string textToPrint5 = "Press SPACEBAR to continue...";
+	float fBlinkTimer = 0.0f;
+	bool bBlink = true;
+	float blinkInterval = 0.4f;
 	
 	void Create() {
 		
@@ -418,15 +422,13 @@ public:
 	bool Run(float fElapsedTime) {
 		pge.Clear(olc::BLACK);
 		
-		fStartDelayTimer += fElapsedTime;
+		/*fStartDelayTimer += fElapsedTime;
 		if (fStartDelayTimer < fStartDelay) {
 			return true;
-		}
+		}*/
 		
-
 		typeWriter(fElapsedTime, offsetY);
 			
-		
 		if (spacePressed) {
 			fEndDelayTimer += fElapsedTime;
 			if (fEndDelayTimer < fEndDelay) {
@@ -440,7 +442,14 @@ public:
 		
 		InputHandling();
 		
-		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint5).x / 2), pge.ScreenHeight() - 20, textToPrint5, olc::WHITE);
+		fBlinkTimer += fElapsedTime;
+		if (fBlinkTimer > blinkInterval) {
+			fBlinkTimer -= blinkInterval;
+			bBlink = !bBlink;
+		}
+
+		if (!bBlink)
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint5).x / 2), pge.ScreenHeight() - 20, textToPrint5, olc::DARK_GREY);
 
 		return true;
 	};
@@ -488,7 +497,7 @@ public:
 		return true;
 	}
 
-	olc::PixelGameEngine& pge;
+	
 
 };
 
