@@ -7,6 +7,7 @@
 #include "Background.h"
 #include "Explosion.h"
 #include "PowerUp.h"
+#include "RetroMenu.h"
 
 constexpr float PI = 3.14159f;
 #pragma once
@@ -24,15 +25,34 @@ public:
 
 	void Create() {
 		sprBG = new olc::Sprite("assets/MainScreen640x480noText.png");
+		sprGFX = new olc::Sprite("./assets/RetroMenu2.png");
 
 		lines.push_back("Start Game");
 		lines.push_back("Options");
 		lines.push_back("About");
 		lines.push_back("Exit");
 
-
 		olc::vf2d pos = olc::vf2d(0, 0);
 
+		mo["main"].SetTable(1, 3);
+		mo["main"]["Difficulty"].SetTable(1, 3);
+		mo["main"]["Sound"].SetTable(1, 2);
+		mo["main"]["Back"];
+		mo["main"]["Back"].SetID(100);
+		mo["main"]["Difficulty"]["Easy"];
+		mo["main"]["Difficulty"]["Normal"];
+		mo["main"]["Difficulty"]["Hard"];
+		mo["main"]["Difficulty"]["Easy"].SetID(101);
+		mo["main"]["Difficulty"]["Normal"].SetID(102);
+		mo["main"]["Difficulty"]["Hard"].SetID(103);
+
+		mo["main"]["Sound"]["On"].SetID(104);
+		mo["main"]["Sound"]["Off"].SetID(105);
+
+
+		mo.Build();
+
+		
 	};
 	
 	bool Run(float fElapsedTime) {
@@ -57,6 +77,10 @@ public:
 			return false;
 		}
 
+		mm.Draw(pge, sprGFX, { mid - (pge.GetTextSize(lines[0]).x), offsetY - 40 });
+		//mm.Draw(pge, sprGFX, { 10, 10 });
+		pge.DrawString(10, pge.ScreenHeight() - 10, sLastAction);
+
 		return true;
 	};
 	
@@ -66,16 +90,53 @@ public:
 	};
 
 	bool InputHandling() {
-		if (pge.GetKey(olc::W).bPressed || pge.GetKey(olc::UP).bPressed) currentSelection = (currentSelection - 1 + lines.size()) % lines.size();
-		if (pge.GetKey(olc::S).bPressed || pge.GetKey(olc::DOWN).bPressed) currentSelection = (currentSelection + 1) % lines.size();
-		if (pge.GetKey(olc::SPACE).bPressed || pge.GetKey(olc::ENTER).bPressed) {
-			if (currentSelection == 0) {
-				std::cout << "Start Game" << std::endl;
+		menuobject* command = nullptr;
+		if (!mm.isOpen()) {
+			if (pge.GetKey(olc::UP).bPressed || pge.GetKey(olc::Key::W).bPressed) 
+				currentSelection = (currentSelection - 1 + lines.size()) % lines.size();
+			
+			if (pge.GetKey(olc::DOWN).bPressed || pge.GetKey(olc::Key::S).bPressed)
+				currentSelection = (currentSelection + 1) % lines.size();
+			
+			if (pge.GetKey(olc::ENTER).bPressed || pge.GetKey(olc::Key::SPACE).bPressed) {
+				if (currentSelection == 0)
+					return false;
+				else if (currentSelection == 1)
+					mm.Open(&mo["main"]);
+				else if (currentSelection == 2)
+					return true;
+				else if (currentSelection == 3)
+					return false;
+				else
+					return true;
+				
 			}
-			else if (currentSelection == lines.size() - 1) {
-				return false;
+		}	
+		else {
+			if (pge.GetKey(olc::UP).bPressed || pge.GetKey(olc::Key::W).bPressed)
+				mm.OnUp();
+			if (pge.GetKey(olc::DOWN).bPressed || pge.GetKey(olc::Key::S).bPressed)
+				mm.OnDown();
+			if (pge.GetKey(olc::Key::A).bPressed)  
+				mm.OnLeft();
+			if (pge.GetKey(olc::Key::D).bPressed) 
+				mm.OnRight();
+			if (pge.GetKey(olc::ENTER).bPressed || pge.GetKey(olc::Key::SPACE).bPressed)
+				command = mm.OnConfirm();
+
+			if (command != nullptr)
+			{
+				sLastAction = "Selected: " + command->GetName() + " ID: " + std::to_string(command->GetID());
+				mm.Close();
 			}
 		}
+		
+		if (pge.GetKey(olc::Key::M).bPressed)    
+			mm.Open(&mo["main"]);
+		if (pge.GetKey(olc::Key::Z).bPressed)     
+			mm.OnBack();
+
+		
 
 		return true;
 	}
@@ -86,6 +147,10 @@ public:
 	std::vector<std:: string> lines;
 	int currentSelection = 0;
 	bool gameStart = false;
+	olc::Sprite* sprGFX = nullptr;
+	std::string sLastAction;
+	menuobject mo;
+	menumanager mm;
 };
 
 class GameScreen : public Screen {
@@ -503,10 +568,50 @@ public:
 		}
 		return true;
 	}
-
-	
-
 };
 
+class GameOverScreen : public Screen {
+	public:
+		GameOverScreen(olc::PixelGameEngine& pge) : pge(pge) {};
 
+		olc::PixelGameEngine& pge;
+
+		int offsetY = 50;
+
+		std::string textToPrint1 = "Game Over!";
+		std::string textToPrint2 = "See you space cowboy...";
+		std::string textToPrint3 = "Press SPACEBAR to continue";
+		float fBlinkTimer = 0.0f;
+		bool bBlink = true;
+		float blinkInterval = 0.4f;
+
+		void Create() {
+
+		};
+
+		bool Run(float fElapsedTime) {
+			pge.Clear(olc::BLACK);
+
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint1).x), 100, textToPrint1, olc::WHITE, 2);
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint2).x / 2), 150, textToPrint2, olc::WHITE);
+			
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint3).x / 2), pge.ScreenHeight() - 20, textToPrint3, olc::DARK_GREY);
+
+			return InputHandling();
+		};
+
+		void Destroy() {
+
+		};
+
+		
+
+		bool InputHandling() {
+			if (pge.GetKey(olc::SPACE).bPressed) {
+				return false;
+			}
+			return true;
+		}
+};
+	
 #endif //SCREEN_H

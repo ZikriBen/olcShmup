@@ -1,4 +1,4 @@
-//// olcShmup.cpp : This file contains the 'main' function. Program execution begins and ends there.
+﻿//// olcShmup.cpp : This file contains the 'main' function. Program execution begins and ends there.
 ////
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
@@ -23,6 +23,7 @@ public:
     MenuScreen* menuScreen;
     IntroScreen* introScreen;
     GameScreen* gameScreen;
+    GameOverScreen* gameOverScreen;
     Screen* currentScreen;
     std::string currentScreenStr;
     std::unordered_map<std::string, Screen*> screenMap;
@@ -39,12 +40,15 @@ public:
         introScreen->Create();
         gameScreen = new GameScreen(*this);
         gameScreen->Create();
+        gameOverScreen = new GameOverScreen(*this);
+        gameOverScreen->Create();
         screenMap["menu"] = menuScreen;
         screenMap["intro"] = introScreen;
-        screenMap["game"] = menuScreen;
+        screenMap["game"] = gameScreen;
+        screenMap["game_over"] = gameOverScreen;
 
         currentScreen = gameScreen;
-        currentScreenStr = "menu";
+        currentScreenStr = "game_over";
         gameState = GameState::GAME;
 
         return true;
@@ -62,10 +66,10 @@ public:
             currentScreen = gameScreen;
             break;
         case GameState::GAME_OVER:
-            // Handle game over screen
+            currentScreen = gameOverScreen;
             break;
         }
-        
+
         if (!currentScreen->Run(fElapsedTime)) {
             // Handle screen transition logic here
             switch (gameState) {

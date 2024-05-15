@@ -50,10 +50,10 @@ void Player::Update(float fElapsedTime) {
 	pos.y += (40.0f * fElapsedTime) * 0.5f;
 
 	if (pos.x <= 0) pos.x = 0;
-	if (pos.y <= 0) pos.x = 0;
+	if (pos.y <= 0) pos.y = 0;
 
-	if (pos.x + 48.0f >= (float)pge.ScreenWidth()) pos.x = (float)pge.ScreenWidth() - 48.0f;
-	if (pos.y + 48.0f >= (float)pge.ScreenHeight()) pos.y = (float)pge.ScreenHeight() - 48.0f;
+	if (pos.x + fWidth >= (float)pge.ScreenWidth()) pos.x = (float)pge.ScreenWidth() - fWidth;
+	if (pos.y + fHeight >= (float)pge.ScreenHeight()) pos.y = (float)pge.ScreenHeight() - fHeight;
 
 	fGunReloadTimer += fElapsedTime;
 
