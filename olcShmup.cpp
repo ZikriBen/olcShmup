@@ -45,7 +45,7 @@ public:
 
         currentScreen = gameScreen;
         currentScreenStr = "menu";
-        gameState = GameState::INTRO;
+        gameState = GameState::GAME;
 
         return true;
     }

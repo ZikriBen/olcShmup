@@ -226,6 +226,11 @@ public:
 		player.Update(fElapsedTime);
 		exp->Update(fElapsedTime, player);
 
+		if (fDescTimer < fDescViewTime) {
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize("Dimension 1").x ), 100, "Dimension 1", olc::WHITE, 2);
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize("First Wave").x / 2), 120, "First Wave", olc::WHITE);
+			fDescTimer += fElapsedTime;
+		}
 
 		while (!listSpawns.empty() && dWorldPos >= listSpawns.front()->dTriggerTime) {
 			Spawn* currentSpawn = listSpawns.front();
@@ -376,6 +381,8 @@ public:
 	Background bg{ pge, fWorldSpeed, 200 };
 	Explosion* exp = nullptr;
 	PowerUp* con;
+	float fDescTimer = 0.0;
+	float fDescViewTime = 2.0f;
 	std::list<Spawn*> listSpawns;
 	std::list<sEnemy> listEnemies;
 	std::list<Bullet> listEnemyBullets;
@@ -422,10 +429,10 @@ public:
 	bool Run(float fElapsedTime) {
 		pge.Clear(olc::BLACK);
 		
-		/*fStartDelayTimer += fElapsedTime;
+		fStartDelayTimer += fElapsedTime;
 		if (fStartDelayTimer < fStartDelay) {
 			return true;
-		}*/
+		}
 		
 		typeWriter(fElapsedTime, offsetY);
 			
