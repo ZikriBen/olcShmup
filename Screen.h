@@ -25,10 +25,10 @@ public:
 	void Create() {
 		sprBG = new olc::Sprite("assets/MainScreen640x480noText.png");
 
-		lines.push_back(Text("Start Game", 316));
-		lines.push_back(Text("Options", 220));
-		lines.push_back(Text("About", 152));
-		lines.push_back(Text("Exit", 120));
+		lines.push_back("Start Game");
+		lines.push_back("Options");
+		lines.push_back("About");
+		lines.push_back("Exit");
 
 
 		olc::vf2d pos = olc::vf2d(0, 0);
@@ -45,10 +45,11 @@ public:
 		pge.SetPixelMode(olc::Pixel::NORMAL);
 
 		olc::Pixel p = olc::WHITE;
-
+		
+		
 		for (int i = 0; i < lines.size(); ++i) {
 			p = i == currentSelection ? olc::YELLOW : olc::WHITE;
-			pge.DrawString(mid - (lines[i].getSize() / 4), offsetY + (i * 20), lines[i].sText, p, 2);
+			pge.DrawString(mid - (pge.GetTextSize(lines[i]).x), offsetY + (i * 20), lines[i], p, 2);
 		}
 
 		pge.SetPixelMode(olc::Pixel::NORMAL);
@@ -82,7 +83,7 @@ public:
 	olc::PixelGameEngine& pge;
 	olc::Sprite* sprBG;
 	olc::vf2d pos;
-	std::vector<Text> lines;
+	std::vector<std:: string> lines;
 	int currentSelection = 0;
 	bool gameStart = false;
 };
@@ -382,5 +383,114 @@ public:
 	std::list<Explosion*> listExplosions;
 	std::list<PowerUp> listPowerUp;
 };
+
+class IntroScreen : public Screen {
+public:
+	IntroScreen(olc::PixelGameEngine& pge) : pge(pge) {};
+	
+	int printIndex = 0;
+	float printSpeed = 20.0f; // 10 characters per second
+	float timeAccumulator = 0.0f;
+	int offsetY = 50;
+	int currentLine = 0;
+	std::vector<std::string> lines;
+	float fStartDelay = 1.5f;
+	float fStartDelayTimer = 0.0;
+	bool spacePressed = false;
+	float fEndDelayTimer = 0.0;
+	float fEndDelay = 2.0f;
+	std::string textToPrint5 = "Press SPACEBAR to continue...";
+	
+	void Create() {
+		
+		std::string textToPrint1 = "Embark on Galactic Havoc: Deep Space Assault!";
+		std::string textToPrint2 = "Command the last bastion against cosmic chaos.";
+		std::string textToPrint3 = "Navigate perilous skies, vanquish alien foes.";
+		std::string textToPrint4 = "Become the hero the universe awaits!";
+		
+
+		lines.push_back(textToPrint1);
+		lines.push_back(textToPrint2);
+		lines.push_back(textToPrint3);
+		lines.push_back(textToPrint4);
+	};
+
+	bool Run(float fElapsedTime) {
+		pge.Clear(olc::BLACK);
+		
+		fStartDelayTimer += fElapsedTime;
+		if (fStartDelayTimer < fStartDelay) {
+			return true;
+		}
+		
+
+		typeWriter(fElapsedTime, offsetY);
+			
+		
+		if (spacePressed) {
+			fEndDelayTimer += fElapsedTime;
+			if (fEndDelayTimer < fEndDelay) {
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		
+		InputHandling();
+		
+		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint5).x / 2), pge.ScreenHeight() - 20, textToPrint5, olc::WHITE);
+
+		return true;
+	};
+
+	void Destroy() {
+		
+	};
+
+	bool typeWriter(float fElapsedTime, int offsetY) {
+		timeAccumulator += fElapsedTime;
+		
+		// Print already typed lines
+		for (int i = 0; i < currentLine; ++i) {
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(lines[i]).x / 2), 10 + i * offsetY, lines[i], olc::WHITE);
+		}
+
+		// All lines are printed, do something else or stop typing
+		if (currentLine >= lines.size()) {
+			return false;
+		}
+
+		// Print the current line with typed characters
+		if (currentLine < lines.size()) {
+			std::string currentText = lines[currentLine].substr(0, printIndex);
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(lines[currentLine]).x / 2), 10 + currentLine * offsetY, currentText, olc::WHITE);
+		}
+
+		// Check if it's time to print another character
+		if (timeAccumulator >= 1.0f / printSpeed && printIndex < lines[currentLine].size()) {
+			printIndex++;
+			timeAccumulator = 0.0f;
+		}
+		else if (printIndex >= lines[currentLine].size()) {
+			currentLine++;
+			printIndex = 0;
+		}
+		
+		return true;
+	}
+
+	bool InputHandling() {
+		if (pge.GetKey(olc::SPACE).bPressed) {
+			spacePressed = true;
+		}
+		return true;
+	}
+
+	olc::PixelGameEngine& pge;
+
+};
+
 
 #endif //SCREEN_H

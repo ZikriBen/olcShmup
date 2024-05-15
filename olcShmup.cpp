@@ -6,18 +6,27 @@
 #include <unordered_map>
 
 
+enum class GameState {
+    MENU,
+    INTRO,
+    GAME,
+    GAME_OVER
+};
+
 class Shmup : public olc::PixelGameEngine {
 public:
     Shmup() {
         sAppName = "Shmup";
     }
 
-    
-    MenuScreen *menuScreen;
+
+    MenuScreen* menuScreen;
+    IntroScreen* introScreen;
     GameScreen* gameScreen;
-    Screen *currentScreen;
+    Screen* currentScreen;
     std::string currentScreenStr;
     std::unordered_map<std::string, Screen*> screenMap;
+    GameState gameState;
 
 public:
 
@@ -26,26 +35,66 @@ public:
     bool OnUserCreate() override {
         menuScreen = new MenuScreen(*this);
         menuScreen->Create();
+        introScreen = new IntroScreen(*this);
+        introScreen->Create();
         gameScreen = new GameScreen(*this);
         gameScreen->Create();
         screenMap["menu"] = menuScreen;
+        screenMap["intro"] = introScreen;
         screenMap["game"] = menuScreen;
 
         currentScreen = gameScreen;
         currentScreenStr = "menu";
+        gameState = GameState::INTRO;
 
         return true;
     }
 
     bool OnUserUpdate(float fElapsedTime) override {
-        return screenMap[currentScreenStr]->Run(fElapsedTime);
-        /*if (!gameStart) {
-            
-            return true;
+        switch (gameState) {
+        case GameState::MENU:
+            currentScreen = menuScreen;
+            break;
+        case GameState::INTRO:
+            currentScreen = introScreen;
+            break;
+        case GameState::GAME:
+            currentScreen = gameScreen;
+            break;
+        case GameState::GAME_OVER:
+            // Handle game over screen
+            break;
         }
-        else {
-            GameUpdate(fElapsedTime);
-        }*/
+        
+        if (!currentScreen->Run(fElapsedTime)) {
+            // Handle screen transition logic here
+            switch (gameState) {
+            case GameState::MENU:
+                if (menuScreen->currentSelection == 0) {
+                    // Start game
+                    gameState = GameState::INTRO;
+                }
+                else if (menuScreen->currentSelection == menuScreen->lines.size() - 1) {
+                    // Exit game
+                    return false;
+                }
+                break;
+            case GameState::INTRO:
+                // Game over logic
+                gameState = GameState::GAME;
+                break;
+            case GameState::GAME:
+                // Game over logic
+                gameState = GameState::GAME_OVER;
+                break;
+            case GameState::GAME_OVER:
+                // Reset game or exit to menu
+                gameState = GameState::MENU;
+                break;
+            }
+        }
+
+        return true;
     }
 
 
@@ -55,11 +104,11 @@ public:
 
 int main()
 {
-	Shmup game;
-	if (game.Construct(640, 480, 2, 2))
-		game.Start();
+    Shmup game;
+    if (game.Construct(640, 480, 2, 2))
+        game.Start();
 
-	return 0;
+    return 0;
 }
 
 // 1. add boss
