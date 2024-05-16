@@ -4,10 +4,12 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Bullet.h"
-#include "Background.h"
 #include "Explosion.h"
 #include "PowerUp.h"
 #include "RetroMenu.h"
+#include "ScrollingStarsBG.h"
+#include "ZoomingStarsBG.h"
+
 
 constexpr float PI = 3.14159f;
 #pragma once
@@ -40,6 +42,9 @@ public:
 	bool bBlink = true;
 	float blinkInterval = 0.4f;
 	olc::Sprite* logo = nullptr;
+	ZoomingStarsBG bg{ pge };
+
+	
 
 	void Create() {
 		logo = new olc::Sprite("assets/logoLongS.png");
@@ -49,15 +54,20 @@ public:
 		lines.push_back("Licensed under OLC - 3.");
 		lines.push_back("2018 - 2024 OneLoneCoder.com");
 		lines.push_back("All rights reserved.");
+		bg.populateStars();
+		
 	};
 
 	bool Run(float fElapsedTime) {
 		pge.Clear(olc::BLACK);
+		bg.Update(fElapsedTime);
 
 		fStartDelayTimer += fElapsedTime;
 		if (fStartDelayTimer < fStartDelay) {
 			return true;
 		}
+
+		bg.Draw();
 
 		if (spacePressed) {
 			fEndDelayTimer += fElapsedTime;
@@ -534,7 +544,7 @@ public:
 	double dWorldPos = 0;
 
 	Player player{ pge };
-	Background bg{ pge, fWorldSpeed, 200 };
+	ScrollingStarsBG bg{ pge, fWorldSpeed, 200 };
 	Explosion* exp = nullptr;
 	float fDescTimer = 0.0;
 	float fDescViewTime = 2.0f;

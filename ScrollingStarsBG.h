@@ -5,10 +5,10 @@
 
 constexpr auto NUM_STARS = 800;
 #pragma once
-class Background
+class ScrollingStarsBG
 {
 public:
-	Background(olc::PixelGameEngine&, float, int);
+	ScrollingStarsBG(olc::PixelGameEngine&, float, int);
 	void populateStars();
 	void Update(float);
 	void Draw();

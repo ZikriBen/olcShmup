@@ -10,8 +10,6 @@ struct sEnemy : public sSpawn {
     sEnemy(sEnemyDefiniton *def) : def(def) {};
     sEnemyDefiniton* def;
 
-    
-
     void Update(float fElpasedTime, float fScrollSpeed, std::list<Bullet>& b) {
         def->funcMove(*this, fElpasedTime, fScrollSpeed);
         def->funcFire(*this, fElpasedTime, fScrollSpeed, b);

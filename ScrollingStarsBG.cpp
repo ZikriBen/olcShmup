@@ -1,9 +1,9 @@
-#include "Background.h"
+#include "ScrollingStarsBG.h"
 
-Background::Background(olc::PixelGameEngine& pge, float fWorldSpeed, int nFarStars) : pge(pge), fWorldSpeed(fWorldSpeed), nFarStars(nFarStars), fNebulaeSpacer(1.5f), fFarStarsSpeed(0.2f){
+ScrollingStarsBG::ScrollingStarsBG(olc::PixelGameEngine& pge, float fWorldSpeed, int nFarStars) : pge(pge), fWorldSpeed(fWorldSpeed), nFarStars(nFarStars), fNebulaeSpacer(1.5f), fFarStarsSpeed(0.2f){
 }
 
-void Background::populateStars(){
+void ScrollingStarsBG::populateStars(){
     for (auto& star : arrStars) 
         star = { (float)(rand() % pge.ScreenWidth()), (float)(rand() % pge.ScreenHeight()) };
 
@@ -14,7 +14,7 @@ void Background::populateStars(){
     nebulas.push_back(nebula1);
 }
 
-void Background::Draw() {
+void ScrollingStarsBG::Draw() {
     pge.SetPixelMode(olc::Pixel::MASK);
     for (size_t i = 0; i < arrStars.size(); ++i) {
         auto& star = arrStars[i];
@@ -26,7 +26,7 @@ void Background::Draw() {
     pge.SetPixelMode(olc::Pixel::NORMAL);
 }
 
-void Background::Update(float fElapsedTime) {
+void ScrollingStarsBG::Update(float fElapsedTime) {
 
     for (size_t i = 0; i < arrStars.size(); ++i) {
         auto& star = arrStars[i];
