@@ -32,7 +32,6 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge), lifeState(Player::ALIVE) {
 	}
 }
 
-
 void Player::Update(float fElapsedTime) {
 	if (health <= 0) {
 		dead = true;
@@ -51,7 +50,6 @@ void Player::Update(float fElapsedTime) {
 
 	if (pos.x <= 0) pos.x = 0;
 	if (pos.y <= 0) pos.y = 0;
-
 	if (pos.x + fWidth >= (float)pge.ScreenWidth()) pos.x = (float)pge.ScreenWidth() - fWidth;
 	if (pos.y + fHeight >= (float)pge.ScreenHeight()) pos.y = (float)pge.ScreenHeight() - fHeight;
 
@@ -63,7 +61,6 @@ void Player::Update(float fElapsedTime) {
 	}
 
 	ih->handleInput(*this, fElapsedTime);
-	
 	listPlayerBullets.remove_if([&](const Bullet& b) {return b.pos.x<0 || b.pos.x>pge.ScreenWidth() || b.pos.y <0 || b.pos.y>pge.ScreenHeight() || b.remove; });
 }
 
@@ -89,9 +86,7 @@ void Player::Draw() {
 	pge.SetPixelMode(olc::Pixel::MASK);
 	pge.DrawPartialSprite(((int)pos.x), ((int)pos.y), sprPlayerSheet, nSheetOffsetX, nSheetOffsetY, (int)fWidth, (int)fHeight, 1, 0);
 	
-	
-	/*for (auto& b : listPlayerBullets) 
-		pge.FillCircle(b.pos, 3, olc::CYAN);*/
+
 	for (auto& b : listPlayerBullets)
 		if (ProjectileType != 0) {
 			pge.DrawSprite(b.pos, listProjectileDef[ProjectileType].spr);
@@ -102,4 +97,3 @@ void Player::Draw() {
 	
 	pge.SetPixelMode(olc::Pixel::NORMAL);
 }
-

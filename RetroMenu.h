@@ -137,12 +137,12 @@ public:
 		vPatchPos = { 1,1 };
 
 		// Work out visible items
-		int32_t nTopLeftItem = nTopVisibleRow * vCellTable.x;
-		int32_t nBottomRightItem = vCellTable.y * vCellTable.x + nTopLeftItem;
+		size_t nTopLeftItem = nTopVisibleRow * vCellTable.x;
+		int32_t nBottomRightItem = ((int32_t)(vCellTable.y * vCellTable.x + nTopLeftItem));
 
 		// Clamp to size of child item vector
 		nBottomRightItem = std::min(int32_t(items.size()), nBottomRightItem);
-		int32_t nVisibleItems = nBottomRightItem - nTopLeftItem;
+		int32_t nVisibleItems = ((int32_t)(nBottomRightItem - nTopLeftItem));
 
 		// Draw Scroll Markers (if required)
 		if (nTopVisibleRow > 0)
@@ -192,7 +192,7 @@ public:
 
 		// Calculate cursor position in screen space in case system draws it
 		vCursorPos.x = (vCellCursor.x * (vCellSize.x + vCellPadding.x)) * nPatch + vScreenOffset.x - nPatch;
-		vCursorPos.y = ((vCellCursor.y - nTopVisibleRow) * (vCellSize.y + vCellPadding.y)) * nPatch + vScreenOffset.y + nPatch;
+		vCursorPos.y = ((int32_t)(((vCellCursor.y - nTopVisibleRow) * (vCellSize.y + vCellPadding.y)) * nPatch + vScreenOffset.y + nPatch));
 	}
 
 	void ClampCursor()
@@ -203,7 +203,7 @@ public:
 		// Clamp Cursor
 		if (nCursorItem >= int32_t(items.size()))
 		{
-			vCellCursor.y = (items.size() / vCellTable.x);
+			vCellCursor.y = ((int32_t)(items.size() / vCellTable.x));
 			vCellCursor.x = (items.size() % vCellTable.x) - 1;
 			nCursorItem = items.size() - 1;
 		}
@@ -226,13 +226,13 @@ public:
 	void OnDown()
 	{
 		vCellCursor.y++;
-		if (vCellCursor.y == nTotalRows) vCellCursor.y = nTotalRows - 1;
+		if (vCellCursor.y == nTotalRows) vCellCursor.y = ((int32_t)nTotalRows - 1);
 
 		if (vCellCursor.y > (nTopVisibleRow + vCellTable.y - 1))
 		{
 			nTopVisibleRow++;
 			if (nTopVisibleRow > (nTotalRows - vCellTable.y))
-				nTopVisibleRow = nTotalRows - vCellTable.y;
+				nTopVisibleRow = nTotalRows - ((size_t)vCellTable.y);
 		}
 
 		ClampCursor();
@@ -278,9 +278,9 @@ protected:
 	olc::vi2d vCellSize = { 0, 0 };
 	olc::vi2d vCellPadding = { 2, 0 };
 	olc::vi2d vCellCursor = { 0, 0 };
-	int32_t nCursorItem = 0;
-	int32_t nTopVisibleRow = 0;
-	int32_t nTotalRows = 0;
+	size_t nCursorItem = 0;
+	size_t nTopVisibleRow = 0;
+	size_t nTotalRows = 0;
 	const olc::vi2d vPatchSize = { nPatch, nPatch };
 	std::string sName;
 	olc::vi2d vCursorPos = { 0, 0 };

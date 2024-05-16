@@ -43,17 +43,12 @@ public:
 
 	void Create() {
 		logo = new olc::Sprite("assets/logoLongS.png");
-		std::string textToPrint1 = "Galactic Havoc : Deep Space Assault";
-		std::string textToPrint2 = "Made by Ben Zikri";
-		std::string textToPrint3 = "Licensed under OLC - 3.";
-		std::string textToPrint4 = "2018 - 2024 OneLoneCoder.com";
-		std::string textToPrint5 = "All rights reserved.";
-		
-		lines.push_back(textToPrint1);
-		lines.push_back(textToPrint2);
-		lines.push_back(textToPrint3);
-		lines.push_back(textToPrint4);
-		lines.push_back(textToPrint5);
+
+		lines.push_back("Galactic Havoc : Deep Space Assault");
+		lines.push_back("Made by Ben Zikri");
+		lines.push_back("Licensed under OLC - 3.");
+		lines.push_back("2018 - 2024 OneLoneCoder.com");
+		lines.push_back("All rights reserved.");
 	};
 
 	bool Run(float fElapsedTime) {
@@ -64,20 +59,15 @@ public:
 			return true;
 		}
 
-
 		if (spacePressed) {
 			fEndDelayTimer += fElapsedTime;
-			if (fEndDelayTimer < fEndDelay) {
+			if (fEndDelayTimer < fEndDelay)
 				return true;
-			}
 			else
-			{
 				return false;
-			}
 		}
-		for (int i = 0; i < lines.size(); ++i) {
+		for (int i = 0; i < lines.size(); ++i)
 			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(lines[i]).x / 2), 100 + i * offsetY, lines[i], olc::WHITE);
-		}
 
 		pge.DrawSprite({(pge.ScreenWidth() / 2) - (logo->width / 2), 300 }, logo);
 
@@ -96,13 +86,13 @@ public:
 	};
 
 	void Destroy() {
-
+		delete logo;
+		lines.clear();
 	};
 
 	bool InputHandling() {
-		if (pge.GetKey(olc::SPACE).bPressed) {
+		if (pge.GetKey(olc::SPACE).bPressed)
 			spacePressed = true;
-		}
 		return true;
 	}
 };
@@ -137,10 +127,7 @@ public:
 		mo["main"]["Sound"]["On"].SetID(104);
 		mo["main"]["Sound"]["Off"].SetID(105);
 
-
 		mo.Build();
-
-		
 	};
 	
 	bool Run(float fElapsedTime) {
@@ -149,7 +136,6 @@ public:
 		int offsetY = (pge.ScreenHeight() / 2 + 160);
 
 		pge.DrawSprite(pos, sprBG);
-
 		pge.SetPixelMode(olc::Pixel::NORMAL);
 
 		olc::Pixel p = olc::WHITE;
@@ -161,12 +147,10 @@ public:
 		}
 
 		pge.SetPixelMode(olc::Pixel::NORMAL);
-		if (!InputHandling()) {
+		if (!InputHandling()) 
 			return false;
-		}
 
 		mm.Draw(pge, sprGFX, { mid - (pge.GetTextSize(lines[0]).x), offsetY - 40 });
-		//mm.Draw(pge, sprGFX, { 10, 10 });
 		pge.DrawString(10, pge.ScreenHeight() - 10, sLastAction);
 
 		return true;
@@ -181,7 +165,7 @@ public:
 		menuobject* command = nullptr;
 		if (!mm.isOpen()) {
 			if (pge.GetKey(olc::UP).bPressed || pge.GetKey(olc::Key::W).bPressed) 
-				currentSelection = (currentSelection - 1 + lines.size()) % lines.size();
+				currentSelection = ((int)(currentSelection - 1 + lines.size()) % lines.size());
 			
 			if (pge.GetKey(olc::DOWN).bPressed || pge.GetKey(olc::Key::S).bPressed)
 				currentSelection = (currentSelection + 1) % lines.size();
@@ -197,7 +181,6 @@ public:
 					return false;
 				else
 					return true;
-				
 			}
 		}	
 		else {
@@ -223,7 +206,6 @@ public:
 		
 		if (pge.GetKey(olc::Key::M).bPressed)    
 			mm.Open(&mo["main"]);
-
 
 		return true;
 	}
@@ -251,12 +233,10 @@ public:
 		exp = new Explosion(pge);
 		exp->spriteSheet = new olc::Sprite("assets/explosion-spritesheet2.png");
 
-
 		// Movement Patterns
 		auto Move_None = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
 			e.pos.y += fScrollSpeed * fElapsedTime;
 		};
-
 
 		auto Move_Fast = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
 			e.pos.y += fScrollSpeed * fElapsedTime * 3.0f;
@@ -355,23 +335,27 @@ public:
 			}
 		};
 
-		olc::Sprite* enemyShip01 = new olc::Sprite("assets/enemyShip01.png");
-		olc::Sprite* powerSpr = new olc::Sprite("assets/powerupSheet.png");
-		olc::Sprite* powerSprProj1 = new olc::Sprite("assets/powerupProjectile1.png");
-		olc::Sprite* powerSprProj2 = new olc::Sprite("assets/powerupProjectile2.png");
+		listSprites = {
+			new olc::Sprite("assets/enemyShip01.png"),
+			new olc::Sprite("assets/powerupSheet.png"),
+			new olc::Sprite("assets/powerupProjectile1.png"),
+			new olc::Sprite("assets/powerupProjectile2.png")
+		};
+
 		float coldTime = 120.0f;
+
 		listSpawns = {
-			new sEnemyDefiniton(coldTime + 60.00, enemyShip01, 0.5f, Move_SinusoidWide, Fire_Straigt2, 3.0f),
-			new sPowerUpDefiniton(coldTime + 30.00, powerSprProj1, 0.5f, Move_Bounce, Fire_None, powerUpType::GREEN),
-			new sPowerUpDefiniton(coldTime + 120.00, powerSpr, 0.5f, Move_Bounce, Fire_None, powerUpType::DEFAULT),
-			new sPowerUpDefiniton(coldTime + 240.00, powerSprProj2, 0.5f, Move_Bounce, Fire_None, powerUpType::BLUE),
-			new sEnemyDefiniton(coldTime + 240.0, enemyShip01,  0.25f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
-			new sEnemyDefiniton(coldTime + 240.0, enemyShip01, 0.75f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
-			new sEnemyDefiniton(coldTime + 360.0, enemyShip01, 0.2f, Move_None, Fire_Straigt2, 3.0f),
-			new sEnemyDefiniton(coldTime + 360.0, enemyShip01, 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
-			new sEnemyDefiniton(coldTime + 360.0, enemyShip01, 0.8f, Move_None, Fire_Straigt2, 3.0f),
-			new sEnemyDefiniton(coldTime + 500.0, enemyShip01, 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
-			new sEnemyDefiniton(coldTime + 850, enemyShip01, 0.5f, Move_Fast, Fire_End, 3.0f),
+			new sEnemyDefiniton(coldTime + 60.00, listSprites[0], 0.5f, Move_SinusoidWide, Fire_Straigt2, 3.0f),
+			new sPowerUpDefiniton(coldTime + 30.00, listSprites[1], 0.5f, Move_Bounce, Fire_None, powerUpType::GREEN),
+			new sPowerUpDefiniton(coldTime + 120.00, listSprites[2], 0.5f, Move_Bounce, Fire_None, powerUpType::DEFAULT),
+			new sPowerUpDefiniton(coldTime + 240.00, listSprites[3], 0.5f, Move_Bounce, Fire_None, powerUpType::BLUE),
+			new sEnemyDefiniton(coldTime + 240.0, listSprites[0],  0.25f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
+			new sEnemyDefiniton(coldTime + 240.0, listSprites[0], 0.75f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
+			new sEnemyDefiniton(coldTime + 360.0, listSprites[0], 0.2f, Move_None, Fire_Straigt2, 3.0f),
+			new sEnemyDefiniton(coldTime + 360.0, listSprites[0], 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
+			new sEnemyDefiniton(coldTime + 360.0, listSprites[0], 0.8f, Move_None, Fire_Straigt2, 3.0f),
+			new sEnemyDefiniton(coldTime + 500.0, listSprites[0], 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
+			new sEnemyDefiniton(coldTime + 850, listSprites[0], 0.5f, Move_Fast, Fire_End, 3.0f),
 		};
 
 	};
@@ -415,7 +399,6 @@ public:
 			}
 		}
 
-
 		for (auto& f : listFragments) {
 			f.pos += (f.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
 		}
@@ -446,7 +429,7 @@ public:
 			listExplosions.push_back(exp);
 			break;
 		case Player::DEAD:
-			break;
+			bGameOn = false;
 		default:
 			break;
 		}
@@ -467,8 +450,8 @@ public:
 		for (auto& e : listExplosions) e->Draw();
 
 		for (auto& f : listFragments) {
-			pge.Draw(f.pos, olc::Pixel(255, 255, 0, f.alpha));
-			f.alpha -= (fElapsedTime * 0.005f);
+			pge.Draw(f.pos, olc::Pixel(255, 255, 0, static_cast<uint8_t>(f.alpha)));
+			f.alpha -= fElapsedTime * 0.005f;
 		}
 
 		//HUD
@@ -481,7 +464,17 @@ public:
 	};
 
 	void Destroy() {
-		
+		for (olc::Sprite* sprite : listSprites) 
+			delete sprite;
+		listSprites.clear();
+
+		for (Spawn* spawn : listSpawns)
+			delete spawn;
+		listSpawns.clear();
+
+		for (Explosion* exp : listExplosions)
+			delete exp;
+		listExplosions.clear();
 	};
 
 	void detectPlayerBulletCollision(float fElapsedTime, std::list<Bullet>& playerBullets, std::list<sEnemy>& listEnemies, std::list<Bullet>* listFragments) {
@@ -546,6 +539,7 @@ public:
 	float fDescTimer = 0.0;
 	float fDescViewTime = 2.0f;
 	bool bGameOn = true;
+	std::vector<olc::Sprite*> listSprites;
 	std::list<Spawn*> listSpawns;
 	std::list<sEnemy> listEnemies;
 	std::list<Bullet> listEnemyBullets;
@@ -576,23 +570,13 @@ public:
 	float blinkInterval = 0.4f;
 	
 	void Create() {
-		
-		std::string textToPrint1 = "Welcome to Galactic Havoc: Deep Space Assault!";
-		std::string textToPrint2 = "Take command of the last bastion against cosmic chaos.";
-		std::string textToPrint3 = "Navigate through perilous skies and vanquish hordes of alien foes.";
-		std::string textToPrint4 = "Upgrade your ship with powerful weapons and defenses.";
-		std::string textToPrint5 = "Unleash devastating special attacks to turn the tide of battle.";
-		std::string textToPrint6 = "Explore mysterious galaxies and uncover ancient secrets.";
-		std::string textToPrint7 = "The fate of the universe rests in your hands!";
-		
-
-		lines.push_back(textToPrint1);
-		lines.push_back(textToPrint2);
-		lines.push_back(textToPrint3);
-		lines.push_back(textToPrint4);
-		lines.push_back(textToPrint5);
-		lines.push_back(textToPrint6);
-		lines.push_back(textToPrint7);
+		lines.push_back("Welcome to Galactic Havoc: Deep Space Assault!");
+		lines.push_back("Take command of the last bastion against cosmic chaos.");
+		lines.push_back("Navigate through perilous skies and vanquish hordes of alien foes.");
+		lines.push_back("Upgrade your ship with powerful weapons and defenses.");
+		lines.push_back("Unleash devastating special attacks to turn the tide of battle.");
+		lines.push_back("Explore mysterious galaxies and uncover ancient secrets.");
+		lines.push_back("The fate of the universe rests in your hands!");
 	};
 
 	bool Run(float fElapsedTime) {
@@ -607,13 +591,10 @@ public:
 			
 		if (spacePressed) {
 			fEndDelayTimer += fElapsedTime;
-			if (fEndDelayTimer < fEndDelay) {
+			if (fEndDelayTimer < fEndDelay) 
 				return true;
-			}
 			else
-			{
 				return false;
-			}
 		}
 		
 		InputHandling();
@@ -679,9 +660,7 @@ class GameOverScreen : public Screen {
 		GameOverScreen(olc::PixelGameEngine& pge) : pge(pge) {};
 
 		olc::PixelGameEngine& pge;
-
 		int offsetY = 50;
-
 		std::string textToPrint1 = "Game Over!";
 		std::string textToPrint2 = "See you space cowboy...";
 		std::string textToPrint3 = "Press SPACEBAR to continue";
@@ -695,10 +674,8 @@ class GameOverScreen : public Screen {
 
 		bool Run(float fElapsedTime) {
 			pge.Clear(olc::BLACK);
-
 			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint1).x), 100, textToPrint1, olc::WHITE, 2);
 			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint2).x / 2), 150, textToPrint2, olc::WHITE);
-			
 			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint3).x / 2), pge.ScreenHeight() - 20, textToPrint3, olc::DARK_GREY);
 
 			return InputHandling();
@@ -708,12 +685,9 @@ class GameOverScreen : public Screen {
 
 		};
 
-		
-
 		bool InputHandling() {
-			if (pge.GetKey(olc::SPACE).bPressed) {
+			if (pge.GetKey(olc::SPACE).bPressed) 
 				return false;
-			}
 			return true;
 		}
 };
