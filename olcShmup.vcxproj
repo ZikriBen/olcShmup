@@ -130,12 +130,13 @@
     <ClCompile Include="Artifact.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Bullet.cpp" />
-    <ClCompile Include="CommandFactory.cpp" />
+    <ClCompile Include="RetroMenu.cpp" />
     <ClCompile Include="PowerUp.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="olcShmup.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Spawn.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +149,8 @@
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="olcPixelGameEngine.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="RetroMenu.h" />
+    <ClInclude Include="Screen.h" />
     <ClInclude Include="Spawn.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

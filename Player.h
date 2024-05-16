@@ -36,7 +36,7 @@ public:
 	float getSpeed() { return speed; };
 	void kill() { dead = false; };
 	bool isDead() { return dead; };
-	int ProjectileType = 0;
+	int ProjectileType = 1;
 	int powerUpLevel = 1;
 	olc::vf2d pos;
 	olc::Sprite* sprPlayerSheet;
