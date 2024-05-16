@@ -7,6 +7,7 @@
 
 
 enum class GameState {
+    START,
     MENU,
     INTRO,
     GAME,
@@ -20,6 +21,7 @@ public:
     }
 
 
+    StartScreen* startScreen;
     MenuScreen* menuScreen;
     IntroScreen* introScreen;
     GameScreen* gameScreen;
@@ -30,10 +32,9 @@ public:
     GameState gameState;
 
 public:
-
-
-
     bool OnUserCreate() override {
+        startScreen = new StartScreen(*this);
+        startScreen->Create();
         menuScreen = new MenuScreen(*this);
         menuScreen->Create();
         introScreen = new IntroScreen(*this);
@@ -42,6 +43,7 @@ public:
         gameScreen->Create();
         gameOverScreen = new GameOverScreen(*this);
         gameOverScreen->Create();
+        screenMap["start"] = menuScreen;
         screenMap["menu"] = menuScreen;
         screenMap["intro"] = introScreen;
         screenMap["game"] = gameScreen;
@@ -49,13 +51,16 @@ public:
 
         currentScreen = gameScreen;
         currentScreenStr = "game_over";
-        gameState = GameState::GAME;
+        gameState = GameState::START;
 
         return true;
     }
 
     bool OnUserUpdate(float fElapsedTime) override {
         switch (gameState) {
+        case GameState::START:
+            currentScreen = startScreen;
+            break;
         case GameState::MENU:
             currentScreen = menuScreen;
             break;
@@ -73,6 +78,9 @@ public:
         if (!currentScreen->Run(fElapsedTime)) {
             // Handle screen transition logic here
             switch (gameState) {
+            case GameState::START:
+                gameState = GameState::MENU;
+                break;
             case GameState::MENU:
                 if (menuScreen->currentSelection == 0) {
                     // Start game

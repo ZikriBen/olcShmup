@@ -19,6 +19,94 @@ public:
 	virtual void Destroy() = 0;
 };
 
+class StartScreen : public Screen {
+public:
+	StartScreen(olc::PixelGameEngine& pge) : pge(pge) {};
+
+	olc::PixelGameEngine& pge;
+	int printIndex = 0;
+	float printSpeed = 30.0f; // 10 characters per second
+	float timeAccumulator = 0.0f;
+	int offsetY = 20;
+	int currentLine = 0;
+	std::vector<std::string> lines;
+	float fStartDelay = 0.5f;
+	float fStartDelayTimer = 0.0;
+	bool spacePressed = false;
+	float fEndDelayTimer = 0.0;
+	float fEndDelay = 2.0f;
+	std::string textToPrint5 = "Press SPACEBAR to continue...";
+	float fBlinkTimer = 0.0f;
+	bool bBlink = true;
+	float blinkInterval = 0.4f;
+	olc::Sprite* logo = nullptr;
+
+	void Create() {
+		logo = new olc::Sprite("assets/logoLongS.png");
+		std::string textToPrint1 = "Galactic Havoc : Deep Space Assault";
+		std::string textToPrint2 = "Made by Ben Zikri";
+		std::string textToPrint3 = "Licensed under OLC - 3.";
+		std::string textToPrint4 = "2018 - 2024 OneLoneCoder.com";
+		std::string textToPrint5 = "All rights reserved.";
+		
+		lines.push_back(textToPrint1);
+		lines.push_back(textToPrint2);
+		lines.push_back(textToPrint3);
+		lines.push_back(textToPrint4);
+		lines.push_back(textToPrint5);
+	};
+
+	bool Run(float fElapsedTime) {
+		pge.Clear(olc::BLACK);
+
+		fStartDelayTimer += fElapsedTime;
+		if (fStartDelayTimer < fStartDelay) {
+			return true;
+		}
+
+
+		if (spacePressed) {
+			fEndDelayTimer += fElapsedTime;
+			if (fEndDelayTimer < fEndDelay) {
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		for (int i = 0; i < lines.size(); ++i) {
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(lines[i]).x / 2), 100 + i * offsetY, lines[i], olc::WHITE);
+		}
+
+		pge.DrawSprite({(pge.ScreenWidth() / 2) - (logo->width / 2), 300 }, logo);
+
+		InputHandling();
+
+		fBlinkTimer += fElapsedTime;
+		if (fBlinkTimer > blinkInterval) {
+			fBlinkTimer -= blinkInterval;
+			bBlink = !bBlink;
+		}
+
+		if (!bBlink)
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint5).x / 2), pge.ScreenHeight() - 20, textToPrint5, olc::DARK_GREY);
+
+		return true;
+	};
+
+	void Destroy() {
+
+	};
+
+	bool InputHandling() {
+		if (pge.GetKey(olc::SPACE).bPressed) {
+			spacePressed = true;
+		}
+		return true;
+	}
+};
+
 class MenuScreen : public Screen {
 public:
 	MenuScreen(olc::PixelGameEngine& pge) : pge(pge), sprBG(nullptr), pos(0,0){};
@@ -123,6 +211,8 @@ public:
 				mm.OnRight();
 			if (pge.GetKey(olc::ENTER).bPressed || pge.GetKey(olc::Key::SPACE).bPressed)
 				command = mm.OnConfirm();
+			if (pge.GetKey(olc::ESCAPE).bPressed || pge.GetKey(olc::Key::Z).bPressed)
+				mm.OnBack();
 
 			if (command != nullptr)
 			{
@@ -133,10 +223,7 @@ public:
 		
 		if (pge.GetKey(olc::Key::M).bPressed)    
 			mm.Open(&mo["main"]);
-		if (pge.GetKey(olc::Key::Z).bPressed)     
-			mm.OnBack();
 
-		
 
 		return true;
 	}
@@ -215,6 +302,10 @@ public:
 
 		auto Fire_None = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {};
 
+		auto Fire_End = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
+			bGameOn = false;
+		};
+
 		auto Fire_Straigt2 = [&](sSpawn& s, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
 			sEnemy& e = *dynamic_cast<sEnemy*>(&s);
 			constexpr float fDelay = 0.2f;
@@ -280,6 +371,7 @@ public:
 			new sEnemyDefiniton(coldTime + 360.0, enemyShip01, 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
 			new sEnemyDefiniton(coldTime + 360.0, enemyShip01, 0.8f, Move_None, Fire_Straigt2, 3.0f),
 			new sEnemyDefiniton(coldTime + 500.0, enemyShip01, 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
+			new sEnemyDefiniton(coldTime + 850, enemyShip01, 0.5f, Move_Fast, Fire_End, 3.0f),
 		};
 
 	};
@@ -385,7 +477,7 @@ public:
 
 		cleanUp();
 
-		return true;
+		return bGameOn;
 	};
 
 	void Destroy() {
@@ -417,9 +509,15 @@ public:
 				if (p.def->type == powerUpType::DEFAULT)
 					player.setPoerUpLeve(1);
 				else if (p.def->type == powerUpType::GREEN)
-					player.ProjectileType = Bullet::GREEN;
+					if (player.ProjectileType == static_cast<int>(powerUpType::GREEN))
+						player.setPoerUpLeve(1);
+					else
+						player.ProjectileType = Bullet::GREEN;
 				else if (p.def->type == powerUpType::BLUE)
-					player.ProjectileType = Bullet::BLUE;
+					if (player.ProjectileType == static_cast<int>(powerUpType::BLUE))
+						player.setPoerUpLeve(1);
+					else
+						player.ProjectileType = Bullet::BLUE;
 				p.remove = true;
 			}
 		}
@@ -445,9 +543,9 @@ public:
 	Player player{ pge };
 	Background bg{ pge, fWorldSpeed, 200 };
 	Explosion* exp = nullptr;
-	PowerUp* con;
 	float fDescTimer = 0.0;
 	float fDescViewTime = 2.0f;
+	bool bGameOn = true;
 	std::list<Spawn*> listSpawns;
 	std::list<sEnemy> listEnemies;
 	std::list<Bullet> listEnemyBullets;
@@ -462,12 +560,12 @@ public:
 	
 	olc::PixelGameEngine& pge;
 	int printIndex = 0;
-	float printSpeed = 20.0f; // 10 characters per second
+	float printSpeed = 30.0f; // 10 characters per second
 	float timeAccumulator = 0.0f;
-	int offsetY = 50;
+	int offsetY = 30;
 	int currentLine = 0;
 	std::vector<std::string> lines;
-	float fStartDelay = 1.5f;
+	float fStartDelay = 1.0f;
 	float fStartDelayTimer = 0.0;
 	bool spacePressed = false;
 	float fEndDelayTimer = 0.0;
@@ -479,16 +577,22 @@ public:
 	
 	void Create() {
 		
-		std::string textToPrint1 = "Embark on Galactic Havoc: Deep Space Assault!";
-		std::string textToPrint2 = "Command the last bastion against cosmic chaos.";
-		std::string textToPrint3 = "Navigate perilous skies, vanquish alien foes.";
-		std::string textToPrint4 = "Become the hero the universe awaits!";
+		std::string textToPrint1 = "Welcome to Galactic Havoc: Deep Space Assault!";
+		std::string textToPrint2 = "Take command of the last bastion against cosmic chaos.";
+		std::string textToPrint3 = "Navigate through perilous skies and vanquish hordes of alien foes.";
+		std::string textToPrint4 = "Upgrade your ship with powerful weapons and defenses.";
+		std::string textToPrint5 = "Unleash devastating special attacks to turn the tide of battle.";
+		std::string textToPrint6 = "Explore mysterious galaxies and uncover ancient secrets.";
+		std::string textToPrint7 = "The fate of the universe rests in your hands!";
 		
 
 		lines.push_back(textToPrint1);
 		lines.push_back(textToPrint2);
 		lines.push_back(textToPrint3);
 		lines.push_back(textToPrint4);
+		lines.push_back(textToPrint5);
+		lines.push_back(textToPrint6);
+		lines.push_back(textToPrint7);
 	};
 
 	bool Run(float fElapsedTime) {
