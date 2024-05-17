@@ -8,6 +8,7 @@ void ScrollingStarsBG::populateStars(){
         star = { (float)(rand() % pge.ScreenWidth()), (float)(rand() % pge.ScreenHeight()) };
 
     olc::Sprite* nebulaSpr = new olc::Sprite("assets/nebula_1.png");
+    //olc::Sprite* nebulaSpr = new olc::Sprite("assets/Baren.png");
     olc::vf2d artPos = { (float)(rand() % (pge.ScreenWidth() - (2 * nebulaSpr->width))), (float)(rand() % (pge.ScreenHeight() - nebulaSpr->height)) };
     Artifact *nebula1 = new Artifact(artPos, nebulaSpr, 1, 1);
 

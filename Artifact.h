@@ -8,8 +8,8 @@ class Artifact
 public:
 	Artifact();
 	Artifact(olc::vf2d, olc::Sprite*);
-	Artifact(olc::vf2d, olc::Sprite*, int);
-	Artifact(olc::vf2d, olc::Sprite*, int, int);
+	Artifact(olc::vf2d, olc::Sprite*, int scale);
+	Artifact(olc::vf2d, olc::Sprite*, int scale, int flip);
 	olc::vf2d pos;
 	olc::Sprite* spr;
 	int scale;

@@ -1,5 +1,5 @@
-#ifndef BG_H
-#define BG_H
+#ifndef SCROLLINGSTARSBG_H
+#define SCROLLINGSTARSBG_H
 #include "olcPixelGameEngine.h"
 #include "Artifact.h"
 
@@ -23,4 +23,4 @@ public:
 	
 };
 
-#endif // BG_H
+#endif // SCROLLINGSTARSBG_H
