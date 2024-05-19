@@ -9,8 +9,7 @@ enum class BossDamageLevel {
     MINOR_DAMAGE = 1,
     MODERATE_DAMAGE = 2,
     SEVERE_DAMAGE = 3,
-    CRITICAL_DAMAGE = 4,
-    DEAD = 5
+    CRITICAL_DAMAGE = 4
 };
 
 struct sEnemy : public sSpawn {
@@ -36,11 +35,20 @@ struct sBoss : public sEnemy {
 
     virtual void Update(float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) override {
         sEnemy::Update(fElapsedTime, fScrollSpeed, b); // Call base class update method
-        if (def->fHealth == 3) {
+        float healthPercentage = (def->fHealth / 10.0f) * 100.0f;
+
+        // Determine the damage level based on the health percentage
+        if (healthPercentage >= 80.0f) {
             damageLevel = BossDamageLevel::NO_DAMAGE;
         }
-        else if (def->fHealth == 2) {
+        else if (healthPercentage >= 60.0f) {
+            damageLevel = BossDamageLevel::MINOR_DAMAGE;
+        }
+        else if (healthPercentage >= 40.0f) {
             damageLevel = BossDamageLevel::MODERATE_DAMAGE;
+        }
+        else if (healthPercentage >= 20.0f) {
+            damageLevel = BossDamageLevel::SEVERE_DAMAGE;
         }
         else {
             damageLevel = BossDamageLevel::CRITICAL_DAMAGE;

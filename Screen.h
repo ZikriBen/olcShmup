@@ -270,6 +270,27 @@ public:
 class GameScreen : public Screen {
 public:
 	GameScreen(olc::PixelGameEngine& pge) : pge(pge){};
+	olc::PixelGameEngine& pge;
+	float fWorldSpeed = 40.0f;
+	double dWorldPos = 0;
+
+	Player player{ pge, miniAudio };
+	PlayerMovement playerMovement{ pge, player };
+
+	ScrollingStarsBG bg{ pge, fWorldSpeed, 200 };
+	Explosion* exp = nullptr;
+	float fDescTimer = 0.0;
+	float fDescViewTime = 2.0f;
+	bool bGameOn = true;
+	std::vector<olc::Sprite*> listSprites;
+	std::list<Spawn*> listSpawns;
+	std::list<sEnemy*> listEnemies;
+	std::list<Bullet> listEnemyBullets;
+	std::list<Bullet> listFragments;
+	std::list<Explosion*> listExplosions;
+	std::list<PowerUp> listPowerUp;
+	sBoss *pBoss = nullptr;
+	
 
 	void Create() {
 		player.pos = olc::vf2d(((float)pge.ScreenWidth() / 2.0f) - player.getWidth() / 2.0f, ((float)pge.ScreenHeight() - player.getHeight() - 50.0f));
@@ -405,18 +426,18 @@ public:
 		float coldTime = 120.0f;
 		std::cout << "w: " << listSprites[4]->width / 5 << " h: " << listSprites[4]->height << std::endl;
 		listSpawns = {
-			//new sEnemyDefinition(coldTime + 60.00, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
-			new sBossDefiniton(coldTime + 40.00, listSprites[4], 0.5f, Move_SinusoidWideInf, Fire_DeathSpiral, 3.0f, (listSprites[4]->width / 5), listSprites[4]->height),
-			/*new sPowerUpDefinition(coldTime + 30.00, listSprites[1], 0.5f, Move_Bounce, Fire_None, PowerUpType::GREEN),
-			new sPowerUpDefinition(coldTime + 120.00, listSprites[2], 0.5f, Move_Bounce, Fire_None, PowerUpType::DEFAULT),
-			new sPowerUpDefinition(coldTime + 240.00, listSprites[3], 0.5f, Move_Bounce, Fire_None, PowerUpType::BLUE),
-			new sEnemyDefinition(coldTime + 240.0, listSprites[0],  0.25f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
-			new sEnemyDefinition(coldTime + 240.0, listSprites[0], 0.75f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
-			new sEnemyDefinition(coldTime + 360.0, listSprites[0], 0.2f, Move_None, Fire_Straigt2, 3.0f),
-			new sEnemyDefinition(coldTime + 360.0, listSprites[0], 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
-			new sEnemyDefinition(coldTime + 360.0, listSprites[0], 0.8f, Move_None, Fire_Straigt2, 3.0f),
-			new sEnemyDefinition(coldTime + 500.0, listSprites[0], 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
-			new sEnemyDefinition(coldTime + 850, listSprites[0], 0.5f, Move_Fast, Fire_End, 3.0f),*/
+			new sPowerUpDefinition(coldTime + 30.00f, listSprites[1], 0.5f, Move_Bounce, Fire_None, PowerUpType::GREEN),
+			new sEnemyDefinition(coldTime + 60.00f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
+			new sPowerUpDefinition(coldTime + 120.00f, listSprites[2], 0.5f, Move_Bounce, Fire_None, PowerUpType::DEFAULT),
+			new sPowerUpDefinition(coldTime + 240.00f, listSprites[3], 0.5f, Move_Bounce, Fire_None, PowerUpType::BLUE),
+			new sEnemyDefinition(coldTime + 240.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
+			new sEnemyDefinition(coldTime + 240.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
+			new sEnemyDefinition(coldTime + 360.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
+			new sEnemyDefinition(coldTime + 360.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
+			new sEnemyDefinition(coldTime + 360.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
+			new sEnemyDefinition(coldTime + 500.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
+			new sBossDefiniton(coldTime + 600.0, listSprites[4], 0.5f, Move_SinusoidWideInf, Fire_DeathSpiral, 10.0f, (listSprites[4]->width / 5), listSprites[4]->height),
+			//new sEnemyDefinition(coldTime + 850, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
 		};
 
 	};
@@ -461,15 +482,16 @@ public:
 				listPowerUp.push_back(p);
 			}
 			else if (SpawnType::BOSS == currentSpawn->type) {
-				sBoss* pBoss = new sBoss(dynamic_cast<sBossDefiniton*>(currentSpawn));
-				pBoss->fWidth = ((int)pBoss->def->iWidth); // remove magice numbers
-				pBoss->fHeight = ((int)pBoss->def->iHeight);
-				pBoss->pos = {
-					pBoss->def->fOffset * ((float)pge.ScreenWidth()) - (((float)pBoss->def->iWidth) / 2),
-					0.0f - ((float)pBoss->def->iHeight)
+				sBoss* boss = new sBoss(dynamic_cast<sBossDefiniton*>(currentSpawn));
+				boss->fWidth = ((int)boss->def->iWidth); // remove magice numbers
+				boss->fHeight = ((int)boss->def->iHeight);
+				boss->pos = {
+					boss->def->fOffset * ((float)pge.ScreenWidth()) - (((float)boss->def->iWidth) / 2),
+					0.0f - ((float)boss->def->iHeight)
 				};
 				listSpawns.pop_front();
-				listEnemies.push_back(pBoss);
+				listEnemies.push_back(boss);
+				pBoss = boss;
 			}
 		}
 
@@ -509,6 +531,11 @@ public:
 		default:
 			break;
 		}
+
+		if (pBoss != nullptr && pBoss->def->fHealth <= 0) {
+			bGameOn = false;
+		}
+
 
 		pge.SetPixelMode(olc::Pixel::MASK);
 		for (auto& e : listEnemies) e->Draw(pge);
@@ -606,27 +633,6 @@ public:
 
 		listPowerUp.remove_if([&](const PowerUp& p) {return p.remove; });
 	}
-
-
-	olc::PixelGameEngine& pge;
-	float fWorldSpeed = 40.0f;
-	double dWorldPos = 0;
-
-	Player player{ pge, miniAudio };
-	PlayerMovement playerMovement{ pge, player };
-
-	ScrollingStarsBG bg{ pge, fWorldSpeed, 200 };
-	Explosion* exp = nullptr;
-	float fDescTimer = 0.0;
-	float fDescViewTime = 2.0f;
-	bool bGameOn = true;
-	std::vector<olc::Sprite*> listSprites;
-	std::list<Spawn*> listSpawns;
-	std::list<sEnemy *> listEnemies;
-	std::list<Bullet> listEnemyBullets;
-	std::list<Bullet> listFragments;
-	std::list<Explosion*> listExplosions;
-	std::list<PowerUp> listPowerUp;
 };
 
 class IntroScreen : public Screen {
@@ -748,6 +754,9 @@ class GameOverScreen : public Screen {
 		float fBlinkTimer = 0.0f;
 		bool bBlink = true;
 		float blinkInterval = 0.4f;
+		float fStartDelay = 2.0f;
+		bool spacePressed = false;
+		float fStartDelayTimer = 0.0;
 
 		void Create() {
 
@@ -757,9 +766,31 @@ class GameOverScreen : public Screen {
 			pge.Clear(olc::BLACK);
 			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint1).x), 100, textToPrint1, olc::WHITE, 2);
 			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint2).x / 2), 150, textToPrint2, olc::WHITE);
-			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint3).x / 2), pge.ScreenHeight() - 20, textToPrint3, olc::DARK_GREY);
+			
 
-			return InputHandling();
+			fStartDelayTimer += fElapsedTime;
+			if (fStartDelayTimer < fStartDelay) {
+				return true;
+			}
+
+			InputHandling();
+
+			if (spacePressed) {
+				return false;
+			}
+
+
+			fBlinkTimer += fElapsedTime;
+			if (fBlinkTimer > blinkInterval) {
+				fBlinkTimer -= blinkInterval;
+				bBlink = !bBlink;
+			}
+
+			if (!bBlink)
+				pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint3).x / 2), pge.ScreenHeight() - 20, textToPrint3, olc::DARK_GREY);
+
+			return true;
+
 		};
 
 		void Destroy() {
@@ -768,7 +799,7 @@ class GameOverScreen : public Screen {
 
 		bool InputHandling() {
 			if (pge.GetKey(olc::SPACE).bPressed) 
-				return false;
+				spacePressed = true;
 			return true;
 		}
 };

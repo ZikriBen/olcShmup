@@ -130,5 +130,4 @@ int main()
     return 0;
 }
 
-// 1. add boss
 // 2. add score
