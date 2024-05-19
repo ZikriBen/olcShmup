@@ -1,8 +1,9 @@
 #include "Player.h"
-#include "CommandFactory.h"
+//#include "CommandFactory.h"
 
-Player::Player(olc::PixelGameEngine& pge) : pge(pge), lifeState(Player::ALIVE) {
-	sprPlayerSheet = new olc::Sprite("assets/PlayerSpritesheet.png");
+
+Player::Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio) : pge(pge), miniAudio(miniAudio), lifeState(Player::ALIVE) {
+	sprPlayerSheet = new olc::Sprite("assets/images/PlayerSpritesheet.png");
 	pos = { (float)pge.ScreenWidth() / 2, (float)pge.ScreenHeight() / 2 };
 	speed = 200.f;
 	health = 100.0f;
@@ -16,11 +17,13 @@ Player::Player(olc::PixelGameEngine& pge) : pge(pge), lifeState(Player::ALIVE) {
 	fWidth = 48.0f;
 	fHeight = 58.0f;
 	dead = false;
-	factory = new ConcreteCommandFactory();
-	ih  = new InputHandler(pge, *factory);
+
+	
+	//factory = new ConcreteCommandFactory();
+	//ih  = new InputHandler(pge, *factory);
 	listProjectileDef.push_back(ProjectileDef());
-	listProjectileDef.push_back({ new olc::Sprite("assets/projectile_1-small.png"), 1 });
-	listProjectileDef.push_back({ new olc::Sprite("assets/projectile_2.png"), 2 });
+	listProjectileDef.push_back({ new olc::Sprite("assets/images/projectile_1-small.png"), 1 });
+	listProjectileDef.push_back({ new olc::Sprite("assets/images/projectile_2.png"), 2 });
 	
 	for (int i = 0; i < listProjectileDef.size(); ++i) {
 		listProjectileDef[i].offsetX = ((int)fWidth / 2);
@@ -60,7 +63,7 @@ void Player::Update(float fElapsedTime) {
 		fGunReloadTimer -= fGunReloadDelay;
 	}
 
-	ih->handleInput(*this, fElapsedTime);
+	//ih->handleInput(*this, fElapsedTime);
 	listPlayerBullets.remove_if([&](const Bullet& b) {return b.pos.x<0 || b.pos.x>pge.ScreenWidth() || b.pos.y <0 || b.pos.y>pge.ScreenHeight() || b.remove; });
 }
 
