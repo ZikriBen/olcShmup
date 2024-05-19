@@ -18,7 +18,11 @@
 
 
 constexpr float PI = 3.14159f;
+
+
 #pragma once
+static int gloalScore = 0;
+
 class Screen
 {
 public:
@@ -289,15 +293,21 @@ public:
 	std::list<Bullet> listFragments;
 	std::list<Explosion*> listExplosions;
 	std::list<PowerUp> listPowerUp;
-	sBoss *pBoss = nullptr;
+	std::vector<void*> listToRemove;
 	
 
 	void Create() {
 		player.pos = olc::vf2d(((float)pge.ScreenWidth() / 2.0f) - player.getWidth() / 2.0f, ((float)pge.ScreenHeight() - player.getHeight() - 50.0f));
 		player.lifeState = Player::ALIVE;
+		bGameOn = true;
 		bg.populateStars();
 		exp = new Explosion(pge);
 		exp->spriteSheet = new olc::Sprite("assets/images/explosion-spritesheet2.png");
+		fDescTimer = 0.0f;
+		dWorldPos = 0;
+		gloalScore = 0;
+		player.reset();
+		
 
 		// Movement Patterns
 		auto Move_None = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
@@ -424,20 +434,19 @@ public:
 		};
 
 		float coldTime = 120.0f;
-		std::cout << "w: " << listSprites[4]->width / 5 << " h: " << listSprites[4]->height << std::endl;
 		listSpawns = {
-			new sPowerUpDefinition(coldTime + 30.00f, listSprites[1], 0.5f, Move_Bounce, Fire_None, PowerUpType::GREEN),
-			new sEnemyDefinition(coldTime + 60.00f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
-			new sPowerUpDefinition(coldTime + 120.00f, listSprites[2], 0.5f, Move_Bounce, Fire_None, PowerUpType::DEFAULT),
-			new sPowerUpDefinition(coldTime + 240.00f, listSprites[3], 0.5f, Move_Bounce, Fire_None, PowerUpType::BLUE),
-			new sEnemyDefinition(coldTime + 240.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
-			new sEnemyDefinition(coldTime + 240.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
-			new sEnemyDefinition(coldTime + 360.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
-			new sEnemyDefinition(coldTime + 360.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
-			new sEnemyDefinition(coldTime + 360.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
-			new sEnemyDefinition(coldTime + 500.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
-			new sBossDefiniton(coldTime + 600.0, listSprites[4], 0.5f, Move_SinusoidWideInf, Fire_DeathSpiral, 10.0f, (listSprites[4]->width / 5), listSprites[4]->height),
-			//new sEnemyDefinition(coldTime + 850, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
+			new sPowerUpDefinition(coldTime + 30.00f, listSprites[1], 0.5f, Move_Bounce, Fire_None, PowerUpType::GREEN, 100),
+			new sEnemyDefinition(coldTime + 60.00f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sPowerUpDefinition(coldTime + 120.00f, listSprites[2], 0.5f, Move_Bounce, Fire_None, PowerUpType::DEFAULT, 100),
+			new sPowerUpDefinition(coldTime + 240.00f, listSprites[3], 0.5f, Move_Bounce, Fire_None, PowerUpType::BLUE, 100),
+			new sEnemyDefinition(coldTime + 240.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition(coldTime + 240.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition(coldTime + 360.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition(coldTime + 360.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition(coldTime + 360.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition(coldTime + 500.0f, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sBossDefiniton(coldTime + 50.0, listSprites[4], 0.5f, Move_SinusoidWideInf, Fire_DeathSpiral, 5.0f, (listSprites[4]->width / 5), listSprites[4]->height, 1000),
+			//new sEnemyDefinition(coldTime + 300, listSprites[0], 0.5f, Move_None, Fire_End, 3.0f, (listSprites[0]->width), listSprites[0]->height),
 		};
 
 	};
@@ -472,7 +481,7 @@ public:
 			else if (SpawnType::POWERUP == currentSpawn->type) {
 				PowerUp p;
 				p.def = dynamic_cast<sPowerUpDefinition*>(currentSpawn);
-				p.fWidth = ((int)p.def->spr->width) / 3; // remove magice numbers
+				p.fWidth = ((int)p.def->spr->width) / 3; // remove magic numbers
 				p.fHeight = ((int)p.def->spr->height);
 				p.pos = {
 					((float)(rand() % pge.ScreenWidth())),
@@ -483,7 +492,7 @@ public:
 			}
 			else if (SpawnType::BOSS == currentSpawn->type) {
 				sBoss* boss = new sBoss(dynamic_cast<sBossDefiniton*>(currentSpawn));
-				boss->fWidth = ((int)boss->def->iWidth); // remove magice numbers
+				boss->fWidth = ((int)boss->def->iWidth);
 				boss->fHeight = ((int)boss->def->iHeight);
 				boss->pos = {
 					boss->def->fOffset * ((float)pge.ScreenWidth()) - (((float)boss->def->iWidth) / 2),
@@ -491,7 +500,6 @@ public:
 				};
 				listSpawns.pop_front();
 				listEnemies.push_back(boss);
-				pBoss = boss;
 			}
 		}
 
@@ -532,10 +540,6 @@ public:
 			break;
 		}
 
-		if (pBoss != nullptr && pBoss->def->fHealth <= 0) {
-			bGameOn = false;
-		}
-
 
 		pge.SetPixelMode(olc::Pixel::MASK);
 		for (auto& e : listEnemies) e->Draw(pge);
@@ -543,7 +547,6 @@ public:
 
 		for (auto& p : listPowerUp) {
 			if (p.bBlink) {
-				//DrawSprite(p.pos, p.def->spr);
 				p.Draw(pge);
 			}
 		}
@@ -560,8 +563,12 @@ public:
 		//HUD
 		pge.DrawString(4, 4, "HEALTH:");
 		pge.FillRect(60, 4, ((int)(player.getHealth() / 100.0f * 576.0f)), 8, olc::GREEN); // Remove magic numbers!
-
+		pge.DrawString(4, 16, "SCORE: " + std::to_string(gloalScore));
 		cleanUp();
+
+		if (listSpawns.empty() && listEnemies.empty()) {
+			bGameOn = false;
+		}
 
 		return bGameOn;
 	};
@@ -578,6 +585,32 @@ public:
 		for (Explosion* exp : listExplosions)
 			delete exp;
 		listExplosions.clear();
+
+		for (sEnemy* enemy : listEnemies)
+			delete enemy;
+		listEnemies.clear();
+
+		listPowerUp.clear();
+
+		for (auto& b : listEnemyBullets) {
+			b.remove = true;
+		}
+		listEnemyBullets.clear();
+
+		for (auto& f : listFragments) {
+			f.remove = true;
+		}
+		listFragments.clear();
+
+		for (auto& b : player.listPlayerBullets) {
+			b.remove = true;
+		}
+		player.listPlayerBullets.clear();
+
+		for (auto* p : listToRemove)
+			delete p;
+		listToRemove.clear();
+
 	};
 
 	void detectPlayerBulletCollision(float fElapsedTime, std::list<Bullet>& playerBullets, std::list<sEnemy *>& listEnemies, std::list<Bullet>* listFragments) {
@@ -588,7 +621,7 @@ public:
 					b.remove = true;
 					e->def->fHealth -= 1.0f;
 					if (e->def->fHealth <= 0) {
-
+						gloalScore += e->def->score;
 						// Johnngy63: Play explosion
 						this->miniAudio.Play(this->souBigExplosion);
 
@@ -617,19 +650,37 @@ public:
 						player.setPoerUpLeve(1);
 					else
 						player.ProjectileType = Bullet::BLUE;
+				gloalScore += p.def->score;
 				p.remove = true;
 			}
 		}
 	}
 
 	void cleanUp() {
-		listEnemies.remove_if([&](const sEnemy* e) {return e->pos.y >= ((float)pge.ScreenHeight()) || e->def->fHealth <= 0; });
+
+		for (auto it = listEnemies.begin(); it != listEnemies.end();) {
+			if ((*it)->pos.y >= static_cast<float>(pge.ScreenHeight()) || (*it)->def->fHealth <= 0) {
+				listToRemove.push_back(static_cast<void*>(*it));
+				it = listEnemies.erase(it);
+			}
+			else {
+				++it; 
+			}
+		}
+
+		for (auto it = listExplosions.begin(); it != listExplosions.end();) {
+			if ((*it)->remove) {
+				listToRemove.push_back(static_cast<void*>(*it));
+				it = listExplosions.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
 
 		listEnemyBullets.remove_if([&](const Bullet& b) {return b.pos.x < 0 || b.pos.x>pge.ScreenWidth() || b.pos.y <0 || b.pos.y > pge.ScreenHeight() || b.remove; });
 
 		listFragments.remove_if([&](const Bullet& b) {return b.pos.x<0 || b.pos.x>pge.ScreenWidth() || b.pos.y <0 || b.pos.y > pge.ScreenHeight() || b.remove; });
-
-		listExplosions.remove_if([&](const Explosion* e) {return  e->remove; });
 
 		listPowerUp.remove_if([&](const PowerUp& p) {return p.remove; });
 	}
@@ -749,8 +800,9 @@ class GameOverScreen : public Screen {
 		olc::PixelGameEngine& pge;
 		int offsetY = 50;
 		std::string textToPrint1 = "Game Over!";
-		std::string textToPrint2 = "See you space cowboy...";
-		std::string textToPrint3 = "Press SPACEBAR to continue";
+		std::string textToPrint2 = "Well Done, your score: ";
+		std::string textToPrint3 = "See you space cowboy...";
+		std::string textToPrint4 = "Press SPACEBAR to continue";
 		float fBlinkTimer = 0.0f;
 		bool bBlink = true;
 		float blinkInterval = 0.4f;
@@ -759,13 +811,17 @@ class GameOverScreen : public Screen {
 		float fStartDelayTimer = 0.0;
 
 		void Create() {
-
+			spacePressed = false;
+			fBlinkTimer = 0.0f;
+			bBlink = true;
 		};
 
 		bool Run(float fElapsedTime) {
 			pge.Clear(olc::BLACK);
 			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint1).x), 100, textToPrint1, olc::WHITE, 2);
-			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint2).x / 2), 150, textToPrint2, olc::WHITE);
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint2).x / 2), 220, textToPrint2, olc::WHITE);
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(std::to_string(gloalScore)).x), 250, std::to_string(gloalScore), olc::WHITE, 2);
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint3).x / 2), pge.ScreenHeight() - 60, textToPrint3, olc::WHITE);
 			
 
 			fStartDelayTimer += fElapsedTime;
@@ -787,7 +843,7 @@ class GameOverScreen : public Screen {
 			}
 
 			if (!bBlink)
-				pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint3).x / 2), pge.ScreenHeight() - 20, textToPrint3, olc::DARK_GREY);
+				pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint4).x / 2), pge.ScreenHeight() - 20, textToPrint4, olc::DARK_GREY);
 
 			return true;
 

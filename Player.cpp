@@ -100,3 +100,18 @@ void Player::Draw() {
 	
 	pge.SetPixelMode(olc::Pixel::NORMAL);
 }
+
+void Player::reset()
+{
+	//graphicState = Player::ALIVE;
+	fGunReloadTimer = 0.0f;
+	bCanFire = true;
+	fGraphicTimer = 0.0f;
+	health = 100.0f;
+	graphicState = STANDING;
+	facingDirection = NORTH;
+	graphicCounter = 0;
+	dead = false;
+	ProjectileType = 1;
+	powerUpLevel = 1;
+}

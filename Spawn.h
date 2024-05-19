@@ -28,6 +28,9 @@ public:
     sSpawn() : pos({ 0.0f, 0.0f }), velocity({ 0.0f, 0.0f }), fWidth(0), fHeight(0), fSpeed(120.0f), remove(false), bBlink(false) {
         velocity = { fSpeed, fSpeed };
     }
+
+    
+
     olc::vf2d pos;
     std::array<float, 4> dataMove{0};
     std::array<float, 4> dataFire{0};
@@ -37,21 +40,22 @@ public:
     float fSpeed;
     bool remove;
     bool bBlink;
-    virtual void dummy() const {}
 };
 
 class Spawn {
 public:
-    Spawn() : dTriggerTime(0.0f), spr(nullptr), fOffset(0.0f), type(SpawnType::SPAWN), funcMove(nullptr), funcFire(nullptr) {}
-    Spawn(double dTriggerTime, olc::Sprite* spr, float fOffset, SpawnType type, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire) :
-        dTriggerTime(dTriggerTime), spr(spr), fOffset(fOffset), type(type), funcMove(funcMove), funcFire(funcFire) {}
+    Spawn() : dTriggerTime(0.0f), spr(nullptr), fOffset(0.0f), type(SpawnType::SPAWN), funcMove(nullptr), funcFire(nullptr), score(0) {}
+    Spawn(double dTriggerTime, olc::Sprite* spr, float fOffset, SpawnType type, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, int score = 0) :
+        dTriggerTime(dTriggerTime), spr(spr), fOffset(fOffset), type(type), funcMove(funcMove), funcFire(funcFire), score(score) {}
+    virtual void dummy() {};
     double dTriggerTime;
     olc::Sprite* spr;
     float fOffset;
     SpawnType type;
     std::function<void(sSpawn&, float, float)> funcMove;
     std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire;
-    virtual void dummy() const {}
+    int score; // New member variable
+        
 };
 
 class sEnemyDefinition : public Spawn {
@@ -60,10 +64,10 @@ public:
     int iWidth;
     int iHeight;
 
-    sEnemyDefinition() : Spawn(0.0f, nullptr, 0.0f, SpawnType::ENEMY, nullptr, nullptr), fHealth(0.0f), iWidth(0), iHeight(0) {}
+    sEnemyDefinition() : Spawn(), fHealth(0.0f), iWidth(0), iHeight(0) {}
 
-    sEnemyDefinition(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health, int width, int height)
-        : Spawn(triggerTime, spr, offset, SpawnType::ENEMY, funcMove, funcFire), fHealth(health), iWidth(width), iHeight(height)
+    sEnemyDefinition(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health, int width, int height, int score = 0)
+        : Spawn(triggerTime, spr, offset, SpawnType::ENEMY, funcMove, funcFire, score), fHealth(health), iWidth(width), iHeight(height)
     {}
 };
 
@@ -71,20 +75,20 @@ class sPowerUpDefinition : public Spawn {
 public:
     PowerUpType type;
 
-    sPowerUpDefinition() : Spawn(0.0f, nullptr, 0.0f, SpawnType::POWERUP, nullptr, nullptr), type(PowerUpType::DEFAULT) {}
+    sPowerUpDefinition() : Spawn(), type(PowerUpType::DEFAULT) {}
 
-    sPowerUpDefinition(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, PowerUpType type)
-        : Spawn(triggerTime, spr, offset, SpawnType::POWERUP, funcMove, funcFire), type(type)
+    sPowerUpDefinition(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, PowerUpType type, int score = 0)
+        : Spawn(triggerTime, spr, offset, SpawnType::POWERUP, funcMove, funcFire, score), type(type)
     {}
 };
 
 struct sBossDefiniton : public sEnemyDefinition {
     sBossDefiniton() : sEnemyDefinition() {
-        type = SpawnType::BOSS;  
+        type = SpawnType::BOSS;
     }
 
-    sBossDefiniton(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health, int width, int height)
-        : sEnemyDefinition(triggerTime, spr, offset, funcMove, funcFire, health, width, height){
+    sBossDefiniton(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health, int width, int height, int score = 0)
+        : sEnemyDefinition(triggerTime, spr, offset, funcMove, funcFire, health, width, height, score) {
         type = SpawnType::BOSS;
     }
 };

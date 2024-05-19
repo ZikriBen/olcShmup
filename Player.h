@@ -38,6 +38,7 @@ public:
 	float getWidth() { return fWidth; };
 	float getHeight() { return fHeight; };
 	float getHealth() { return health; };
+	void reset();
 	void setHealth(float newHealth) { health = newHealth; };
 	void setPoerUpLeve(int change) { powerUpLevel = std::max(1, std::min(powerUpCap, powerUpLevel + change)); };
 	float getSpeed() { return speed; };

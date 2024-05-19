@@ -8,7 +8,6 @@
 #include "Screen.h"
 #include <unordered_map>
 
-
 enum class GameState {
     START,
     MENU,
@@ -35,7 +34,6 @@ public:
     GameState gameState;
 
 
-
 public:
     bool OnUserCreate() override {
         startScreen = new StartScreen(*this);
@@ -47,7 +45,7 @@ public:
         gameScreen = new GameScreen(*this);
         gameScreen->Create();
         gameOverScreen = new GameOverScreen(*this);
-        gameOverScreen->Create();
+        //gameOverScreen->Create();
         screenMap["start"] = startScreen;
         screenMap["menu"] = menuScreen;
         screenMap["intro"] = introScreen;
@@ -108,13 +106,17 @@ public:
             }
             break;
         case GameState::INTRO:
+            gameScreen->Create();
             gameState = GameState::GAME;
             break;
         case GameState::GAME:
+            gameScreen->Destroy();
             gameState = GameState::GAME_OVER;
             break;
         case GameState::GAME_OVER:
+            gameOverScreen->Create();
             gameState = GameState::MENU;
+            gameOverScreen->Destroy();
             break;
         }
     }
