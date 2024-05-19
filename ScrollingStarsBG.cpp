@@ -1,3 +1,4 @@
+
 #include "ScrollingStarsBG.h"
 
 ScrollingStarsBG::ScrollingStarsBG(olc::PixelGameEngine& pge, float fWorldSpeed, int nFarStars) : pge(pge), fWorldSpeed(fWorldSpeed), nFarStars(nFarStars), fNebulaeSpacer(1.5f), fFarStarsSpeed(0.2f){
@@ -7,8 +8,7 @@ void ScrollingStarsBG::populateStars(){
     for (auto& star : arrStars) 
         star = { (float)(rand() % pge.ScreenWidth()), (float)(rand() % pge.ScreenHeight()) };
 
-    olc::Sprite* nebulaSpr = new olc::Sprite("assets/nebula_1.png");
-    //olc::Sprite* nebulaSpr = new olc::Sprite("assets/Baren.png");
+    olc::Sprite* nebulaSpr = new olc::Sprite("assets/images/nebula_1.png");
     olc::vf2d artPos = { (float)(rand() % (pge.ScreenWidth() - (2 * nebulaSpr->width))), (float)(rand() % (pge.ScreenHeight() - nebulaSpr->height)) };
     Artifact *nebula1 = new Artifact(artPos, nebulaSpr, 1, 1);
 
