@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Artifact.cpp" />
+    <ClCompile Include="PlayerMovement.cpp" />
     <ClCompile Include="ScrollingStarsBG.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="RetroMenu.cpp" />
@@ -142,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Artifact.h" />
+    <ClInclude Include="PlayerMovement.h" />
     <ClInclude Include="ScrollingStarsBG.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="CommandFactory.h" />
@@ -154,6 +156,42 @@
     <ClInclude Include="Screen.h" />
     <ClInclude Include="Spawn.h" />
     <ClInclude Include="ZoomingStarsBG.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\images\enemyShip01.png" />
+    <Image Include="assets\images\explosion-spritesheet.png" />
+    <Image Include="assets\images\explosion-spritesheet2.png" />
+    <Image Include="assets\images\icon-health.png" />
+    <Image Include="assets\images\iconShip.png" />
+    <Image Include="assets\images\logoLong.png" />
+    <Image Include="assets\images\logoLongS.png" />
+    <Image Include="assets\images\MainScreen.png" />
+    <Image Include="assets\images\MainScreen640x480.png" />
+    <Image Include="assets\images\MainScreen640x480noText.png" />
+    <Image Include="assets\images\nebula_1.png" />
+    <Image Include="assets\images\playerShip.png" />
+    <Image Include="assets\images\playerShipLeft1.png" />
+    <Image Include="assets\images\playerShipOld.png" />
+    <Image Include="assets\images\playerShipRight1.png" />
+    <Image Include="assets\images\PlayerSpritesheet.png" />
+    <Image Include="assets\images\powerup.png" />
+    <Image Include="assets\images\powerupProjectile1.png" />
+    <Image Include="assets\images\powerupProjectile2.png" />
+    <Image Include="assets\images\powerupSheet.png" />
+    <Image Include="assets\images\projectile_1-small.png" />
+    <Image Include="assets\images\projectile_1.png" />
+    <Image Include="assets\images\projectile_2.png" />
+    <Image Include="assets\images\RetroMenu.png" />
+    <Image Include="assets\images\RetroMenu2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="assets\images\test.txt" />
+    <Text Include="assets\sounds\Test.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="assets\sounds\big_explosion.wav" />
+    <Media Include="assets\sounds\laser_a1.mp3" />
+    <Media Include="assets\sounds\menu_music.mp3" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
