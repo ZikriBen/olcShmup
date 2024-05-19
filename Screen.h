@@ -158,8 +158,8 @@ public:
 		// You do not need the 'this->' referance but I wanted you to see where I was getting this madness from
 		// Basicilly I am asking the parent class (Screen) to load & play music for this child class (MenuScreen) only
 		// Debug it to understand better
-		this->nMenuMusic_ID = this->miniAudio.LoadSound(this->souMenuMusic);
-		this->miniAudio.Play(this->nMenuMusic_ID, true);
+		//this->nMenuMusic_ID = this->miniAudio.LoadSound(this->souMenuMusic);
+		//this->miniAudio.Play(this->nMenuMusic_ID, true);
 	};
 	
 	bool Run(float fElapsedTime) {
@@ -390,17 +390,17 @@ public:
 		float coldTime = 120.0f;
 
 		listSpawns = {
-			new sEnemyDefiniton(coldTime + 60.00, listSprites[0], 0.5f, Move_SinusoidWide, Fire_Straigt2, 3.0f),
-			new sPowerUpDefiniton(coldTime + 30.00, listSprites[1], 0.5f, Move_Bounce, Fire_None, powerUpType::GREEN),
-			new sPowerUpDefiniton(coldTime + 120.00, listSprites[2], 0.5f, Move_Bounce, Fire_None, powerUpType::DEFAULT),
-			new sPowerUpDefiniton(coldTime + 240.00, listSprites[3], 0.5f, Move_Bounce, Fire_None, powerUpType::BLUE),
-			new sEnemyDefiniton(coldTime + 240.0, listSprites[0],  0.25f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
-			new sEnemyDefiniton(coldTime + 240.0, listSprites[0], 0.75f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
-			new sEnemyDefiniton(coldTime + 360.0, listSprites[0], 0.2f, Move_None, Fire_Straigt2, 3.0f),
-			new sEnemyDefiniton(coldTime + 360.0, listSprites[0], 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
-			new sEnemyDefiniton(coldTime + 360.0, listSprites[0], 0.8f, Move_None, Fire_Straigt2, 3.0f),
-			new sEnemyDefiniton(coldTime + 500.0, listSprites[0], 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
-			new sEnemyDefiniton(coldTime + 850, listSprites[0], 0.5f, Move_Fast, Fire_End, 3.0f),
+			new sEnemyDefinition(coldTime + 60.00, listSprites[0], 0.5f, Move_SinusoidWide, Fire_Straigt2, 3.0f),
+			new sPowerUpDefinition(coldTime + 30.00, listSprites[1], 0.5f, Move_Bounce, Fire_None, PowerUpType::GREEN),
+			new sPowerUpDefinition(coldTime + 120.00, listSprites[2], 0.5f, Move_Bounce, Fire_None, PowerUpType::DEFAULT),
+			new sPowerUpDefinition(coldTime + 240.00, listSprites[3], 0.5f, Move_Bounce, Fire_None, PowerUpType::BLUE),
+			new sEnemyDefinition(coldTime + 240.0, listSprites[0],  0.25f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
+			new sEnemyDefinition(coldTime + 240.0, listSprites[0], 0.75f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
+			new sEnemyDefinition(coldTime + 360.0, listSprites[0], 0.2f, Move_None, Fire_Straigt2, 3.0f),
+			new sEnemyDefinition(coldTime + 360.0, listSprites[0], 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
+			new sEnemyDefinition(coldTime + 360.0, listSprites[0], 0.8f, Move_None, Fire_Straigt2, 3.0f),
+			new sEnemyDefinition(coldTime + 500.0, listSprites[0], 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
+			new sEnemyDefinition(coldTime + 850, listSprites[0], 0.5f, Move_Fast, Fire_End, 3.0f),
 		};
 
 	};
@@ -425,7 +425,7 @@ public:
 			Spawn* currentSpawn = listSpawns.front();
 			if (SpawnType::ENEMY == currentSpawn->type) {
 				sEnemy e;
-				e.def = dynamic_cast<sEnemyDefiniton*>(currentSpawn);
+				e.def = dynamic_cast<sEnemyDefinition*>(currentSpawn);
 				e.pos = {
 					e.def->fOffset * ((float)pge.ScreenWidth()) - (((float)e.def->spr->width) / 2),
 					0.0f - ((float)e.def->spr->height)
@@ -435,7 +435,7 @@ public:
 			}
 			if (SpawnType::POWERUP == currentSpawn->type) {
 				PowerUp p;
-				p.def = dynamic_cast<sPowerUpDefiniton*>(currentSpawn);
+				p.def = dynamic_cast<sPowerUpDefinition*>(currentSpawn);
 				p.fWidth = ((int)p.def->spr->width) / 3; // remove magice numbers
 				p.fHeight = ((int)p.def->spr->height);
 				p.pos = {
@@ -552,15 +552,15 @@ public:
 	void detectPlayerPowerUpCollision(float fElapsedTime, Player& player, std::list<PowerUp>& listPowerUp) {
 		for (auto& p : listPowerUp) {
 			if ((p.pos - (player.pos + olc::vf2d(((float)player.getWidth() / 2.0f), ((float)player.getWidth() / 2.0f)))).mag2() < powf(((float)player.getWidth() / 2.0f), 2.0f)) {
-				if (p.def->type == powerUpType::DEFAULT)
+				if (p.def->type == PowerUpType::DEFAULT)
 					player.setPoerUpLeve(1);
-				else if (p.def->type == powerUpType::GREEN)
-					if (player.ProjectileType == static_cast<int>(powerUpType::GREEN))
+				else if (p.def->type == PowerUpType::GREEN)
+					if (player.ProjectileType == static_cast<int>(PowerUpType::GREEN))
 						player.setPoerUpLeve(1);
 					else
 						player.ProjectileType = Bullet::GREEN;
-				else if (p.def->type == powerUpType::BLUE)
-					if (player.ProjectileType == static_cast<int>(powerUpType::BLUE))
+				else if (p.def->type == PowerUpType::BLUE)
+					if (player.ProjectileType == static_cast<int>(PowerUpType::BLUE))
 						player.setPoerUpLeve(1);
 					else
 						player.ProjectileType = Bullet::BLUE;

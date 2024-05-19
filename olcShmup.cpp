@@ -54,7 +54,7 @@ public:
         screenMap["game"] = gameScreen;
         screenMap["game_over"] = gameOverScreen;
 
-        gameState = GameState::START;
+        gameState = GameState::GAME;
        
         return true;
     }

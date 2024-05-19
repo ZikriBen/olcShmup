@@ -7,7 +7,7 @@
 class PowerUp : public sSpawn {
 public:
     float fTriggerTime;
-    sPowerUpDefiniton* def;
+    sPowerUpDefinition* def;
     olc::Sprite* sprite;
     float fBlinkDelay = 8;
     float fBlinkTimer = 0.0f;
@@ -18,7 +18,7 @@ public:
  
 
     PowerUp(): sSpawn() {};
-    PowerUp(sPowerUpDefiniton* def) : def(def) {};
+    PowerUp(sPowerUpDefinition* def) : def(def) {};
     PowerUp(olc::PixelGameEngine& pge, olc::Sprite* spr, float x, float y, float speed, float fTriggerTime) : sprite(spr), fTriggerTime(fTriggerTime) {
     }
 

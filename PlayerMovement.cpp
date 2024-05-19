@@ -77,7 +77,7 @@ void PlayerMovement::Update(float fElapsedTime)
 	{
 		player.graphicState = Player::MOVING;
 		player.facingDirection = Player::NORTH;
-		player.pos.y -= player.getSpeed() * fElapsedTime;
+		player.pos.y += player.getSpeed() * fElapsedTime;
 	}
 
 	// If A or direction key Left is held
