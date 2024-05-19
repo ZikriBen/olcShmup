@@ -1,5 +1,8 @@
 ﻿//// olcShmup.cpp : This file contains the 'main' function. Program execution begins and ends there.
 ////
+#define OLC_PGEX_MINIAUDIO          // Johnngy63: Added to support cool sounds
+#include "olcPGEX_MiniAudio.h"
+
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 #include "Screen.h"
@@ -31,6 +34,8 @@ public:
     std::unordered_map<std::string, Screen*> screenMap;
     GameState gameState;
 
+
+
 public:
     bool OnUserCreate() override {
         startScreen = new StartScreen(*this);
@@ -50,7 +55,7 @@ public:
         screenMap["game_over"] = gameOverScreen;
 
         gameState = GameState::START;
-
+       
         return true;
     }
 

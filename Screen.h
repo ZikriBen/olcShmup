@@ -1,6 +1,9 @@
 #ifndef SCREEN_H
 #define SCREEN_H
+
+#include "olcPGEX_MiniAudio.h"
 #include "olcPixelGameEngine.h"
+
 #include "Player.h"
 #include "Enemy.h"
 #include "Bullet.h"
@@ -9,6 +12,9 @@
 #include "RetroMenu.h"
 #include "ScrollingStarsBG.h"
 #include "ZoomingStarsBG.h"
+
+// Johnnyg63:
+#include "PlayerMovement.h"
 
 
 constexpr float PI = 3.14159f;
@@ -19,6 +25,15 @@ public:
 	virtual void Create() = 0;
 	virtual bool Run(float fElapsedTime) = 0;
 	virtual void Destroy() = 0;
+
+	// Johnnyg63: Lets add some sounds !!!
+public:
+
+	olc::MiniAudio miniAudio;		// We use miniAudio to play sounds throught out our game
+	int32_t nMenuMusic_ID = -1;     // Stores the ID of the menu musice so it can be played & looped easliy
+	std::string souMenuMusic = "assets\\sounds\\menu_music.mp3";       // Holds the full path to menu_music.mp3
+	std::string souLaserA1 = "assets\\sounds\\laser_a1.mp3";             // Holds the full path to laser_a1.mp3
+	std::string souBigExplosion = "assets\\sounds\\big_explosion.wav";;    // Holds the full path to big_explosion.way
 };
 
 class StartScreen : public Screen {
@@ -47,7 +62,7 @@ public:
 	
 
 	void Create() {
-		logo = new olc::Sprite("assets/logoLongS.png");
+		logo = new olc::Sprite("assets/images/logoLongS.png");
 
 		lines.push_back("Galactic Havoc : Deep Space Assault");
 		lines.push_back("Made by Ben Zikri");
@@ -112,8 +127,8 @@ public:
 	MenuScreen(olc::PixelGameEngine& pge) : pge(pge), sprBG(nullptr), pos(0,0){};
 
 	void Create() {
-		sprBG = new olc::Sprite("assets/MainScreen640x480noText.png");
-		sprGFX = new olc::Sprite("./assets/RetroMenu2.png");
+		sprBG = new olc::Sprite("assets/images/MainScreen640x480noText.png");
+		sprGFX = new olc::Sprite("./assets/images/RetroMenu2.png");
 
 		lines.push_back("Start Game");
 		lines.push_back("Options");
@@ -138,6 +153,13 @@ public:
 		mo["main"]["Sound"]["Off"].SetID(105);
 
 		mo.Build();
+
+		// Johnngy63: This code plays the menu music in a loop
+		// You do not need the 'this->' referance but I wanted you to see where I was getting this madness from
+		// Basicilly I am asking the parent class (Screen) to load & play music for this child class (MenuScreen) only
+		// Debug it to understand better
+		this->nMenuMusic_ID = this->miniAudio.LoadSound(this->souMenuMusic);
+		this->miniAudio.Play(this->nMenuMusic_ID, true);
 	};
 	
 	bool Run(float fElapsedTime) {
@@ -181,6 +203,9 @@ public:
 				currentSelection = (currentSelection + 1) % lines.size();
 			
 			if (pge.GetKey(olc::ENTER).bPressed || pge.GetKey(olc::Key::SPACE).bPressed) {
+				
+				// Johnnyg63: Plays the laser sound when you press Enter||Space
+				this->miniAudio.Play(this->souLaserA1);
 				if (currentSelection == 0)
 					return false;
 				else if (currentSelection == 1)
@@ -196,14 +221,24 @@ public:
 		else {
 			if (pge.GetKey(olc::UP).bPressed || pge.GetKey(olc::Key::W).bPressed)
 				mm.OnUp();
+
 			if (pge.GetKey(olc::DOWN).bPressed || pge.GetKey(olc::Key::S).bPressed)
 				mm.OnDown();
+
 			if (pge.GetKey(olc::Key::A).bPressed)  
 				mm.OnLeft();
+
 			if (pge.GetKey(olc::Key::D).bPressed) 
 				mm.OnRight();
+
 			if (pge.GetKey(olc::ENTER).bPressed || pge.GetKey(olc::Key::SPACE).bPressed)
+			{
+				// Johnnyg63: Plays the laser sound when you press Enter||Space
+				this->miniAudio.Play(this->souLaserA1);
 				command = mm.OnConfirm();
+			}
+				
+
 			if (pge.GetKey(olc::ESCAPE).bPressed || pge.GetKey(olc::Key::Z).bPressed)
 				mm.OnBack();
 
@@ -241,7 +276,7 @@ public:
 		player.lifeState = Player::ALIVE;
 		bg.populateStars();
 		exp = new Explosion(pge);
-		exp->spriteSheet = new olc::Sprite("assets/explosion-spritesheet2.png");
+		exp->spriteSheet = new olc::Sprite("assets/images/explosion-spritesheet2.png");
 
 		// Movement Patterns
 		auto Move_None = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
@@ -346,10 +381,10 @@ public:
 		};
 
 		listSprites = {
-			new olc::Sprite("assets/enemyShip01.png"),
-			new olc::Sprite("assets/powerupSheet.png"),
-			new olc::Sprite("assets/powerupProjectile1.png"),
-			new olc::Sprite("assets/powerupProjectile2.png")
+			new olc::Sprite("assets/images/enemyShip01.png"),
+			new olc::Sprite("assets/images/powerupSheet.png"),
+			new olc::Sprite("assets/images/powerupProjectile1.png"),
+			new olc::Sprite("assets/images/powerupProjectile2.png")
 		};
 
 		float coldTime = 120.0f;
@@ -374,6 +409,9 @@ public:
 		pge.Clear(olc::BLACK);
 		dWorldPos += fWorldSpeed * fElapsedTime;
 		bg.Update(fElapsedTime);
+
+		playerMovement.Update(fElapsedTime); // Johnnyg63: Update the player position
+
 		player.Update(fElapsedTime);
 		exp->Update(fElapsedTime, player);
 
@@ -436,6 +474,8 @@ public:
 			break;
 		case Player::DYING:
 			exp->pos = olc::vf2d(player.pos.x, player.pos.y);
+			// Johnngy63: Play explosion
+			this->miniAudio.Play(this->souBigExplosion);
 			listExplosions.push_back(exp);
 			break;
 		case Player::DEAD:
@@ -496,6 +536,9 @@ public:
 					e.def->fHealth -= 1.0f;
 					if (e.def->fHealth <= 0) {
 
+						// Johnngy63: Play explosion
+						this->miniAudio.Play(this->souBigExplosion);
+
 						for (int i = 0; i < 500; ++i) {
 							float fAngle = ((float)rand() / (float)RAND_MAX * 2.0f * PI);
 							float fSpeed = ((float)rand() / (float)RAND_MAX * 200.0f + 50.0f);
@@ -543,7 +586,9 @@ public:
 	float fWorldSpeed = 40.0f;
 	double dWorldPos = 0;
 
-	Player player{ pge };
+	Player player{ pge, miniAudio };
+	PlayerMovement playerMovement{ pge, player };
+
 	ScrollingStarsBG bg{ pge, fWorldSpeed, 200 };
 	Explosion* exp = nullptr;
 	float fDescTimer = 0.0;

@@ -1,14 +1,20 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+#include "olcPGEX_MiniAudio.h"
 #include "olcPixelGameEngine.h"
+
+// Jonngy63: Added PlayerMovement.h
+#include "PlayerMovement.h";
 #include <unordered_set>
 #include "Bullet.h"
 
 #pragma once
 
 class InputHandler;
-class Command;
-class CommandFactory;
+
+// Johhnyg63: Removed PlayerMovement now handles this
+//class Command;
+//class CommandFactory;
 
 class ProjectileDef {
 public:
@@ -24,8 +30,9 @@ public:
 class Player
 {
 public:
-	Player(olc::PixelGameEngine& pge);
+	Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio);
 	olc::PixelGameEngine& pge;
+	olc::MiniAudio& miniAudio; // Johnnyg63: We need to inject the miniAudio so we can play the laser sounds when the player is shooting
 	void Update(float);
 	void Draw();
 	float getWidth() { return fWidth; };
@@ -45,13 +52,16 @@ public:
 	bool bCanFire;
 	std::list<Bullet> listPlayerBullets;
 	std::vector<ProjectileDef> listProjectileDef;
-	std::vector<std::tuple<Command*, float>> listPlayerCommands;
+	//std::vector<std::tuple<Command*, float>> listPlayerCommands;
 	float fGraphicTimer;
 	int graphicCounter;
-	CommandFactory* factory;
+	//CommandFactory* factory;
 	enum { STANDING, MOVING } graphicState;
 	enum { ALIVE, DYING, DEAD } lifeState;
 	enum { NORTH = 0, EAST = 1, WEST = 2} facingDirection;
+
+	// Johnnyg63: Lasers sounds for when the user is shooting (Space bar)
+	std::string souLaserA1 = "assets\\sounds\\laser_a1.mp3"; // Holds the full path to laser_a1.mp3
 	
 private:
 	int powerUpCap = 3;
@@ -61,6 +71,8 @@ private:
 	InputHandler *ih;
 	float fWidth;
 	float fHeight;
+
+	
 };
 
 

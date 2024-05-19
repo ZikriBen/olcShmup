@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -12,6 +12,15 @@
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{6c5128e1-c588-40a4-a1e5-f96719aad13a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets\images">
+      <UniqueIdentifier>{02fdeaea-d3b5-464c-bd81-fa4ba5899e08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets\sounds">
+      <UniqueIdentifier>{23c424a9-19ae-4742-9ef4-eb3ffdca1752}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,22 +36,31 @@
     <ClCompile Include="Artifact.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Background.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Bullet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Explosion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CommandFactory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PowerUp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Spawn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScrollingStarsBG.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RetroMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Screen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZoomingStarsBG.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerMovement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -57,9 +75,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Artifact.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Background.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Bullet.h">
@@ -77,5 +92,116 @@
     <ClInclude Include="Spawn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ScrollingStarsBG.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RetroMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Screen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ZoomingStarsBG.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerMovement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\images\enemyShip01.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\explosion-spritesheet.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\explosion-spritesheet2.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\icon-health.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\iconShip.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\logoLong.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\logoLongS.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\MainScreen.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\MainScreen640x480.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\MainScreen640x480noText.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\nebula_1.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\playerShip.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\playerShipLeft1.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\playerShipOld.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\playerShipRight1.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\PlayerSpritesheet.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\powerup.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\powerupProjectile1.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\powerupProjectile2.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\powerupSheet.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\projectile_1.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\projectile_1-small.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\projectile_2.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\RetroMenu.png">
+      <Filter>assets\images</Filter>
+    </Image>
+    <Image Include="assets\images\RetroMenu2.png">
+      <Filter>assets\images</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="assets\images\test.txt">
+      <Filter>assets\images</Filter>
+    </Text>
+    <Text Include="assets\sounds\Test.txt">
+      <Filter>assets\sounds</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="assets\sounds\big_explosion.wav">
+      <Filter>assets\sounds</Filter>
+    </Media>
+    <Media Include="assets\sounds\laser_a1.mp3">
+      <Filter>assets\sounds</Filter>
+    </Media>
+    <Media Include="assets\sounds\menu_music.mp3">
+      <Filter>assets\sounds</Filter>
+    </Media>
   </ItemGroup>
 </Project>
