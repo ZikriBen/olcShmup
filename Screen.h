@@ -300,6 +300,20 @@ public:
 			e.pos.x += 200.0f * cosf(e.dataMove[0]) * fElapsedTime;
 		};
 
+		auto Move_SinusoidWideInf = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
+			e.dataMove[0] += fElapsedTime;
+			
+			e.pos.x += 200.0f * cosf(e.dataMove[0]) * fElapsedTime;
+
+			if (e.pos.y + (e.fHeight) >= 0.87f * pge.ScreenHeight())
+				e.dataMove[1] = -1;
+			if (e.pos.y <= 0)
+				e.dataMove[1] = 1;
+				
+			e.pos.y += e.dataMove[1] * fScrollSpeed * fElapsedTime * 1.0f;
+			
+		};
+
 		auto Move_Bounce = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
 			// Update position based on velocity
 
@@ -338,7 +352,7 @@ public:
 			if (e.dataFire[0] >= fDelay) {
 				e.dataFire[0] -= fDelay;
 				Bullet b;
-				b.pos = e.pos + (olc::vf2d(((float)e.def->spr->width / 2.0f), ((float)e.def->spr->height)));
+				b.pos = e.pos + (olc::vf2d(((float)e.def->iWidth / 2.0f), ((float)e.def->iHeight)));
 				b.vel = { 0.0f, 180.0f };
 				listEnemyBullets.push_back(b);
 			}
@@ -355,7 +369,7 @@ public:
 				e.dataFire[0] -= fDelay;
 				for (int i = 0; i < nBullets; ++i) {
 					Bullet b;
-					b.pos = e.pos + (olc::vf2d(((float)e.def->spr->width / 2.0f), ((float)e.def->spr->height / 2.0f)));
+					b.pos = e.pos + (olc::vf2d(((float)e.def->iWidth / 2.0f), ((float)e.def->iHeight / 2.0f)));
 					b.vel = { 180.0f * cosf(fTetha * i), 180.0f * sinf(fTetha * i) };
 					listEnemyBullets.push_back(b);
 				}
@@ -374,7 +388,7 @@ public:
 				e.dataFire[1] += 0.1f;
 
 				Bullet b;
-				b.pos = e.pos + (olc::vf2d(24, 24)); // Remove magic numbers!
+				b.pos = e.pos + (olc::vf2d((e.def->iWidth / 2.0f), e.def->iHeight));
 				b.vel = { 180.0f * cosf(e.dataFire[1]), 180.0f * sinf(e.dataFire[1]) };
 				listEnemyBullets.push_back(b);
 			}
@@ -384,14 +398,16 @@ public:
 			new olc::Sprite("assets/images/enemyShip01.png"),
 			new olc::Sprite("assets/images/powerupSheet.png"),
 			new olc::Sprite("assets/images/powerupProjectile1.png"),
-			new olc::Sprite("assets/images/powerupProjectile2.png")
+			new olc::Sprite("assets/images/powerupProjectile2.png"),
+			new olc::Sprite("assets/images/boss2.png")
 		};
 
 		float coldTime = 120.0f;
-
+		std::cout << "w: " << listSprites[4]->width / 5 << " h: " << listSprites[4]->height << std::endl;
 		listSpawns = {
-			new sEnemyDefinition(coldTime + 60.00, listSprites[0], 0.5f, Move_SinusoidWide, Fire_Straigt2, 3.0f),
-			new sPowerUpDefinition(coldTime + 30.00, listSprites[1], 0.5f, Move_Bounce, Fire_None, PowerUpType::GREEN),
+			//new sEnemyDefinition(coldTime + 60.00, listSprites[0], 0.5f, Move_None, Fire_None, 3.0f, (listSprites[0]->width), listSprites[0]->height),
+			new sBossDefiniton(coldTime + 40.00, listSprites[4], 0.5f, Move_SinusoidWideInf, Fire_DeathSpiral, 3.0f, (listSprites[4]->width / 5), listSprites[4]->height),
+			/*new sPowerUpDefinition(coldTime + 30.00, listSprites[1], 0.5f, Move_Bounce, Fire_None, PowerUpType::GREEN),
 			new sPowerUpDefinition(coldTime + 120.00, listSprites[2], 0.5f, Move_Bounce, Fire_None, PowerUpType::DEFAULT),
 			new sPowerUpDefinition(coldTime + 240.00, listSprites[3], 0.5f, Move_Bounce, Fire_None, PowerUpType::BLUE),
 			new sEnemyDefinition(coldTime + 240.0, listSprites[0],  0.25f, Move_SinusoidNarrow, Fire_Straigt2, 3.0f),
@@ -400,7 +416,7 @@ public:
 			new sEnemyDefinition(coldTime + 360.0, listSprites[0], 0.5f, Move_None, Fire_CirclePulse2, 3.0f),
 			new sEnemyDefinition(coldTime + 360.0, listSprites[0], 0.8f, Move_None, Fire_Straigt2, 3.0f),
 			new sEnemyDefinition(coldTime + 500.0, listSprites[0], 0.5f, Move_Fast, Fire_DeathSpiral, 3.0f),
-			new sEnemyDefinition(coldTime + 850, listSprites[0], 0.5f, Move_Fast, Fire_End, 3.0f),
+			new sEnemyDefinition(coldTime + 850, listSprites[0], 0.5f, Move_Fast, Fire_End, 3.0f),*/
 		};
 
 	};
@@ -424,16 +440,15 @@ public:
 		while (!listSpawns.empty() && dWorldPos >= listSpawns.front()->dTriggerTime) {
 			Spawn* currentSpawn = listSpawns.front();
 			if (SpawnType::ENEMY == currentSpawn->type) {
-				sEnemy e;
-				e.def = dynamic_cast<sEnemyDefinition*>(currentSpawn);
-				e.pos = {
-					e.def->fOffset * ((float)pge.ScreenWidth()) - (((float)e.def->spr->width) / 2),
-					0.0f - ((float)e.def->spr->height)
+				sEnemy* pEenemy = new sEnemy(dynamic_cast<sEnemyDefinition*>(currentSpawn));
+				pEenemy->pos = {
+					pEenemy->def->fOffset * ((float)pge.ScreenWidth()) - (((float)pEenemy->def->iWidth) / 2),
+					0.0f - ((float)pEenemy->def->iHeight)
 				};
 				listSpawns.pop_front();
-				listEnemies.push_back(e);
+				listEnemies.push_back(pEenemy);
 			}
-			if (SpawnType::POWERUP == currentSpawn->type) {
+			else if (SpawnType::POWERUP == currentSpawn->type) {
 				PowerUp p;
 				p.def = dynamic_cast<sPowerUpDefinition*>(currentSpawn);
 				p.fWidth = ((int)p.def->spr->width) / 3; // remove magice numbers
@@ -445,6 +460,17 @@ public:
 				listSpawns.pop_front();
 				listPowerUp.push_back(p);
 			}
+			else if (SpawnType::BOSS == currentSpawn->type) {
+				sBoss* pBoss = new sBoss(dynamic_cast<sBossDefiniton*>(currentSpawn));
+				pBoss->fWidth = ((int)pBoss->def->iWidth); // remove magice numbers
+				pBoss->fHeight = ((int)pBoss->def->iHeight);
+				pBoss->pos = {
+					pBoss->def->fOffset * ((float)pge.ScreenWidth()) - (((float)pBoss->def->iWidth) / 2),
+					0.0f - ((float)pBoss->def->iHeight)
+				};
+				listSpawns.pop_front();
+				listEnemies.push_back(pBoss);
+			}
 		}
 
 		for (auto& f : listFragments) {
@@ -452,7 +478,7 @@ public:
 		}
 
 		for (auto& e : listEnemies) {
-			e.Update(fElapsedTime, fWorldSpeed, listEnemyBullets);
+			e->Update(fElapsedTime, fWorldSpeed, listEnemyBullets);
 		}
 
 		for (auto& p : listPowerUp) {
@@ -485,7 +511,7 @@ public:
 		}
 
 		pge.SetPixelMode(olc::Pixel::MASK);
-		for (auto& e : listEnemies) pge.DrawSprite(e.pos, e.def->spr, 1, olc::Sprite::Flip::VERT);
+		for (auto& e : listEnemies) e->Draw(pge);
 		pge.SetPixelMode(olc::Pixel::NORMAL);
 
 		for (auto& p : listPowerUp) {
@@ -527,14 +553,14 @@ public:
 		listExplosions.clear();
 	};
 
-	void detectPlayerBulletCollision(float fElapsedTime, std::list<Bullet>& playerBullets, std::list<sEnemy>& listEnemies, std::list<Bullet>* listFragments) {
+	void detectPlayerBulletCollision(float fElapsedTime, std::list<Bullet>& playerBullets, std::list<sEnemy *>& listEnemies, std::list<Bullet>* listFragments) {
 		for (auto& b : playerBullets) {
 			b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
 			for (auto& e : listEnemies)
-				if ((b.pos - (e.pos + olc::vf2d(((float)e.def->spr->width / 2.0f), ((float)e.def->spr->width / 2.0f)))).mag2() < powf(((float)e.def->spr->width / 2.0f), 2.0f)) { // Remove magic numbers!
+				if ((b.pos - (e->pos + olc::vf2d(((float)e->def->iWidth / 2.0f), ((float)e->def->iHeight / 2.0f)))).mag2() < ((float)(e->def->iWidth * e->def->iHeight / 2.0f))) { // Remove magic numbers!
 					b.remove = true;
-					e.def->fHealth -= 1.0f;
-					if (e.def->fHealth <= 0) {
+					e->def->fHealth -= 1.0f;
+					if (e->def->fHealth <= 0) {
 
 						// Johnngy63: Play explosion
 						this->miniAudio.Play(this->souBigExplosion);
@@ -542,7 +568,7 @@ public:
 						for (int i = 0; i < 500; ++i) {
 							float fAngle = ((float)rand() / (float)RAND_MAX * 2.0f * PI);
 							float fSpeed = ((float)rand() / (float)RAND_MAX * 200.0f + 50.0f);
-							listFragments->push_back({ e.pos + olc::vf2d(24, 24), {fSpeed * cosf(fAngle), fSpeed * sinf(fAngle)}, false, 255 });
+							listFragments->push_back({ e->pos + olc::vf2d(e->def->iWidth / 2.0f , e->def->iHeight / 2.0f), {fSpeed * cosf(fAngle), fSpeed * sinf(fAngle)}, false, 255 });
 						}
 					}
 				}
@@ -570,7 +596,7 @@ public:
 	}
 
 	void cleanUp() {
-		listEnemies.remove_if([&](const sEnemy& e) {return e.pos.y >= ((float)pge.ScreenHeight()) || e.def->fHealth <= 0; });
+		listEnemies.remove_if([&](const sEnemy* e) {return e->pos.y >= ((float)pge.ScreenHeight()) || e->def->fHealth <= 0; });
 
 		listEnemyBullets.remove_if([&](const Bullet& b) {return b.pos.x < 0 || b.pos.x>pge.ScreenWidth() || b.pos.y <0 || b.pos.y > pge.ScreenHeight() || b.remove; });
 
@@ -596,7 +622,7 @@ public:
 	bool bGameOn = true;
 	std::vector<olc::Sprite*> listSprites;
 	std::list<Spawn*> listSpawns;
-	std::list<sEnemy> listEnemies;
+	std::list<sEnemy *> listEnemies;
 	std::list<Bullet> listEnemyBullets;
 	std::list<Bullet> listFragments;
 	std::list<Explosion*> listExplosions;

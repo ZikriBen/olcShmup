@@ -9,7 +9,8 @@
 enum class SpawnType {
     SPAWN,
     ENEMY,
-    POWERUP
+    POWERUP,
+    BOSS
 };
 
 enum class PowerUpType {
@@ -17,6 +18,8 @@ enum class PowerUpType {
     GREEN = 1,
     BLUE = 2
 };
+
+
 
 struct sEnemy;
 
@@ -54,11 +57,13 @@ public:
 class sEnemyDefinition : public Spawn {
 public:
     float fHealth;
+    int iWidth;
+    int iHeight;
 
-    sEnemyDefinition() : Spawn(0.0f, nullptr, 0.0f, SpawnType::ENEMY, nullptr, nullptr), fHealth(0.0f) {}
+    sEnemyDefinition() : Spawn(0.0f, nullptr, 0.0f, SpawnType::ENEMY, nullptr, nullptr), fHealth(0.0f), iWidth(0), iHeight(0) {}
 
-    sEnemyDefinition(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health)
-        : Spawn(triggerTime, spr, offset, SpawnType::ENEMY, funcMove, funcFire), fHealth(health)
+    sEnemyDefinition(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health, int width, int height)
+        : Spawn(triggerTime, spr, offset, SpawnType::ENEMY, funcMove, funcFire), fHealth(health), iWidth(width), iHeight(height)
     {}
 };
 
@@ -74,10 +79,14 @@ public:
 };
 
 struct sBossDefiniton : public sEnemyDefinition {
-    sBossDefiniton() : sEnemyDefinition() {}
+    sBossDefiniton() : sEnemyDefinition() {
+        type = SpawnType::BOSS;  
+    }
 
-    sBossDefiniton(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health)
-        : sEnemyDefinition(triggerTime, spr, offset, funcMove, funcFire, health) {}
+    sBossDefiniton(double triggerTime, olc::Sprite* spr, float offset, std::function<void(sSpawn&, float, float)> funcMove, std::function<void(sSpawn&, float, float, std::list<Bullet>&)> funcFire, float health, int width, int height)
+        : sEnemyDefinition(triggerTime, spr, offset, funcMove, funcFire, health, width, height){
+        type = SpawnType::BOSS;
+    }
 };
 
 #endif // SPAWN_H
