@@ -443,27 +443,27 @@ public:
 		float coldTime = 120.0f;
 		listSpawns = {
 			new sEnemyDefinition  (coldTime + 60.00f,  listSprites[0], 0.5f, Move_None,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sPowerUpDefinition(coldTime + 120.00f, listSprites[1], 0.5f, Move_Bounce,            Fire_None, PowerUpType::GREEN, 100),
-			new sEnemyDefinition  (coldTime + 180.0f,  listSprites[0], 0.2f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 180.0f,  listSprites[0], 0.8f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 240.0f,  listSprites[0], 0.5f, Move_SinusoidNarrow,    Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sPowerUpDefinition(coldTime + 200.00f, listSprites[2], 0.5f, Move_Bounce,            Fire_None, PowerUpType::DEFAULT, 100),
-			new sEnemyDefinition  (coldTime + 260.0f,  listSprites[0], 0.3f, Move_SinusoidWide,      Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 360.0f,  listSprites[0], 0.3f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 420.0f,  listSprites[0], 0.1f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 420.0f,  listSprites[0], 0.9f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 500.0f,  listSprites[0], 0.5f, Move_None,              Fire_DeathSpiral, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 560.0f,  listSprites[0], 0.5f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 600.0f,  listSprites[0], 0.6f, Move_Slow,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 720.0f,  listSprites[0], 0.4f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 780.0f,  listSprites[0], 0.7f, Move_SinusoidWide,      Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sPowerUpDefinition(coldTime + 800.00f, listSprites[3], 0.9f, Move_Bounce,            Fire_None, PowerUpType::BLUE, 100),
-			new sEnemyDefinition  (coldTime + 840.0f,  listSprites[0], 0.3f, Move_None,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 900.0f,  listSprites[0], 0.8f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 960.0f,  listSprites[0], 0.2f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 1020.0f, listSprites[0], 0.5f, Move_SinusoidNarrow,    Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 1080.0f, listSprites[0], 0.9f, Move_Slow,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			new sBossDefiniton    (coldTime + 1500.0,  listSprites[4], 0.5f, Move_SinusoidWideInf,   Fire_CirclePulse2, 20.0f, (listSprites[4]->width / 5), listSprites[4]->height, 1000),
+			//new sPowerUpDefinition(coldTime + 120.00f, listSprites[1], 0.5f, Move_Bounce,            Fire_None, PowerUpType::GREEN, 100),
+			//new sEnemyDefinition  (coldTime + 180.0f,  listSprites[0], 0.2f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 180.0f,  listSprites[0], 0.8f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 240.0f,  listSprites[0], 0.5f, Move_SinusoidNarrow,    Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sPowerUpDefinition(coldTime + 200.00f, listSprites[2], 0.5f, Move_Bounce,            Fire_None, PowerUpType::DEFAULT, 100),
+			//new sEnemyDefinition  (coldTime + 260.0f,  listSprites[0], 0.3f, Move_SinusoidWide,      Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 360.0f,  listSprites[0], 0.3f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 420.0f,  listSprites[0], 0.1f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 420.0f,  listSprites[0], 0.9f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 500.0f,  listSprites[0], 0.5f, Move_None,              Fire_DeathSpiral, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 560.0f,  listSprites[0], 0.5f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 600.0f,  listSprites[0], 0.6f, Move_Slow,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 720.0f,  listSprites[0], 0.4f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 780.0f,  listSprites[0], 0.7f, Move_SinusoidWide,      Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sPowerUpDefinition(coldTime + 800.00f, listSprites[3], 0.9f, Move_Bounce,            Fire_None, PowerUpType::BLUE, 100),
+			//new sEnemyDefinition  (coldTime + 840.0f,  listSprites[0], 0.3f, Move_None,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 900.0f,  listSprites[0], 0.8f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 960.0f,  listSprites[0], 0.2f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 1020.0f, listSprites[0], 0.5f, Move_SinusoidNarrow,    Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sEnemyDefinition  (coldTime + 1080.0f, listSprites[0], 0.9f, Move_Slow,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
+			//new sBossDefiniton    (coldTime + 1500.0,  listSprites[4], 0.5f, Move_SinusoidWideInf,   Fire_CirclePulse2, 20.0f, (listSprites[4]->width / 5), listSprites[4]->height, 1000),
 			//new sEnemyDefinition(coldTime + 300, listSprites[0], 0.5f, Move_None, Fire_End, 3.0f, (listSprites[0]->width), listSprites[0]->height),
 		};
 
@@ -493,6 +493,7 @@ public:
 				};
 				listSpawns.pop_front();
 				listEnemies.push_back(pEenemy);
+				listToRemove.push_back(pEenemy);
 			}
 			else if (SpawnType::POWERUP == currentSpawn->type) {
 				PowerUp p;
@@ -517,6 +518,7 @@ public:
 				listSpawns.pop_front();
 				listEnemies.push_back(boss);
 				pBoss = boss;
+				listToRemove.push_back(boss);
 			}
 		}
 

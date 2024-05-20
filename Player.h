@@ -72,10 +72,6 @@ private:
 	InputHandler *ih;
 	float fWidth;
 	float fHeight;
-
-	
 };
-
-
 
 #endif // PLAYER_H
