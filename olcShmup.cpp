@@ -52,7 +52,7 @@ public:
         screenMap["game"] = gameScreen;
         screenMap["game_over"] = gameOverScreen;
 
-        gameState = GameState::GAME;
+        gameState = GameState::START;
        
         return true;
     }
@@ -132,4 +132,6 @@ int main()
     return 0;
 }
 
-// 2. add score
+// 1. Add HUD
+// 2. Fix all memory leaks
+// 3. replace sounds

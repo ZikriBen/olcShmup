@@ -6,7 +6,7 @@ Player::Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio) : pge(pge),
 	sprPlayerSheet = new olc::Sprite("assets/images/PlayerSpritesheet.png");
 	pos = { (float)pge.ScreenWidth() / 2, (float)pge.ScreenHeight() / 2 };
 	speed = 200.f;
-	health = 100.0f;
+	health = 20.0f;
 	fGunReloadTimer = 0.0f;
 	fGunReloadDelay = 0.3f;
 	bCanFire = true;

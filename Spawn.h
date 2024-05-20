@@ -29,7 +29,7 @@ public:
         velocity = { fSpeed, fSpeed };
     }
 
-    
+    virtual void dummy() const {}
 
     olc::vf2d pos;
     std::array<float, 4> dataMove{0};
