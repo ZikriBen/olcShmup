@@ -1,20 +1,14 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+#include <unordered_set>
 #include "olcPGEX_MiniAudio.h"
 #include "olcPixelGameEngine.h"
-
-// Jonngy63: Added PlayerMovement.h
-#include "PlayerMovement.h";
-#include <unordered_set>
+#include "PlayerMovement.h"
 #include "Bullet.h"
 
 #pragma once
 
 class InputHandler;
-
-// Johhnyg63: Removed PlayerMovement now handles this
-//class Command;
-//class CommandFactory;
 
 class ProjectileDef {
 public:
@@ -37,10 +31,12 @@ public:
 	void Draw();
 	float getWidth() { return fWidth; };
 	float getHeight() { return fHeight; };
-	float getHealth() { return health; };
+	float getCurrentHealth() { return currentHealth; };
+	float getMaxHealth() { return maxHealth; };
 	void reset();
-	void setHealth(float newHealth) { health = newHealth; };
-	void setPoerUpLeve(int change) { powerUpLevel = std::max(1, std::min(powerUpCap, powerUpLevel + change)); };
+	void setMaxHealth(float newHealth) { maxHealth = newHealth; };
+	void setCurrentHealth(float newHealth) { currentHealth = newHealth; };
+	void setPowerUpLeve(int change) { powerUpLevel = std::max(1, std::min(powerUpCap, powerUpLevel + change)); };
 	float getSpeed() { return speed; };
 	void kill() { dead = false; };
 	bool isDead() { return dead; };
@@ -67,7 +63,8 @@ public:
 private:
 	int powerUpCap = 3;
 	bool dead;
-	float health;
+	float currentHealth;
+	float maxHealth;
 	float speed;
 	InputHandler *ih;
 	float fWidth;

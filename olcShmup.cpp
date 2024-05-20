@@ -6,7 +6,7 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 #include "Screen.h"
-#include <unordered_map>
+
 
 enum class GameState {
     START,
@@ -43,9 +43,9 @@ public:
         introScreen = new IntroScreen(*this);
         introScreen->Create();
         gameScreen = new GameScreen(*this);
-        gameScreen->Create();
+        //gameScreen->Create();
         gameOverScreen = new GameOverScreen(*this);
-        //gameOverScreen->Create();
+        gameOverScreen->Create();
         screenMap["start"] = startScreen;
         screenMap["menu"] = menuScreen;
         screenMap["intro"] = introScreen;

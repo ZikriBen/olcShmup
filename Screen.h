@@ -1,6 +1,7 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+
 #include "olcPGEX_MiniAudio.h"
 #include "olcPixelGameEngine.h"
 
@@ -12,16 +13,16 @@
 #include "RetroMenu.h"
 #include "ScrollingStarsBG.h"
 #include "ZoomingStarsBG.h"
-
-// Johnnyg63:
 #include "PlayerMovement.h"
-
+#include "Difficulty.h"
 
 constexpr float PI = 3.14159f;
 
 
 #pragma once
 static int gloalScore = 0;
+static GameDifficulty globalGameDiff = GameDifficulty::NORMAL;
+static bool soundOn = true;
 
 class Screen
 {
@@ -143,18 +144,14 @@ public:
 
 		mo["main"].SetTable(1, 3);
 		mo["main"]["Difficulty"].SetTable(1, 3);
-		mo["main"]["Sound"].SetTable(1, 2);
-		mo["main"]["Back"];
+		mo["main"]["Music"].SetTable(1, 2);
 		mo["main"]["Back"].SetID(100);
-		mo["main"]["Difficulty"]["Easy"];
-		mo["main"]["Difficulty"]["Normal"];
-		mo["main"]["Difficulty"]["Hard"];
 		mo["main"]["Difficulty"]["Easy"].SetID(101);
 		mo["main"]["Difficulty"]["Normal"].SetID(102);
 		mo["main"]["Difficulty"]["Hard"].SetID(103);
 
-		mo["main"]["Sound"]["On"].SetID(104);
-		mo["main"]["Sound"]["Off"].SetID(105);
+		mo["main"]["Music"]["On"].SetID(104);
+		mo["main"]["Music"]["Off"].SetID(105);
 
 		mo.Build();
 
@@ -192,6 +189,26 @@ public:
 		return true;
 	};
 	
+	void CommandSwitch(int cmdID) {
+		if (cmdID == 101) {
+			globalGameDiff = GameDifficulty::EASY;
+		}
+		else if (cmdID == 102) {
+			globalGameDiff = GameDifficulty::NORMAL;
+		}
+		else if (cmdID == 103) {
+			globalGameDiff = GameDifficulty::HARD;
+		}
+		else if (cmdID == 104) {
+			float vol = 1.0f;
+			this->miniAudio.SetVolume(nMenuMusic_ID, vol);
+		}
+		else if (cmdID == 105) {
+			float vol = 0.0f;
+			this->miniAudio.SetVolume(nMenuMusic_ID, vol);
+		}
+	}
+
 	void Destroy() {
 		delete sprBG;
 		lines.clear();
@@ -249,6 +266,7 @@ public:
 			if (command != nullptr)
 			{
 				sLastAction = "Selected: " + command->GetName() + " ID: " + std::to_string(command->GetID());
+				CommandSwitch(command->GetID());
 				mm.Close();
 			}
 		}
@@ -297,20 +315,24 @@ public:
 	std::vector<void*> listToRemove;
 	sBoss* pBoss = nullptr;
 	bool bPlayerExp = false;
+	Difficulty gameScreenDifficulty;
 	
 
 	void Create() {
+		gameScreenDifficulty.setDifficulty(globalGameDiff);
+		player.reset();
 		player.pos = olc::vf2d(((float)pge.ScreenWidth() / 2.0f) - player.getWidth() / 2.0f, ((float)pge.ScreenHeight() - player.getHeight() - 50.0f));
 		player.lifeState = Player::ALIVE;
+		player.setMaxHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
+		player.setCurrentHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
+		fWorldSpeed = gameScreenDifficulty.diffMap["WorldSpeed"];
 		bGameOn = true;
 		bg.populateStars();
 		fDescTimer = 0.0f;
 		dWorldPos = 0;
 		gloalScore = 0;
-		player.reset();
 		fEndDelayTimer = 0.0f;
 		
-
 		// Movement Patterns
 		auto Move_None = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
 			e.pos.y += fScrollSpeed * fElapsedTime;
@@ -441,29 +463,32 @@ public:
 		};
 
 		float coldTime = 120.0f;
+		float enemyHealth = gameScreenDifficulty.diffMap["EnemyHealth"];
+		float bossHealth = gameScreenDifficulty.diffMap["BossHealth"];
+
 		listSpawns = {
-			new sEnemyDefinition  (coldTime + 60.00f,  listSprites[0], 0.5f, Move_None,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sPowerUpDefinition(coldTime + 120.00f, listSprites[1], 0.5f, Move_Bounce,            Fire_None, PowerUpType::GREEN, 100),
-			//new sEnemyDefinition  (coldTime + 180.0f,  listSprites[0], 0.2f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 180.0f,  listSprites[0], 0.8f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 240.0f,  listSprites[0], 0.5f, Move_SinusoidNarrow,    Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sPowerUpDefinition(coldTime + 200.00f, listSprites[2], 0.5f, Move_Bounce,            Fire_None, PowerUpType::DEFAULT, 100),
-			//new sEnemyDefinition  (coldTime + 260.0f,  listSprites[0], 0.3f, Move_SinusoidWide,      Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 360.0f,  listSprites[0], 0.3f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 420.0f,  listSprites[0], 0.1f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 420.0f,  listSprites[0], 0.9f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 500.0f,  listSprites[0], 0.5f, Move_None,              Fire_DeathSpiral, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 560.0f,  listSprites[0], 0.5f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 600.0f,  listSprites[0], 0.6f, Move_Slow,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 720.0f,  listSprites[0], 0.4f, Move_Fast,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 780.0f,  listSprites[0], 0.7f, Move_SinusoidWide,      Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sPowerUpDefinition(coldTime + 800.00f, listSprites[3], 0.9f, Move_Bounce,            Fire_None, PowerUpType::BLUE, 100),
-			//new sEnemyDefinition  (coldTime + 840.0f,  listSprites[0], 0.3f, Move_None,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 900.0f,  listSprites[0], 0.8f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 960.0f,  listSprites[0], 0.2f, Move_None,              Fire_CirclePulse2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 1020.0f, listSprites[0], 0.5f, Move_SinusoidNarrow,    Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sEnemyDefinition  (coldTime + 1080.0f, listSprites[0], 0.9f, Move_Slow,              Fire_Straigt2, 3.0f, (listSprites[0]->width), listSprites[0]->height, 300),
-			//new sBossDefiniton    (coldTime + 1500.0,  listSprites[4], 0.5f, Move_SinusoidWideInf,   Fire_CirclePulse2, 20.0f, (listSprites[4]->width / 5), listSprites[4]->height, 1000),
+			new sEnemyDefinition  (coldTime + 60.00f,  listSprites[0], 0.5f, Move_None,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sPowerUpDefinition(coldTime + 120.00f, listSprites[1], 0.5f, Move_Bounce,            Fire_None,         PowerUpType::GREEN, 100),
+			new sEnemyDefinition  (coldTime + 180.0f,  listSprites[0], 0.2f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 180.0f,  listSprites[0], 0.8f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 240.0f,  listSprites[0], 0.5f, Move_SinusoidNarrow,    Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sPowerUpDefinition(coldTime + 200.00f, listSprites[2], 0.5f, Move_Bounce,            Fire_None,         PowerUpType::DEFAULT, 100),
+			new sEnemyDefinition  (coldTime + 260.0f,  listSprites[0], 0.3f, Move_SinusoidWide,      Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 360.0f,  listSprites[0], 0.3f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 420.0f,  listSprites[0], 0.1f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 420.0f,  listSprites[0], 0.9f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 500.0f,  listSprites[0], 0.5f, Move_None,              Fire_DeathSpiral,  enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 560.0f,  listSprites[0], 0.5f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 600.0f,  listSprites[0], 0.6f, Move_Slow,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 720.0f,  listSprites[0], 0.4f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 780.0f,  listSprites[0], 0.7f, Move_SinusoidWide,      Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sPowerUpDefinition(coldTime + 800.00f, listSprites[3], 0.9f, Move_Bounce,            Fire_None,         PowerUpType::BLUE, 100),
+			new sEnemyDefinition  (coldTime + 840.0f,  listSprites[0], 0.3f, Move_None,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 900.0f,  listSprites[0], 0.8f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 960.0f,  listSprites[0], 0.2f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 1020.0f, listSprites[0], 0.5f, Move_SinusoidNarrow,    Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sEnemyDefinition  (coldTime + 1080.0f, listSprites[0], 0.9f, Move_Slow,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width), listSprites[0]->height, 300),
+			new sBossDefiniton    (coldTime + 1500.0f,  listSprites[4], 0.5f, Move_SinusoidWideInf,   Fire_CirclePulse2, 20.0f, (listSprites[4]->width / 5), listSprites[4]->height, 1000),
 			//new sEnemyDefinition(coldTime + 300, listSprites[0], 0.5f, Move_None, Fire_End, 3.0f, (listSprites[0]->width), listSprites[0]->height),
 		};
 
@@ -509,6 +534,7 @@ public:
 			}
 			else if (SpawnType::BOSS == currentSpawn->type) {
 				sBoss* boss = new sBoss(dynamic_cast<sBossDefiniton*>(currentSpawn));
+				boss->maxHealth = boss->def->fHealth;
 				boss->fWidth = ((int)boss->def->iWidth);
 				boss->fHeight = ((int)boss->def->iHeight);
 				boss->pos = {
@@ -589,12 +615,12 @@ public:
 
 		//HUD
 		pge.DrawString(4, 4, "HEALTH:");
-		pge.FillRect(60, 4, ((int)(player.getHealth() / 100.0f * 576.0f)), 8, olc::GREEN); // Remove magic numbers!
+		pge.FillRect(60, 4, static_cast<int>((player.getCurrentHealth() / static_cast<float>(player.getMaxHealth()) * 576.0)), 8, olc::GREEN); // Scale player's health bar
 		pge.DrawString(4, 16, "SCORE: " + std::to_string(gloalScore));
 
 		if (pBoss) {
 			pge.DrawString(4, 450, "BOSS:");
-			pge.FillRect(60, 450, ((int)(pBoss->def->fHealth / 100.0f * 576.0f)), 8, olc::RED); // Remove magic numbers!
+			pge.FillRect(60, 450, static_cast<int>((pBoss->def->fHealth / pBoss->maxHealth) * 576.0f), 8, olc::RED);
 		}
 
 		cleanUp();
@@ -648,9 +674,9 @@ public:
 		}
 		player.listPlayerBullets.clear();
 
-		for (auto* p : listToRemove)
+		/*for (auto* p : listToRemove)
 			delete p;
-		listToRemove.clear();
+		listToRemove.clear();*/
 		
 		if (pBoss) {
 			pBoss = nullptr;
@@ -665,7 +691,7 @@ public:
 					b.remove = true;
 					e->def->fHealth -= 1.0f;
 					if (e->def->fHealth <= 0) {
-						gloalScore += e->def->score;
+						gloalScore += gameScreenDifficulty.diffMap["ScoreFactor"] * e->def->score;
 						// Johnngy63: Play explosion
 						this->miniAudio.Play(this->souBigExplosion);
 
@@ -683,15 +709,15 @@ public:
 		for (auto& p : listPowerUp) {
 			if ((p.pos - (player.pos + olc::vf2d(((float)player.getWidth() / 2.0f), ((float)player.getWidth() / 2.0f)))).mag2() < powf(((float)player.getWidth() / 2.0f), 2.0f)) {
 				if (p.def->type == PowerUpType::DEFAULT)
-					player.setPoerUpLeve(1);
+					player.setPowerUpLeve(1);
 				else if (p.def->type == PowerUpType::GREEN)
 					if (player.ProjectileType == static_cast<int>(PowerUpType::GREEN))
-						player.setPoerUpLeve(1);
+						player.setPowerUpLeve(1);
 					else
 						player.ProjectileType = Bullet::GREEN;
 				else if (p.def->type == PowerUpType::BLUE)
 					if (player.ProjectileType == static_cast<int>(PowerUpType::BLUE))
-						player.setPoerUpLeve(1);
+						player.setPowerUpLeve(1);
 					else
 						player.ProjectileType = Bullet::BLUE;
 				gloalScore += p.def->score;
