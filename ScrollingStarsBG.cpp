@@ -34,7 +34,7 @@ void ScrollingStarsBG::Update(float fElapsedTime) {
 
         star.y += fWorldSpeed * fElapsedTime * ((i < nFarStars) ? 1.0f - fFarStarsSpeed : 1.0f);
         if (star.y > (float)pge.ScreenHeight()) {
-            star = { (float)(rand() % pge.ScreenWidth()), 0.0f };
+            star = { ((float)(rand() % pge.ScreenWidth())), ((float)(rand() % 20)) };
         }
     }
 

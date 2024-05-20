@@ -6,7 +6,8 @@ Player::Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio) : pge(pge),
 	sprPlayerSheet = new olc::Sprite("assets/images/PlayerSpritesheet.png");
 	pos = { (float)pge.ScreenWidth() / 2, (float)pge.ScreenHeight() / 2 };
 	speed = 200.f;
-	health = 20.0f;
+	maxHealth = 20.0f;
+	currentHealth = 20.0f;
 	fGunReloadTimer = 0.0f;
 	fGunReloadDelay = 0.3f;
 	bCanFire = true;
@@ -36,7 +37,7 @@ Player::Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio) : pge(pge),
 }
 
 void Player::Update(float fElapsedTime) {
-	if (health <= 0) {
+	if (currentHealth <= 0) {
 		dead = true;
 		lifeState = Player::DYING;
 		return;
@@ -107,7 +108,8 @@ void Player::reset()
 	fGunReloadTimer = 0.0f;
 	bCanFire = true;
 	fGraphicTimer = 0.0f;
-	health = 100.0f;
+	currentHealth = 100.0f;
+	maxHealth = 100.0f;
 	graphicState = STANDING;
 	facingDirection = NORTH;
 	graphicCounter = 0;

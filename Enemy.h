@@ -29,13 +29,16 @@ struct sEnemy : public sSpawn {
 };
 
 struct sBoss : public sEnemy {
-    sBoss() : sEnemy() {}
-    sBoss(sEnemyDefinition* def) : sEnemy(def) {}
     BossDamageLevel damageLevel = BossDamageLevel::NO_DAMAGE;
+    float maxHealth;
 
+    sBoss(sEnemyDefinition* def) : sEnemy(def) {
+        maxHealth = def->fHealth;
+    }
+    
     virtual void Update(float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) override {
         sEnemy::Update(fElapsedTime, fScrollSpeed, b); // Call base class update method
-        float healthPercentage = (def->fHealth / 10.0f) * 100.0f;
+        float healthPercentage = (def->fHealth / maxHealth) * 100.0f;
 
         // Determine the damage level based on the health percentage
         if (healthPercentage >= 80.0f) {
