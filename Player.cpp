@@ -1,7 +1,7 @@
 #include "Player.h"
 
 
-Player::Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio) : pge(pge), miniAudio(miniAudio), lifeState(Player::ALIVE) {
+Player::Player(olc::PixelGameEngine& pge /*,olc::MiniAudio& miniAudio*/) : pge(pge), /*miniAudio(miniAudio), */ lifeState(Player::ALIVE) {
 	sprPlayerSheet = new olc::Sprite("assets/images/PlayerSpritesheet.png");
 	pos = { (float)pge.ScreenWidth() / 2, (float)pge.ScreenHeight() / 2 };
 	speed = 200.f;

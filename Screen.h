@@ -2,7 +2,7 @@
 #define SCREEN_H
 
 
-#include "olcPGEX_MiniAudio.h"
+//#include "olcPGEX_MiniAudio.h"
 #include "olcPixelGameEngine.h"
 
 #include "Player.h"
@@ -13,6 +13,7 @@
 #include "RetroMenu.h"
 #include "ScrollingStarsBG.h"
 #include "ZoomingStarsBG.h"
+#include "ZoomingStarsJavBG.h"
 #include "PlayerMovement.h"
 #include "Difficulty.h"
 
@@ -34,7 +35,7 @@ public:
 	// Johnnyg63: Lets add some sounds !!!
 public:
 
-	olc::MiniAudio miniAudio;		// We use miniAudio to play sounds throught out our game
+	//olc::MiniAudio miniAudio;		// We use miniAudio to play sounds throught out our game
 	int32_t nMenuMusic_ID = -1;     // Stores the ID of the menu musice so it can be played & looped easliy
 	std::string souMenuMusic = "assets\\sounds\\ShmupBGMusic.mp3";       // Holds the full path to ShmupBGMusic.mp3
 	std::string souLaserA1 = "assets\\sounds\\laser_a1.mp3";             // Holds the full path to laser_a1.mp3
@@ -159,8 +160,8 @@ public:
 		// You do not need the 'this->' referance but I wanted you to see where I was getting this madness from
 		// Basicilly I am asking the parent class (Screen) to load & play music for this child class (MenuScreen) only
 		// Debug it to understand better
-		this->nMenuMusic_ID = this->miniAudio.LoadSound(this->souMenuMusic);
-		this->miniAudio.Play(this->nMenuMusic_ID, true);
+		//this->nMenuMusic_ID = this->miniAudio.LoadSound(this->souMenuMusic);
+		//this->miniAudio.Play(this->nMenuMusic_ID, true);
 	};
 	
 	bool Run(float fElapsedTime) {
@@ -201,11 +202,11 @@ public:
 		}
 		else if (cmdID == 104) {
 			float vol = 1.0f;
-			this->miniAudio.SetVolume(nMenuMusic_ID, vol);
+			//this->miniAudio.SetVolume(nMenuMusic_ID, vol);
 		}
 		else if (cmdID == 105) {
 			float vol = 0.0f;
-			this->miniAudio.SetVolume(nMenuMusic_ID, vol);
+			//this->miniAudio.SetVolume(nMenuMusic_ID, vol);
 		}
 	}
 
@@ -226,7 +227,7 @@ public:
 			if (pge.GetKey(olc::ENTER).bPressed || pge.GetKey(olc::Key::SPACE).bPressed) {
 				
 				// Johnnyg63: Plays the laser sound when you press Enter||Space
-				this->miniAudio.Play(this->souLaserA1);
+				//this->miniAudio.Play(this->souLaserA1);
 				if (currentSelection == 0)
 					return false;
 				else if (currentSelection == 1)
@@ -255,7 +256,7 @@ public:
 			if (pge.GetKey(olc::ENTER).bPressed || pge.GetKey(olc::Key::SPACE).bPressed)
 			{
 				// Johnnyg63: Plays the laser sound when you press Enter||Space
-				this->miniAudio.Play(this->souLaserA1);
+				//this->miniAudio.Play(this->souLaserA1);
 				command = mm.OnConfirm();
 			}
 				
@@ -296,7 +297,7 @@ public:
 	float fWorldSpeed = 40.0f;
 	double dWorldPos = 0;
 
-	Player player{ pge, miniAudio };
+	Player player{ pge /*, miniAudio*/};
 	PlayerMovement playerMovement{ pge, player };
 
 	ScrollingStarsBG bg{ pge, fWorldSpeed, 200 };
@@ -583,7 +584,7 @@ public:
 				bPlayerExp = true;
 				listExplosions.push_back(exp);
 				// Johnngy63: Play explosion
-				this->miniAudio.Play(this->souBigExplosion);
+				//this->miniAudio.Play(this->souBigExplosion);
 			}
 			break;
 		}
@@ -693,7 +694,7 @@ public:
 					if (e->def->fHealth <= 0) {
 						gloalScore += gameScreenDifficulty.diffMap["ScoreFactor"] * e->def->score;
 						// Johnngy63: Play explosion
-						this->miniAudio.Play(this->souBigExplosion);
+						//this->miniAudio.Play(this->souBigExplosion);
 
 						for (int i = 0; i < 500; ++i) {
 							float fAngle = ((float)rand() / (float)RAND_MAX * 2.0f * PI);
