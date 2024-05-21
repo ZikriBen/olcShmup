@@ -154,6 +154,7 @@
     <ClInclude Include="Screen.h" />
     <ClInclude Include="Spawn.h" />
     <ClInclude Include="ZoomingStarsBG.h" />
+    <ClInclude Include="ZoomingStarsJavBG.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\images\enemyShip01.png" />
