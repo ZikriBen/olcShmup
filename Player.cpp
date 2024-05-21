@@ -1,5 +1,4 @@
 #include "Player.h"
-//#include "CommandFactory.h"
 
 
 Player::Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio) : pge(pge), miniAudio(miniAudio), lifeState(Player::ALIVE) {
@@ -19,9 +18,7 @@ Player::Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio) : pge(pge),
 	fHeight = 58.0f;
 	dead = false;
 
-	
-	//factory = new ConcreteCommandFactory();
-	//ih  = new InputHandler(pge, *factory);
+
 	listProjectileDef.push_back(ProjectileDef());
 	listProjectileDef.push_back({ new olc::Sprite("assets/images/projectile_1-small.png"), 1 });
 	listProjectileDef.push_back({ new olc::Sprite("assets/images/projectile_2.png"), 2 });

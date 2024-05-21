@@ -86,6 +86,8 @@ public:
         case GameState::GAME_OVER:
             screen = "game_over";
             break;
+        case GameState::EXIT:
+            break;
         }
 
         return screen;
@@ -117,6 +119,8 @@ public:
             gameOverScreen->Create();
             gameState = GameState::MENU;
             gameOverScreen->Destroy();
+            break;
+        case GameState::EXIT:
             break;
         }
     }

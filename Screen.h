@@ -708,18 +708,25 @@ public:
 	void detectPlayerPowerUpCollision(float fElapsedTime, Player& player, std::list<PowerUp>& listPowerUp) {
 		for (auto& p : listPowerUp) {
 			if ((p.pos - (player.pos + olc::vf2d(((float)player.getWidth() / 2.0f), ((float)player.getWidth() / 2.0f)))).mag2() < powf(((float)player.getWidth() / 2.0f), 2.0f)) {
-				if (p.def->type == PowerUpType::DEFAULT)
+				if (p.def->type == PowerUpType::DEFAULT) {
 					player.setPowerUpLeve(1);
-				else if (p.def->type == PowerUpType::GREEN)
-					if (player.ProjectileType == static_cast<int>(PowerUpType::GREEN))
+				}
+				else if (p.def->type == PowerUpType::GREEN) {
+					if (player.ProjectileType == static_cast<int>(PowerUpType::GREEN)) {
 						player.setPowerUpLeve(1);
-					else
+					}
+					else {
 						player.ProjectileType = Bullet::GREEN;
-				else if (p.def->type == PowerUpType::BLUE)
-					if (player.ProjectileType == static_cast<int>(PowerUpType::BLUE))
+					}
+				}
+				else if (p.def->type == PowerUpType::BLUE) {
+					if (player.ProjectileType == static_cast<int>(PowerUpType::BLUE)) {
 						player.setPowerUpLeve(1);
-					else
+					}
+					else {
 						player.ProjectileType = Bullet::BLUE;
+					}
+				}
 				gloalScore += p.def->score;
 				p.remove = true;
 			}
