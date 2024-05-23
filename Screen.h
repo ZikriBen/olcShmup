@@ -324,6 +324,7 @@ public:
 		player.setCurrentHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
 		fWorldSpeed = gameScreenDifficulty.diffMap["WorldSpeed"];
 		bGameOn = true;
+		bPlayerExp = false;
 		bg.populateStars();
 		fDescTimer = 0.0f;
 		dWorldPos = 0;
