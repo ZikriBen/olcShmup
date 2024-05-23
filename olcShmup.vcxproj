@@ -142,6 +142,7 @@
   <ItemGroup>
     <ClInclude Include="Artifact.h" />
     <ClInclude Include="Difficulty.h" />
+    <ClInclude Include="miniaudio.h" />
     <ClInclude Include="PlayerMovement.h" />
     <ClInclude Include="ScrollingStarsBG.h" />
     <ClInclude Include="Bullet.h" />
