@@ -2,6 +2,7 @@
 #define PLAYER_H
 #include <unordered_set>
 #include "olcPixelGameEngine.h"
+#include "olcPGEX_MiniAudio.h"
 #include "PlayerMovement.h"
 #include "Bullet.h"
 
@@ -23,9 +24,9 @@ public:
 class Player
 {
 public:
-	Player(olc::PixelGameEngine& pge /*, olc::MiniAudio& miniAudio*/);
+	Player(olc::PixelGameEngine& pge , olc::MiniAudio& miniAudio);
 	olc::PixelGameEngine& pge;
-	//olc::MiniAudio& miniAudio; // Johnnyg63: We need to inject the miniAudio so we can play the laser sounds when the player is shooting
+	olc::MiniAudio& miniAudio; // Johnnyg63: We need to inject the miniAudio so we can play the laser sounds when the player is shooting
 	void Update(float);
 	void Draw();
 	float getWidth() { return fWidth; };
@@ -57,7 +58,7 @@ public:
 	enum { NORTH = 0, EAST = 1, WEST = 2} facingDirection;
 
 	// Johnnyg63: Lasers sounds for when the user is shooting (Space bar)
-	std::string souLaserA1 = "assets\\sounds\\laser_a1.mp3"; // Holds the full path to laser_a1.mp3
+	std::string souLaserA1 = "./assets/sounds/laser_a1.mp3"; // Holds the full path to laser_a1.mp3
 	
 private:
 	int powerUpCap = 3;

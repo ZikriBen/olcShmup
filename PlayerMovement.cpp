@@ -8,7 +8,7 @@ void PlayerMovement::ManageSpaceKey(float fElapsedTime)
 	if (player.bCanFire) {
 		int offsetX = player.listProjectileDef[player.ProjectileType].offsetX;
 		int offsetY = player.listProjectileDef[player.ProjectileType].offsetY;
-		//player.miniAudio.Play(player.souLaserA1);
+		player.miniAudio.Play(player.souLaserA1);
 
 		if (player.powerUpLevel == 1) {
 			Bullet b;

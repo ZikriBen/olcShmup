@@ -1,7 +1,7 @@
 ﻿//// olcShmup.cpp : This file contains the 'main' function. Program execution begins and ends there.
 ////
-//#define OLC_PGEX_MINIAUDIO          // Johnngy63: Added to support cool sounds
-//#include "olcPGEX_MiniAudio.h"
+#define OLC_PGEX_MINIAUDIO          // Johnngy63: Added to support cool sounds
+#include "olcPGEX_MiniAudio.h"
 
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
@@ -112,13 +112,12 @@ public:
             gameState = GameState::GAME;
             break;
         case GameState::GAME:
-            gameScreen->Destroy();
+            gameOverScreen->Create();
             gameState = GameState::GAME_OVER;
+            gameScreen->Destroy();
             break;
         case GameState::GAME_OVER:
-            gameOverScreen->Create();
             gameState = GameState::MENU;
-            gameOverScreen->Destroy();
             break;
         case GameState::EXIT:
             break;
