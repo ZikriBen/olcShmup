@@ -142,6 +142,7 @@
   <ItemGroup>
     <ClInclude Include="Artifact.h" />
     <ClInclude Include="Difficulty.h" />
+    <ClInclude Include="miniaudio.h" />
     <ClInclude Include="PlayerMovement.h" />
     <ClInclude Include="ScrollingStarsBG.h" />
     <ClInclude Include="Bullet.h" />
@@ -154,6 +155,7 @@
     <ClInclude Include="Screen.h" />
     <ClInclude Include="Spawn.h" />
     <ClInclude Include="ZoomingStarsBG.h" />
+    <ClInclude Include="ZoomingStarsJavBG.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\images\enemyShip01.png" />

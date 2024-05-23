@@ -16,7 +16,8 @@ enum class SpawnType {
 enum class PowerUpType {
     DEFAULT = 0,
     GREEN = 1,
-    BLUE = 2
+    BLUE = 2,
+    HEALTH = 3
 };
 
 

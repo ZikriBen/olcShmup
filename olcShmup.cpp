@@ -112,13 +112,12 @@ public:
             gameState = GameState::GAME;
             break;
         case GameState::GAME:
-            gameScreen->Destroy();
+            gameOverScreen->Create();
             gameState = GameState::GAME_OVER;
+            gameScreen->Destroy();
             break;
         case GameState::GAME_OVER:
-            gameOverScreen->Create();
             gameState = GameState::MENU;
-            gameOverScreen->Destroy();
             break;
         case GameState::EXIT:
             break;
