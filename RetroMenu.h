@@ -174,7 +174,6 @@ public:
 
 			// Actual screen location in pixels
 			olc::vi2d vScreenLocation = vPatchPos * nPatch + vScreenOffset;
-			vScreenLocation.x += 10;
 
 			// Display Item Header
 			pge.DrawString(vScreenLocation, items[nTopLeftItem + i].sName, items[nTopLeftItem + i].bEnabled ? olc::WHITE : olc::DARK_GREY, 2);

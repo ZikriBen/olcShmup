@@ -44,7 +44,7 @@ public:
         introScreen = std::make_unique<IntroScreen>(*this);
         introScreen->Create();
         gameScreen = std::make_unique<GameScreen>(*this);
-        //gameScreen->Create();
+        gameScreen->Create();
         gameOverScreen = std::make_unique<GameOverScreen>(*this);
         gameOverScreen->Create();
         
@@ -54,7 +54,7 @@ public:
         screenMap["game"] = gameScreen.get();
         screenMap["game_over"] = gameOverScreen.get();
 
-        gameState = GameState::START;
+        gameState = GameState::GAME;
        
         return true;
     }
@@ -100,6 +100,8 @@ public:
         switch (gameState) {
         case GameState::START:
             gameState = GameState::MENU;
+            menuScreen->Reset();
+            startScreen->Destroy(); // Only Destroy, as no need for start screen anymore
             break;
         case GameState::MENU:
             if (menuScreen->currentSelection == 0) {
@@ -108,17 +110,20 @@ public:
             else if (menuScreen->currentSelection == menuScreen->lines.size() - 1) {
                 gameState = GameState::EXIT;
             }
+            introScreen->Reset();
             break;
         case GameState::INTRO:
-            gameScreen->Create();
+            gameScreen->Reset();
+            gameScreen->CreateSpawns();
             gameState = GameState::GAME;
             break;
         case GameState::GAME:
-            gameOverScreen->Create();
+            gameOverScreen->Reset();
             gameState = GameState::GAME_OVER;
             gameScreen->Destroy();
             break;
         case GameState::GAME_OVER:
+            menuScreen->Reset();
             gameState = GameState::MENU;
             break;
         case GameState::EXIT:
