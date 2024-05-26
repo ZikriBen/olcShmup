@@ -21,7 +21,7 @@ public:
 			diffMap["PlayerHealth"] = 120.0f;
 			diffMap["EnemyHealth"] = 2.0f;
 			diffMap["BossHealth"] = 40.0f;
-			diffMap["PlayerFireRate"] = 0.1;
+			diffMap["PlayerFireRate"] = 0.1f;
 			diffMap["ScoreFactor"] = 1;
 		}
 		else if (diff == GameDifficulty::HARD) {
@@ -29,7 +29,7 @@ public:
 			diffMap["PlayerHealth"] = 60.0f;
 			diffMap["EnemyHealth"] = 5.0f;
 			diffMap["BossHealth"] = 70.0f;
-			diffMap["PlayerFireRate"] = 0.4;
+			diffMap["PlayerFireRate"] = 0.4f;
 			diffMap["ScoreFactor"] = 3;
 		}
 		else {
