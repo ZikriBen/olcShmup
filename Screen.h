@@ -16,7 +16,6 @@
 #include "ZoomingStarsJavBG.h"
 #include "PlayerMovement.h"
 #include "Difficulty.h"
-
 constexpr float PI = 3.14159f;
 
 
@@ -24,6 +23,7 @@ constexpr float PI = 3.14159f;
 static int gloalScore = 0;
 static GameDifficulty globalGameDiff = GameDifficulty::NORMAL;
 static bool soundOn = true;
+static bool globalAutoFire = false;
 
 class Screen
 {
@@ -31,6 +31,7 @@ public:
 	virtual void Create() = 0;
 	virtual bool Run(float fElapsedTime) = 0;
 	virtual void Destroy() = 0;
+	virtual void Reset() = 0;
 
 	// Johnnyg63: Lets add some sounds !!!
 public:
@@ -62,13 +63,11 @@ public:
 	float fBlinkTimer = 0.0f;
 	bool bBlink = true;
 	float blinkInterval = 0.4f;
-	olc::Sprite* logo = nullptr;
+	std::unique_ptr<olc::Sprite> logo = nullptr;
 	ZoomingStarsJavBG bg{ pge };
 
-	
-
 	void Create() {
-		logo = new olc::Sprite("assets/images/logoLongS.png");
+		logo = std::make_unique <olc::Sprite>("assets/images/logoLongS.png");
 
 		lines.push_back("Galactic Havoc : Deep Space Assault");
 		lines.push_back("Made by Ben Zikri");
@@ -100,7 +99,7 @@ public:
 		for (int i = 0; i < lines.size(); ++i)
 			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(lines[i]).x / 2), 100 + i * offsetY, lines[i], olc::WHITE);
 
-		pge.DrawSprite({(pge.ScreenWidth() / 2) - (logo->width / 2), 300 }, logo);
+		pge.DrawSprite({(pge.ScreenWidth() / 2) - (logo->width / 2), 300 }, logo.get());
 
 		InputHandling();
 
@@ -117,9 +116,20 @@ public:
 	};
 
 	void Destroy() {
-		delete logo;
 		lines.clear();
+		logo.reset();
 	};
+
+	void Reset() {
+		printIndex = 0;
+		timeAccumulator = 0.0f;
+		currentLine = 0;
+		fStartDelayTimer = 0.0;
+		spacePressed = false;
+		fEndDelayTimer = 0.0;
+		fBlinkTimer = 0.0f;
+		bBlink = true;
+	}
 
 	bool InputHandling() {
 		if (pge.GetKey(olc::SPACE).bPressed)
@@ -133,28 +143,26 @@ public:
 	MenuScreen(olc::PixelGameEngine& pge) : pge(pge), sprBG(nullptr), pos(0,0){};
 
 	olc::PixelGameEngine& pge;
-	olc::Sprite* sprBG;
+	std::unique_ptr<olc::Sprite> sprBG;
+	std::unique_ptr<olc::Sprite> sprGFX;
 	olc::vf2d pos;
 	std::vector<std::string> lines;
 	int currentSelection = 0;
-	bool gameStart = false;
-	olc::Sprite* sprGFX = nullptr;
 	std::string sLastAction;
 	menuobject mo;
 	menumanager mm;
 
 	void Create() {
-		sprBG = new olc::Sprite("assets/images/MainScreen640x480noText.png");
-		sprGFX = new olc::Sprite("./assets/images/RetroMenu2.png");
+		sprBG = std::make_unique <olc::Sprite>("assets/images/MainScreen640x480noText.png");
+		sprGFX = std::make_unique <olc::Sprite>("./assets/images/RetroMenu2.png");
 
 		lines.push_back("Start Game");
 		lines.push_back("Options");
 
-		olc::vf2d pos = olc::vf2d(0, 0);
-
 		mo["main"].SetTable(1, 3);
 		mo["main"]["Difficulty"].SetTable(1, 3);
 		mo["main"]["Music"].SetTable(1, 2);
+		mo["main"]["Auto Fire"].SetTable(1, 2);
 		mo["main"]["Back"].SetID(100);
 		mo["main"]["Difficulty"]["Easy"].SetID(101);
 		mo["main"]["Difficulty"]["Normal"].SetID(102);
@@ -162,6 +170,9 @@ public:
 
 		mo["main"]["Music"]["On"].SetID(104);
 		mo["main"]["Music"]["Off"].SetID(105);
+
+		mo["main"]["Auto Fire"]["On"].SetID(106);
+		mo["main"]["Auto Fire"]["Off"].SetID(107);
 
 		mo.Build();
 
@@ -178,12 +189,11 @@ public:
 		int mid = (pge.ScreenWidth() / 2);
 		int offsetY = (pge.ScreenHeight() / 2 + 170);
 
-		pge.DrawSprite(pos, sprBG);
+		pge.DrawSprite(olc::vf2d(0, 0), sprBG.get());
 		pge.SetPixelMode(olc::Pixel::NORMAL);
 
 		olc::Pixel p = olc::WHITE;
-		
-		
+
 		for (int i = 0; i < lines.size(); ++i) {
 			p = i == currentSelection ? olc::YELLOW : olc::WHITE;
 			pge.DrawString(mid - (pge.GetTextSize(lines[i]).x), offsetY + (i * 20), lines[i], p, 2);
@@ -193,8 +203,7 @@ public:
 		if (!InputHandling()) 
 			return false;
 
-		mm.Draw(pge, sprGFX, { mid - (pge.GetTextSize(lines[0]).x), offsetY - 50 });
-		//pge.DrawString(10, pge.ScreenHeight() - 10, sLastAction);
+		mm.Draw(pge, sprGFX.get(), {mid - (pge.GetTextSize(lines[0]).x), offsetY - 80});
 
 		return true;
 	};
@@ -217,11 +226,19 @@ public:
 			float vol = 0.0f;
 			this->miniAudio.SetVolume(nMenuMusic_ID, vol);
 		}
+		else if (cmdID == 106) {
+			globalAutoFire = true;
+		}
+		else if (cmdID == 107) {
+			globalAutoFire = false;
+		}
 	}
 
-	void Destroy() {
-		delete sprBG;
-		lines.clear();
+	void Destroy() {};
+
+	void Reset() {
+		currentSelection = 0;
+		sLastAction = "";
 	};
 
 	bool InputHandling() {
@@ -292,7 +309,6 @@ public:
 	olc::PixelGameEngine& pge;
 	float fWorldSpeed = 40.0f;
 	double dWorldPos = 0;
-
 	Player player{ pge , miniAudio};
 	PlayerMovement playerMovement{ pge, player };
 
@@ -302,7 +318,7 @@ public:
 	float fEndDelayTimer = 0.0f;
 	float fEndDelay = 1.5f;
 	bool bGameOn = true;
-	std::vector<olc::Sprite*> listSprites;
+	std::vector<std::unique_ptr<olc::Sprite>> listSprites;
 	std::list<Spawn*> listSpawns;
 	std::list<sEnemy*> listEnemies;
 	std::list<Bullet> listEnemyBullets;
@@ -310,190 +326,25 @@ public:
 	std::list<Explosion*> listExplosions;
 	std::list<PowerUp> listPowerUp;
 	std::vector<void*> listToRemove;
-	sBoss* pBoss = nullptr;
+	std::unique_ptr<sBoss> pBoss;
 	bool bPlayerExp = false;
 	Difficulty gameScreenDifficulty;
 	
 
 	void Create() {
-		gameScreenDifficulty.setDifficulty(globalGameDiff);
-		player.reset();
-		player.pos = olc::vf2d(((float)pge.ScreenWidth() / 2.0f) - player.getWidth() / 2.0f, ((float)pge.ScreenHeight() - player.getHeight() - 50.0f));
-		player.lifeState = Player::ALIVE;
-		player.setMaxHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
-		player.setCurrentHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
-		fWorldSpeed = gameScreenDifficulty.diffMap["WorldSpeed"];
-		bGameOn = true;
-		bPlayerExp = false;
 		bg.populateStars();
-		fDescTimer = 0.0f;
-		dWorldPos = 0;
-		gloalScore = 0;
-		fEndDelayTimer = 0.0f;
+		GameScreen::Reset();
 		
-		// Movement Patterns
-		auto Move_None = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
-			e.pos.y += fScrollSpeed * fElapsedTime;
-		};
-
-		auto Move_Slow = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
-			e.pos.y += fScrollSpeed * fElapsedTime * 0.5f;
-
-		};
-
-		auto Move_Fast = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
-			e.pos.y += fScrollSpeed * fElapsedTime * 2.0f;
-
-		};
-
-		auto Move_SinusoidNarrow = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
-			e.pos.y += fScrollSpeed * fElapsedTime * 1.0f;
-			e.dataMove[0] += fElapsedTime;
-			e.pos.x += 50.0f * cosf(e.dataMove[0]) * fElapsedTime;
-		};
-
-		auto Move_SinusoidWide = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
-			e.pos.y += fScrollSpeed * fElapsedTime * 1.0f;
-			e.dataMove[0] += fElapsedTime;
-			e.pos.x += 200.0f * cosf(e.dataMove[0]) * fElapsedTime;
-		};
-
-		auto Move_SinusoidWideInf = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
-			e.dataMove[0] += fElapsedTime;
-			
-			e.pos.x += 200.0f * cosf(e.dataMove[0]) * fElapsedTime;
-
-			if (e.pos.y + (e.fHeight) >= 0.87f * pge.ScreenHeight())
-				e.dataMove[1] = -1;
-			if (e.pos.y <= 0)
-				e.dataMove[1] = 1;
-				
-			e.pos.y += e.dataMove[1] * fScrollSpeed * fElapsedTime * 1.0f;
-			
-		};
-
-		auto Move_Bounce = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
-			// Update position based on velocity
-
-			e.pos += e.velocity * fElapsedTime;
-
-			// Check collision with screen boundaries
-			if (e.pos.x < 0) {
-				e.pos.x = 0;
-				e.velocity.x *= -1;
-			}
-			else if (e.pos.x + e.fWidth > pge.ScreenWidth()) {
-				e.pos.x = ((float)pge.ScreenWidth() - e.fWidth);
-				e.velocity.x *= -1;
-			}
-
-			if (e.pos.y < 0) {
-				e.pos.y = 0;
-				e.velocity.y *= -1;
-			}
-			else if (e.pos.y + e.fHeight > pge.ScreenHeight()) {
-				e.pos.y = ((float)pge.ScreenHeight() - e.fHeight);
-				e.velocity.y *= -1;
-			}
-		};
-
-		auto Fire_None = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {};
-
-		auto Fire_End = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
-			bGameOn = false;
-		};
-
-		auto Fire_Straigt2 = [&](sSpawn& s, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
-			sEnemy& e = *dynamic_cast<sEnemy*>(&s);
-			constexpr float fDelay = 0.3f;
-			e.dataFire[0] += fElapsedTime;
-			if (e.dataFire[0] >= fDelay) {
-				e.dataFire[0] -= fDelay;
-				Bullet b;
-				b.pos = e.pos + (olc::vf2d(((float)e.def->iWidth / 2.0f), ((float)e.def->iHeight)));
-				b.vel = { 0.0f, 180.0f };
-				listEnemyBullets.push_back(b);
-			}
-		};
-
-		auto Fire_CirclePulse2 = [&](sSpawn& s, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
-			sEnemy& e = *dynamic_cast<sEnemy*>(&s);
-			constexpr float fDelay = 1.0f;
-			constexpr int nBullets = 15;
-			constexpr float fTetha = ((float)PI * 2.0f / nBullets);
-
-			e.dataFire[0] += fElapsedTime;
-			if (e.dataFire[0] >= fDelay) {
-				e.dataFire[0] -= fDelay;
-				for (int i = 0; i < nBullets; ++i) {
-					Bullet b;
-					b.pos = e.pos + (olc::vf2d(((float)e.def->iWidth / 2.0f), ((float)e.def->iHeight / 2.0f)));
-					b.vel = { 180.0f * cosf(fTetha * i), 180.0f * sinf(fTetha * i) };
-					listEnemyBullets.push_back(b);
-				}
-			}
-		};
-
-		auto Fire_DeathSpiral = [&](sSpawn& s, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
-			sEnemy& e = *dynamic_cast<sEnemy*>(&s);
-			constexpr float fDelay = 0.01f;
-			constexpr int nBullets = 50;
-			constexpr float fTetha = ((float)PI * 2.0f / nBullets);
-
-			e.dataFire[0] += fElapsedTime;
-			if (e.dataFire[0] >= fDelay) {
-				e.dataFire[0] -= fDelay;
-				e.dataFire[1] += 0.1f;
-
-				Bullet b;
-				b.pos = e.pos + (olc::vf2d((e.def->iWidth / 2.0f), e.def->iHeight));
-				b.vel = { 180.0f * cosf(e.dataFire[1]), 180.0f * sinf(e.dataFire[1]) };
-				listEnemyBullets.push_back(b);
-			}
-		};
-
-		listSprites = {
-			new olc::Sprite("assets/images/enemyShip01.png"),
-			new olc::Sprite("assets/images/enemyShip02.png"),
-			new olc::Sprite("assets/images/enemyShip03.png"),
-			new olc::Sprite("assets/images/boss2.png"),
-			new olc::Sprite("assets/images/powerupSheet.png"),
-			new olc::Sprite("assets/images/powerupProjectile1.png"),
-			new olc::Sprite("assets/images/powerupProjectile2.png"),
-			new olc::Sprite("assets/images/powerupHealthSheet.png"),
-		};
-
-		float coldTime = 120.0f;
-		float enemyHealth = gameScreenDifficulty.diffMap["EnemyHealth"];
-		float bossHealth = gameScreenDifficulty.diffMap["BossHealth"];
-
-		listSpawns = {
-			new sEnemyDefinition  (coldTime + 60.00f,  listSprites[1], 0.5f, Move_None,              Fire_Straigt2,     enemyHealth, (listSprites[1]->width),     listSprites[1]->height, 300),
-			new sPowerUpDefinition(coldTime + 120.00f, listSprites[5], 0.5f, Move_Bounce,            Fire_None,         PowerUpType::GREEN, 100),			      
-			new sEnemyDefinition  (coldTime + 180.0f,  listSprites[1], 0.2f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[1]->width),     listSprites[1]->height, 300),
-			new sEnemyDefinition  (coldTime + 180.0f,  listSprites[1], 0.8f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[1]->width),     listSprites[1]->height, 300),
-			new sEnemyDefinition  (coldTime + 240.0f,  listSprites[1], 0.5f, Move_SinusoidNarrow,    Fire_Straigt2,     enemyHealth, (listSprites[1]->width),     listSprites[1]->height, 300),
-			new sPowerUpDefinition(coldTime + 200.00f, listSprites[4], 0.5f, Move_Bounce,            Fire_None,         PowerUpType::DEFAULT, 100),			      
-			new sEnemyDefinition  (coldTime + 260.0f,  listSprites[0], 0.3f, Move_SinusoidWide,      Fire_Straigt2,     enemyHealth, (listSprites[0]->width),     listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 360.0f,  listSprites[0], 0.3f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width),     listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 420.0f,  listSprites[0], 0.1f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width),     listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 420.0f,  listSprites[0], 0.9f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width),     listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 500.0f,  listSprites[0], 0.5f, Move_None,              Fire_DeathSpiral,  enemyHealth, (listSprites[0]->width),     listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 560.0f,  listSprites[0], 0.5f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[0]->width),     listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 600.0f,  listSprites[0], 0.6f, Move_Slow,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width),     listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 720.0f,  listSprites[0], 0.4f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0]->width),     listSprites[0]->height, 300),
-			new sEnemyDefinition  (coldTime + 780.0f,  listSprites[0], 0.7f, Move_SinusoidWide,      Fire_Straigt2,     enemyHealth, (listSprites[0]->width),     listSprites[0]->height, 300),
-			new sPowerUpDefinition(coldTime + 800.00f, listSprites[6], 0.9f, Move_Bounce,            Fire_None,         PowerUpType::BLUE, 100),			      
-			new sEnemyDefinition  (coldTime + 840.0f,  listSprites[2], 0.3f, Move_None,              Fire_Straigt2,     enemyHealth, (listSprites[2]->width),     listSprites[2]->height, 300),
-			new sEnemyDefinition  (coldTime + 900.0f,  listSprites[2], 0.8f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[2]->width),     listSprites[2]->height, 300),
-			new sPowerUpDefinition(coldTime + 930.00f, listSprites[7], 0.5f, Move_Bounce,            Fire_None,         PowerUpType::HEALTH, 100),			      
-			new sEnemyDefinition  (coldTime + 960.0f,  listSprites[2], 0.2f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[2]->width),     listSprites[2]->height, 300),
-			new sEnemyDefinition  (coldTime + 1020.0f, listSprites[2], 0.5f, Move_SinusoidNarrow,    Fire_Straigt2,     enemyHealth, (listSprites[2]->width),     listSprites[2]->height, 300),
-			new sEnemyDefinition  (coldTime + 1080.0f, listSprites[2], 0.9f, Move_Slow,              Fire_Straigt2,     enemyHealth, (listSprites[2]->width),     listSprites[2]->height, 300),
-			new sBossDefiniton    (coldTime + 1500.0f, listSprites[3], 0.5f, Move_SinusoidWideInf,   Fire_CirclePulse2, 20.0f,       (listSprites[3]->width / 5), listSprites[3]->height, 1000),
-			//new sEnemyDefinition(coldTime + 300, listSprites[0], 0.5f, Move_None, Fire_End, 3.0f, (listSprites[0]->width), listSprites[0]->height),
-		};
-
+		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/enemyShip01.png"));
+		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/enemyShip02.png"));
+		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/enemyShip03.png"));
+		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/boss2.png"));
+		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/powerupSheet.png"));
+		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/powerupProjectile1.png"));
+		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/poweupProjectile2.png"));
+		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/powerupHealthSheet.png"));
+		
+		CreateSpawns();
 	};
 
 	bool Run(float fElapsedTime) {
@@ -585,7 +436,7 @@ public:
 
 		if (pBoss) {
 			pge.DrawString(4, 450, "BOSS:");
-			pge.FillRect(60, 450, static_cast<int>((pBoss->def->fHealth / pBoss->maxHealth) * 576.0f), 8, olc::RED);
+			pge.FillRect(60, 450, static_cast<int>((pBoss.get()->def->fHealth / pBoss.get()->maxHealth) * 576.0f), 8, olc::RED);
 		}
 
 		cleanUp();
@@ -606,11 +457,8 @@ public:
 	};
 
 	void Destroy() {
-		for (olc::Sprite* sprite : listSprites) 
-			delete sprite;
-		listSprites.clear();
 
-		for (Spawn* spawn : listSpawns)
+		for (auto& spawn : listSpawns)
 			delete spawn;
 		listSpawns.clear();
 
@@ -639,14 +487,187 @@ public:
 		}
 		player.listPlayerBullets.clear();
 
-		/*for (auto* p : listToRemove)
+		for (auto* p : listToRemove)
 			delete p;
-		listToRemove.clear();*/
+		listToRemove.clear();
 		
 		if (pBoss) {
-			pBoss = nullptr;
+			pBoss.release();
 		}
 	};
+
+	void Reset() {
+		bGameOn = true;
+		pBoss = nullptr;
+		gameScreenDifficulty.setDifficulty(globalGameDiff);
+		player.reset();
+		player.pos = olc::vf2d(((float)pge.ScreenWidth() / 2.0f) - player.getWidth() / 2.0f, ((float)pge.ScreenHeight() - player.getHeight() - 50.0f));
+		player.lifeState = Player::ALIVE;
+		player.setMaxHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
+		player.setCurrentHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
+		fWorldSpeed = gameScreenDifficulty.diffMap["WorldSpeed"];
+		bPlayerExp = false;
+		player.bAutoFire = globalAutoFire;
+		fDescTimer = 0.0f;
+		dWorldPos = 0;
+		gloalScore = 0;
+		fEndDelayTimer = 0.0f;
+	};
+
+	void CreateSpawns() {
+		// Movement Patterns
+		auto Move_None = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
+			e.pos.y += fScrollSpeed * fElapsedTime;
+		};
+
+		auto Move_Slow = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
+			e.pos.y += fScrollSpeed * fElapsedTime * 0.5f;
+
+		};
+
+		auto Move_Fast = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
+			e.pos.y += fScrollSpeed * fElapsedTime * 2.0f;
+
+		};
+
+		auto Move_SinusoidNarrow = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
+			e.pos.y += fScrollSpeed * fElapsedTime * 1.0f;
+			e.dataMove[0] += fElapsedTime;
+			e.pos.x += 50.0f * cosf(e.dataMove[0]) * fElapsedTime;
+		};
+
+		auto Move_SinusoidWide = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
+			e.pos.y += fScrollSpeed * fElapsedTime * 1.0f;
+			e.dataMove[0] += fElapsedTime;
+			e.pos.x += 200.0f * cosf(e.dataMove[0]) * fElapsedTime;
+		};
+
+		auto Move_SinusoidWideInf = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
+			e.dataMove[0] += fElapsedTime;
+
+			e.pos.x += 200.0f * cosf(e.dataMove[0]) * fElapsedTime;
+
+			if (e.pos.y + (e.fHeight) >= 0.87f * pge.ScreenHeight())
+				e.dataMove[1] = -1;
+			if (e.pos.y <= 0)
+				e.dataMove[1] = 1;
+
+			e.pos.y += e.dataMove[1] * fScrollSpeed * fElapsedTime * 1.0f;
+
+		};
+
+		auto Move_Bounce = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed) {
+			// Update position based on velocity
+
+			e.pos += e.velocity * fElapsedTime;
+
+			// Check collision with screen boundaries
+			if (e.pos.x < 0) {
+				e.pos.x = 0;
+				e.velocity.x *= -1;
+			}
+			else if (e.pos.x + e.fWidth > pge.ScreenWidth()) {
+				e.pos.x = ((float)pge.ScreenWidth() - e.fWidth);
+				e.velocity.x *= -1;
+			}
+
+			if (e.pos.y < 0) {
+				e.pos.y = 0;
+				e.velocity.y *= -1;
+			}
+			else if (e.pos.y + e.fHeight > pge.ScreenHeight()) {
+				e.pos.y = ((float)pge.ScreenHeight() - e.fHeight);
+				e.velocity.y *= -1;
+			}
+		};
+
+		auto Fire_None = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {};
+
+		auto Fire_End = [&](sSpawn& e, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
+			bGameOn = false;
+		};
+
+		auto Fire_Straigt2 = [&](sSpawn& s, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
+			sEnemy& e = *dynamic_cast<sEnemy*>(&s);
+			constexpr float fDelay = 0.3f;
+			e.dataFire[0] += fElapsedTime;
+			if (e.dataFire[0] >= fDelay) {
+				e.dataFire[0] -= fDelay;
+				Bullet b;
+				b.pos = e.pos + (olc::vf2d(((float)e.def->iWidth / 2.0f), ((float)e.def->iHeight)));
+				b.vel = { 0.0f, 180.0f };
+				listEnemyBullets.push_back(b);
+			}
+		};
+
+		auto Fire_CirclePulse2 = [&](sSpawn& s, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
+			sEnemy& e = *dynamic_cast<sEnemy*>(&s);
+			constexpr float fDelay = 1.0f;
+			constexpr int nBullets = 15;
+			constexpr float fTetha = ((float)PI * 2.0f / nBullets);
+
+			e.dataFire[0] += fElapsedTime;
+			if (e.dataFire[0] >= fDelay) {
+				e.dataFire[0] -= fDelay;
+				for (int i = 0; i < nBullets; ++i) {
+					Bullet b;
+					b.pos = e.pos + (olc::vf2d(((float)e.def->iWidth / 2.0f), ((float)e.def->iHeight / 2.0f)));
+					b.vel = { 180.0f * cosf(fTetha * i), 180.0f * sinf(fTetha * i) };
+					listEnemyBullets.push_back(b);
+				}
+			}
+		};
+
+		auto Fire_DeathSpiral = [&](sSpawn& s, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& b) {
+			sEnemy& e = *dynamic_cast<sEnemy*>(&s);
+			constexpr float fDelay = 0.01f;
+			constexpr int nBullets = 50;
+			constexpr float fTetha = ((float)PI * 2.0f / nBullets);
+
+			e.dataFire[0] += fElapsedTime;
+			if (e.dataFire[0] >= fDelay) {
+				e.dataFire[0] -= fDelay;
+				e.dataFire[1] += 0.1f;
+
+				Bullet b;
+				b.pos = e.pos + (olc::vf2d((e.def->iWidth / 2.0f), e.def->iHeight));
+				b.vel = { 180.0f * cosf(e.dataFire[1]), 180.0f * sinf(e.dataFire[1]) };
+				listEnemyBullets.push_back(b);
+			}
+		};
+
+		float coldTime = 120.0f;
+		float enemyHealth = gameScreenDifficulty.diffMap["EnemyHealth"];
+		float bossHealth = gameScreenDifficulty.diffMap["BossHealth"];
+
+		listSpawns = {
+			new sEnemyDefinition(coldTime + 60.00f,    listSprites[1].get(), 0.5f, Move_None,              Fire_Straigt2,     enemyHealth, (listSprites[1].get()->width),     listSprites[1].get()->height, 300),
+			new sPowerUpDefinition(coldTime + 120.00f, listSprites[5].get(), 0.5f, Move_Bounce,            Fire_None,         PowerUpType::GREEN, 100),
+			new sEnemyDefinition(coldTime + 180.0f,    listSprites[1].get(), 0.2f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[1].get()->width),     listSprites[1].get()->height, 300),
+			new sEnemyDefinition(coldTime + 180.0f,    listSprites[1].get(), 0.8f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[1].get()->width),     listSprites[1].get()->height, 300),
+			new sEnemyDefinition(coldTime + 240.0f,    listSprites[1].get(), 0.5f, Move_SinusoidNarrow,    Fire_Straigt2,     enemyHealth, (listSprites[1].get()->width),     listSprites[1].get()->height, 300),
+			new sPowerUpDefinition(coldTime + 200.00f, listSprites[4].get(), 0.5f, Move_Bounce,            Fire_None,         PowerUpType::DEFAULT, 100),
+			new sEnemyDefinition(coldTime + 260.0f,    listSprites[0].get(), 0.3f, Move_SinusoidWide,      Fire_Straigt2,     enemyHealth, (listSprites[0].get()->width),     listSprites[0].get()->height, 300),
+			new sEnemyDefinition(coldTime + 360.0f,    listSprites[0].get(), 0.3f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0].get()->width),     listSprites[0].get()->height, 300),
+			new sEnemyDefinition(coldTime + 420.0f,    listSprites[0].get(), 0.1f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0].get()->width),     listSprites[0].get()->height, 300),
+			new sEnemyDefinition(coldTime + 420.0f,    listSprites[0].get(), 0.9f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0].get()->width),     listSprites[0].get()->height, 300),
+			new sEnemyDefinition(coldTime + 500.0f,    listSprites[0].get(), 0.5f, Move_None,              Fire_DeathSpiral,  enemyHealth, (listSprites[0].get()->width),     listSprites[0].get()->height, 300),
+			new sEnemyDefinition(coldTime + 560.0f,    listSprites[0].get(), 0.5f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[0].get()->width),     listSprites[0].get()->height, 300),
+			new sEnemyDefinition(coldTime + 600.0f,    listSprites[0].get(), 0.6f, Move_Slow,              Fire_Straigt2,     enemyHealth, (listSprites[0].get()->width),     listSprites[0].get()->height, 300),
+			new sEnemyDefinition(coldTime + 720.0f,    listSprites[0].get(), 0.4f, Move_Fast,              Fire_Straigt2,     enemyHealth, (listSprites[0].get()->width),     listSprites[0].get()->height, 300),
+			new sEnemyDefinition(coldTime + 780.0f,    listSprites[0].get(), 0.7f, Move_SinusoidWide,      Fire_Straigt2,     enemyHealth, (listSprites[0].get()->width),     listSprites[0].get()->height, 300),
+			new sPowerUpDefinition(coldTime + 800.00f, listSprites[6].get(), 0.9f, Move_Bounce,            Fire_None,         PowerUpType::BLUE, 100),
+			new sEnemyDefinition(coldTime + 840.0f,    listSprites[2].get(), 0.3f, Move_None,              Fire_Straigt2,     enemyHealth, (listSprites[2].get()->width),     listSprites[2].get()->height, 300),
+			new sEnemyDefinition(coldTime + 900.0f,    listSprites[2].get(), 0.8f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[2].get()->width),     listSprites[2].get()->height, 300),
+			new sPowerUpDefinition(coldTime + 930.00f, listSprites[7].get(), 0.5f, Move_Bounce,            Fire_None,         PowerUpType::HEALTH, 100),
+			new sEnemyDefinition(coldTime + 960.0f,    listSprites[2].get(), 0.2f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[2].get()->width),     listSprites[2].get()->height, 300),
+			new sEnemyDefinition(coldTime + 1020.0f,   listSprites[2].get(), 0.5f, Move_SinusoidNarrow,    Fire_Straigt2,     enemyHealth, (listSprites[2].get()->width),     listSprites[2].get()->height, 300),
+			new sEnemyDefinition(coldTime + 1080.0f,   listSprites[2].get(), 0.9f, Move_Slow,              Fire_Straigt2,     enemyHealth, (listSprites[2].get()->width),     listSprites[2].get()->height, 300),
+			new sBossDefiniton(coldTime + 1500.0f,     listSprites[3].get(), 0.5f, Move_SinusoidWideInf,   Fire_CirclePulse2, 20.0f,       (listSprites[3].get()->width / 5), listSprites[3].get()->height, 1000),
+			//new sEnemyDefinition(coldTime + 300, listSprites[0], 0.5f, Move_None, Fire_End, 3.0f, (listSprites[0]->width), listSprites[0]->height),
+		};
+
+	}
 
 	void Spawnning() {
 		// Spawns
@@ -660,7 +681,6 @@ public:
 				};
 				listSpawns.pop_front();
 				listEnemies.push_back(pEenemy);
-				listToRemove.push_back(pEenemy);
 			}
 			else if (SpawnType::POWERUP == currentSpawn->type) {
 				PowerUp p;
@@ -675,18 +695,16 @@ public:
 				listPowerUp.push_back(p);
 			}
 			else if (SpawnType::BOSS == currentSpawn->type) {
-				sBoss* boss = new sBoss(dynamic_cast<sBossDefiniton*>(currentSpawn));
-				boss->maxHealth = boss->def->fHealth;
-				boss->fWidth = ((int)boss->def->iWidth);
-				boss->fHeight = ((int)boss->def->iHeight);
-				boss->pos = {
-					boss->def->fOffset * ((float)pge.ScreenWidth()) - (((float)boss->def->iWidth) / 2),
-					0.0f - ((float)boss->def->iHeight)
+				pBoss = std::make_unique<sBoss>(dynamic_cast<sBossDefiniton*>(currentSpawn));
+				pBoss.get()->maxHealth = pBoss.get()->def->fHealth;
+				pBoss.get()->fWidth = ((int)pBoss.get()->def->iWidth);
+				pBoss.get()->fHeight = ((int)pBoss.get()->def->iHeight);
+				pBoss.get()->pos = {
+					pBoss.get()->def->fOffset * ((float)pge.ScreenWidth()) - (((float)pBoss.get()->def->iWidth) / 2),
+					0.0f - ((float)pBoss->def->iHeight)
 				};
 				listSpawns.pop_front();
-				listEnemies.push_back(boss);
-				pBoss = boss;
-				listToRemove.push_back(boss);
+				listEnemies.push_back(pBoss.get());
 			}
 		}
 	}
@@ -837,8 +855,17 @@ public:
 		return true;
 	};
 
-	void Destroy() {
-		
+	void Destroy() {};
+
+	void Reset() {
+		printIndex = 0;
+		timeAccumulator = 0.0f;
+		currentLine = 0;
+		fStartDelayTimer = 0.0;
+		spacePressed = false;
+		fEndDelayTimer = 0.0;
+		fBlinkTimer = 0.0f;
+		bBlink = true;
 	};
 
 	bool typeWriter(float fElapsedTime, int offsetY) {
@@ -937,8 +964,13 @@ class GameOverScreen : public Screen {
 
 		};
 
-		void Destroy() {
+		void Destroy() {};
 
+		void Reset() {
+			bBlink = true;
+			fStartDelay = 2.0f;
+			spacePressed = false;
+			fStartDelayTimer = 0.0;
 		};
 
 		bool InputHandling() {

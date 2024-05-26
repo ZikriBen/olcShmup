@@ -8,7 +8,9 @@ void PlayerMovement::ManageSpaceKey(float fElapsedTime)
 	if (player.bCanFire) {
 		int offsetX = player.listProjectileDef[player.ProjectileType].offsetX;
 		int offsetY = player.listProjectileDef[player.ProjectileType].offsetY;
-		player.miniAudio.Play(player.souLaserA1);
+
+		if (!player.bAutoFire)
+			player.miniAudio.Play(player.souLaserA1);
 
 		if (player.powerUpLevel == 1) {
 			Bullet b;
@@ -107,6 +109,7 @@ void PlayerMovement::Update(float fElapsedTime)
 
 	if (pge.GetKey(olc::Key::SPACE).bPressed)
 	{
+		if (player.bAutoFire) return;
 		// Right we have a bunch of work here, so lets put it in its own private method
 		this->ManageSpaceKey(fElapsedTime);
 	}
@@ -117,6 +120,8 @@ void PlayerMovement::Update(float fElapsedTime)
 
 
 	}
+
+	if (player.bAutoFire) this->ManageSpaceKey(fElapsedTime);
 }
 
 

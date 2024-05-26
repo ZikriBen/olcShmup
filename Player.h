@@ -42,6 +42,7 @@ public:
 	bool isDead() { return dead; };
 	int ProjectileType = 1;
 	int powerUpLevel = 1;
+	bool bAutoFire = false;
 	olc::vf2d pos;
 	olc::Sprite* sprPlayerSheet;
 	float fGunReloadTimer;

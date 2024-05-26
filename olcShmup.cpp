@@ -1,5 +1,6 @@
 ﻿//// olcShmup.cpp : This file contains the 'main' function. Program execution begins and ends there.
 ////
+#include <memory>
 #define OLC_PGEX_MINIAUDIO          // Johnngy63: Added to support cool sounds
 #include "olcPGEX_MiniAudio.h"
 
@@ -23,11 +24,11 @@ public:
         sAppName = "Shmup";
     }
 
-    StartScreen* startScreen;
-    MenuScreen* menuScreen;
-    IntroScreen* introScreen;
-    GameScreen* gameScreen;
-    GameOverScreen* gameOverScreen;
+    std::unique_ptr<StartScreen> startScreen;
+    std::unique_ptr<MenuScreen> menuScreen;
+    std::unique_ptr<IntroScreen> introScreen;
+    std::unique_ptr<GameScreen> gameScreen;
+    std::unique_ptr<GameOverScreen> gameOverScreen;
     Screen* currentScreen;
     std::string currentScreenStr;
     std::unordered_map<std::string, Screen*> screenMap;
@@ -36,23 +37,24 @@ public:
 
 public:
     bool OnUserCreate() override {
-        startScreen = new StartScreen(*this);
+        startScreen = std::make_unique<StartScreen>(*this);
         startScreen->Create();
-        menuScreen = new MenuScreen(*this);
+        menuScreen = std::make_unique<MenuScreen>(*this);
         menuScreen->Create();
-        introScreen = new IntroScreen(*this);
+        introScreen = std::make_unique<IntroScreen>(*this);
         introScreen->Create();
-        gameScreen = new GameScreen(*this);
-        //gameScreen->Create();
-        gameOverScreen = new GameOverScreen(*this);
+        gameScreen = std::make_unique<GameScreen>(*this);
+        gameScreen->Create();
+        gameOverScreen = std::make_unique<GameOverScreen>(*this);
         gameOverScreen->Create();
-        screenMap["start"] = startScreen;
-        screenMap["menu"] = menuScreen;
-        screenMap["intro"] = introScreen;
-        screenMap["game"] = gameScreen;
-        screenMap["game_over"] = gameOverScreen;
+        
+        screenMap["start"] = startScreen.get();
+        screenMap["menu"] = menuScreen.get();
+        screenMap["intro"] = introScreen.get();
+        screenMap["game"] = gameScreen.get();
+        screenMap["game_over"] = gameOverScreen.get();
 
-        gameState = GameState::START;
+        gameState = GameState::GAME;
        
         return true;
     }
@@ -98,6 +100,8 @@ public:
         switch (gameState) {
         case GameState::START:
             gameState = GameState::MENU;
+            menuScreen->Reset();
+            startScreen->Destroy(); // Only Destroy, as no need for start screen anymore
             break;
         case GameState::MENU:
             if (menuScreen->currentSelection == 0) {
@@ -106,17 +110,20 @@ public:
             else if (menuScreen->currentSelection == menuScreen->lines.size() - 1) {
                 gameState = GameState::EXIT;
             }
+            introScreen->Reset();
             break;
         case GameState::INTRO:
-            gameScreen->Create();
+            gameScreen->Reset();
+            gameScreen->CreateSpawns();
             gameState = GameState::GAME;
             break;
         case GameState::GAME:
-            gameOverScreen->Create();
+            gameOverScreen->Reset();
             gameState = GameState::GAME_OVER;
             gameScreen->Destroy();
             break;
         case GameState::GAME_OVER:
+            menuScreen->Reset();
             gameState = GameState::MENU;
             break;
         case GameState::EXIT:
