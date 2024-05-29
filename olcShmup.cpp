@@ -47,15 +47,15 @@ public:
         gameScreen->Create();
         gameOverScreen = std::make_unique<GameOverScreen>(*this);
         gameOverScreen->Create();
-        
+
         screenMap["start"] = startScreen.get();
         screenMap["menu"] = menuScreen.get();
         screenMap["intro"] = introScreen.get();
         screenMap["game"] = gameScreen.get();
         screenMap["game_over"] = gameOverScreen.get();
 
-        gameState = GameState::GAME;
-       
+        gameState = GameState::START;
+
         return true;
     }
 
@@ -63,8 +63,8 @@ public:
         currentScreen = screenMap[EnumStateToString(gameState)];
 
         bool keepState = currentScreen->Run(fElapsedTime);
-        
-        if (!keepState) 
+
+        if (!keepState)
             stateTransition(gameState);
 
         return (gameState == GameState::EXIT) ? false : true;
@@ -143,5 +143,3 @@ int main()
 }
 
 // 1. Add HUD
-// 2. Fix all memory leaks
-// 3. replace sounds

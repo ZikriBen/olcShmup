@@ -40,7 +40,8 @@ public:
 	int32_t nMenuMusic_ID = -1;     // Stores the ID of the menu musice so it can be played & looped easliy
 	std::string souMenuMusic = "./assets/sounds/ShmupBGMusic.mp3";       // Holds the full path to ShmupBGMusic.mp3
 	std::string souLaserA1 = "./assets/sounds/laser_a1.mp3";             // Holds the full path to laser_a1.mp3
-	std::string souBigExplosion = "./assets/sounds/big_explosion.wav";;    // Holds the full path to big_explosion.way
+	std::string souBigExplosion = "./assets/sounds/big_explosion.wav";    // Holds the full path to big_explosion.way
+	std::string souBeep = "./assets/sounds/one_beep-99630.mp3";
 };
 
 class StartScreen : public Screen {
@@ -75,7 +76,7 @@ public:
 		lines.push_back("2018 - 2024 OneLoneCoder.com");
 		lines.push_back("All rights reserved.");
 		bg.populateStars();
-		
+
 	};
 
 	bool Run(float fElapsedTime) {
@@ -99,7 +100,7 @@ public:
 		for (int i = 0; i < lines.size(); ++i)
 			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(lines[i]).x / 2), 100 + i * offsetY, lines[i], olc::WHITE);
 
-		pge.DrawSprite({(pge.ScreenWidth() / 2) - (logo->width / 2), 300 }, logo.get());
+		pge.DrawSprite({ (pge.ScreenWidth() / 2) - (logo->width / 2), 300 }, logo.get());
 
 		InputHandling();
 
@@ -140,7 +141,7 @@ public:
 
 class MenuScreen : public Screen {
 public:
-	MenuScreen(olc::PixelGameEngine& pge) : pge(pge), sprBG(nullptr), pos(0,0){};
+	MenuScreen(olc::PixelGameEngine& pge) : pge(pge), sprBG(nullptr), pos(0, 0) {};
 
 	olc::PixelGameEngine& pge;
 	std::unique_ptr<olc::Sprite> sprBG;
@@ -161,15 +162,15 @@ public:
 
 		mo["main"].SetTable(1, 3);
 		mo["main"]["Difficulty"].SetTable(1, 3);
-		mo["main"]["Music"].SetTable(1, 2);
+		mo["main"]["Sound"].SetTable(1, 2);
 		mo["main"]["Auto Fire"].SetTable(1, 2);
 		mo["main"]["Back"].SetID(100);
 		mo["main"]["Difficulty"]["Easy"].SetID(101);
 		mo["main"]["Difficulty"]["Normal"].SetID(102);
 		mo["main"]["Difficulty"]["Hard"].SetID(103);
 
-		mo["main"]["Music"]["On"].SetID(104);
-		mo["main"]["Music"]["Off"].SetID(105);
+		mo["main"]["Sound"]["On"].SetID(104);
+		mo["main"]["Sound"]["Off"].SetID(105);
 
 		mo["main"]["Auto Fire"]["On"].SetID(106);
 		mo["main"]["Auto Fire"]["Off"].SetID(107);
@@ -180,10 +181,13 @@ public:
 		// You do not need the 'this->' referance but I wanted you to see where I was getting this madness from
 		// Basicilly I am asking the parent class (Screen) to load & play music for this child class (MenuScreen) only
 		// Debug it to understand better
-		this->nMenuMusic_ID = this->miniAudio.LoadSound(this->souMenuMusic);
-		this->miniAudio.Play(this->nMenuMusic_ID, true);
+		if (soundOn) {
+			this->nMenuMusic_ID = this->miniAudio.LoadSound(this->souMenuMusic);
+			this->miniAudio.SetVolume(nMenuMusic_ID, 0.7f);
+			this->miniAudio.Play(this->nMenuMusic_ID, true);
+		}
 	};
-	
+
 	bool Run(float fElapsedTime) {
 		pge.Clear(olc::BLACK);
 		int mid = (pge.ScreenWidth() / 2);
@@ -200,14 +204,14 @@ public:
 		}
 
 		pge.SetPixelMode(olc::Pixel::NORMAL);
-		if (!InputHandling()) 
+		if (!InputHandling())
 			return false;
 
-		mm.Draw(pge, sprGFX.get(), {mid - (pge.GetTextSize(lines[0]).x), offsetY - 80});
+		mm.Draw(pge, sprGFX.get(), { mid - (pge.GetTextSize(lines[0]).x), offsetY - 80 });
 
 		return true;
 	};
-	
+
 	void CommandSwitch(int cmdID) {
 		if (cmdID == 101) {
 			globalGameDiff = GameDifficulty::EASY;
@@ -219,11 +223,13 @@ public:
 			globalGameDiff = GameDifficulty::HARD;
 		}
 		else if (cmdID == 104) {
-			float vol = 1.0f;
+			float vol = 0.7f;
+			soundOn = true;
 			this->miniAudio.SetVolume(nMenuMusic_ID, vol);
 		}
 		else if (cmdID == 105) {
 			float vol = 0.0f;
+			soundOn = false;
 			this->miniAudio.SetVolume(nMenuMusic_ID, vol);
 		}
 		else if (cmdID == 106) {
@@ -244,16 +250,17 @@ public:
 	bool InputHandling() {
 		menuobject* command = nullptr;
 		if (!mm.isOpen()) {
-			if (pge.GetKey(olc::UP).bPressed || pge.GetKey(olc::Key::W).bPressed) 
+			if (pge.GetKey(olc::UP).bPressed || pge.GetKey(olc::Key::W).bPressed)
 				currentSelection = ((int)(currentSelection - 1 + lines.size()) % lines.size());
-			
+
 			if (pge.GetKey(olc::DOWN).bPressed || pge.GetKey(olc::Key::S).bPressed)
 				currentSelection = (currentSelection + 1) % lines.size();
-			
+
 			if (pge.GetKey(olc::ENTER).bPressed || pge.GetKey(olc::Key::SPACE).bPressed) {
-				
+
 				// Johnnyg63: Plays the laser sound when you press Enter||Space
-				this->miniAudio.Play(this->souLaserA1);
+				if (soundOn)
+					this->miniAudio.Play(this->souLaserA1);
 				if (currentSelection == 0)
 					return false;
 				else if (currentSelection == 1)
@@ -263,7 +270,7 @@ public:
 				else
 					return true;
 			}
-		}	
+		}
 		else {
 			if (pge.GetKey(olc::UP).bPressed || pge.GetKey(olc::Key::W).bPressed)
 				mm.OnUp();
@@ -271,19 +278,20 @@ public:
 			if (pge.GetKey(olc::DOWN).bPressed || pge.GetKey(olc::Key::S).bPressed)
 				mm.OnDown();
 
-			if (pge.GetKey(olc::Key::A).bPressed)  
+			if (pge.GetKey(olc::Key::A).bPressed)
 				mm.OnLeft();
 
-			if (pge.GetKey(olc::Key::D).bPressed) 
+			if (pge.GetKey(olc::Key::D).bPressed)
 				mm.OnRight();
 
 			if (pge.GetKey(olc::ENTER).bPressed || pge.GetKey(olc::Key::SPACE).bPressed)
 			{
 				// Johnnyg63: Plays the laser sound when you press Enter||Space
-				this->miniAudio.Play(this->souLaserA1);
+				if (soundOn)
+					this->miniAudio.Play(this->souLaserA1);
 				command = mm.OnConfirm();
 			}
-				
+
 
 			if (pge.GetKey(olc::ESCAPE).bPressed || pge.GetKey(olc::Key::Z).bPressed)
 				mm.OnBack();
@@ -295,8 +303,8 @@ public:
 				mm.Close();
 			}
 		}
-		
-		if (pge.GetKey(olc::Key::M).bPressed)    
+
+		if (pge.GetKey(olc::Key::M).bPressed)
 			mm.Open(&mo["main"]);
 
 		return true;
@@ -305,18 +313,20 @@ public:
 
 class GameScreen : public Screen {
 public:
-	GameScreen(olc::PixelGameEngine& pge) : pge(pge){};
+	GameScreen(olc::PixelGameEngine& pge) : pge(pge) {};
 	olc::PixelGameEngine& pge;
 	float fWorldSpeed = 40.0f;
 	double dWorldPos = 0;
-	Player player{ pge , miniAudio};
+	Player player{ pge , miniAudio };
 	PlayerMovement playerMovement{ pge, player };
 
 	ScrollingStarsBG bg{ pge, fWorldSpeed, 200 };
 	float fDescTimer = 0.0;
 	float fDescViewTime = 2.0f;
-	float fEndDelayTimer = 0.0f;
-	float fEndDelay = 1.5f;
+	float fEndDelayTimer1 = 0.0f;
+	float fEndDelayTimer2 = 0.0f;
+	float fEndDelay1 = 1.0f;
+	float fEndDelay2 = 1.0f;
 	bool bGameOn = true;
 	std::vector<std::unique_ptr<olc::Sprite>> listSprites;
 	std::list<Spawn*> listSpawns;
@@ -329,12 +339,13 @@ public:
 	std::unique_ptr<sBoss> pBoss;
 	bool bPlayerExp = false;
 	Difficulty gameScreenDifficulty;
-	
+	float healthDecrementInterval = 0.07f; // Decrement health every 0.1 seconds
+	float healthDecrementTimer = 0.0f;
 
 	void Create() {
 		bg.populateStars();
 		GameScreen::Reset();
-		
+
 		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/enemyShip01.png"));
 		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/enemyShip02.png"));
 		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/enemyShip03.png"));
@@ -343,13 +354,13 @@ public:
 		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/powerupProjectile1.png"));
 		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/poweupProjectile2.png"));
 		listSprites.emplace_back(std::make_unique<olc::Sprite>("assets/images/powerupHealthSheet.png"));
-		
+
 		CreateSpawns();
 	};
 
 	bool Run(float fElapsedTime) {
 		dWorldPos += fWorldSpeed * fElapsedTime;
-		
+
 		Spawnning();
 
 		// Update Functions
@@ -401,7 +412,8 @@ public:
 				bPlayerExp = true;
 				listExplosions.push_back(exp);
 				// Johnngy63: Play explosion
-				this->miniAudio.Play(this->souBigExplosion);
+				if (soundOn)
+					this->miniAudio.Play(this->souBigExplosion);
 			}
 			break;
 		}
@@ -446,8 +458,29 @@ public:
 		}
 
 		if (!bGameOn) {
-			fEndDelayTimer += fElapsedTime;
-			if (fEndDelayTimer < fEndDelay) {
+			fEndDelayTimer1 += fElapsedTime;
+
+			if (fEndDelayTimer1 < fEndDelay1) {
+				return true;
+			}
+
+			healthDecrementTimer += fElapsedTime;
+
+			if (healthDecrementTimer >= healthDecrementInterval) {
+				healthDecrementTimer -= healthDecrementInterval;
+
+				if (player.getCurrentHealth() > 1) {
+					player.setCurrentHealth(player.getCurrentHealth() - 1);
+					gloalScore += 100;
+					if (soundOn)
+						this->miniAudio.Play(this->souBeep);
+					fEndDelayTimer2 = 0.0f;
+				}
+			}
+
+			fEndDelayTimer2 += fElapsedTime;
+
+			if (fEndDelayTimer2 < fEndDelay2) {
 				return true;
 			}
 			else return false;
@@ -490,7 +523,7 @@ public:
 		for (auto* p : listToRemove)
 			delete p;
 		listToRemove.clear();
-		
+
 		if (pBoss) {
 			pBoss.release();
 		}
@@ -505,13 +538,15 @@ public:
 		player.lifeState = Player::ALIVE;
 		player.setMaxHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
 		player.setCurrentHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
+		player.setSoundOn(soundOn);
 		fWorldSpeed = gameScreenDifficulty.diffMap["WorldSpeed"];
 		bPlayerExp = false;
 		player.bAutoFire = globalAutoFire;
 		fDescTimer = 0.0f;
 		dWorldPos = 0;
 		gloalScore = 0;
-		fEndDelayTimer = 0.0f;
+		fEndDelayTimer1 = 0.0f;
+		fEndDelayTimer2 = 0.0f;
 	};
 
 	void CreateSpawns() {
@@ -641,8 +676,8 @@ public:
 		float bossHealth = gameScreenDifficulty.diffMap["BossHealth"];
 
 		listSpawns = {
-			new sEnemyDefinition(coldTime + 60.00f,    listSprites[1].get(), 0.5f, Move_None,              Fire_Straigt2,     enemyHealth, (listSprites[1].get()->width),     listSprites[1].get()->height, 300),
-			new sPowerUpDefinition(coldTime + 120.00f, listSprites[5].get(), 0.5f, Move_Bounce,            Fire_None,         PowerUpType::GREEN, 100),
+			new sEnemyDefinition(coldTime + 60.0f,     listSprites[1].get(), 0.5f, Move_None,              Fire_Straigt2,     enemyHealth, (listSprites[1].get()->width),     listSprites[1].get()->height, 300),
+			new sPowerUpDefinition(coldTime + 120.0f,  listSprites[5].get(), 0.5f, Move_Bounce,            Fire_None,         PowerUpType::GREEN, 100),
 			new sEnemyDefinition(coldTime + 180.0f,    listSprites[1].get(), 0.2f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[1].get()->width),     listSprites[1].get()->height, 300),
 			new sEnemyDefinition(coldTime + 180.0f,    listSprites[1].get(), 0.8f, Move_None,              Fire_CirclePulse2, enemyHealth, (listSprites[1].get()->width),     listSprites[1].get()->height, 300),
 			new sEnemyDefinition(coldTime + 240.0f,    listSprites[1].get(), 0.5f, Move_SinusoidNarrow,    Fire_Straigt2,     enemyHealth, (listSprites[1].get()->width),     listSprites[1].get()->height, 300),
@@ -709,7 +744,7 @@ public:
 		}
 	}
 
-	void detectPlayerBulletCollision(float fElapsedTime, std::list<Bullet>& playerBullets, std::list<sEnemy *>& listEnemies, std::list<Bullet>* listFragments) {
+	void detectPlayerBulletCollision(float fElapsedTime, std::list<Bullet>& playerBullets, std::list<sEnemy*>& listEnemies, std::list<Bullet>* listFragments) {
 		for (auto& b : playerBullets) {
 			b.pos += (b.vel + olc::vf2d(0.0f, fWorldSpeed)) * fElapsedTime;
 			for (auto& e : listEnemies)
@@ -719,7 +754,8 @@ public:
 					if (e->def->fHealth <= 0) {
 						gloalScore += gameScreenDifficulty.diffMap["ScoreFactor"] * e->def->score;
 						// Johnngy63: Play explosion
-						//this->miniAudio.Play(this->souBigExplosion);
+						if (soundOn)
+							this->miniAudio.Play(this->souBigExplosion);
 
 						for (int i = 0; i < 500; ++i) {
 							float fAngle = ((float)rand() / (float)RAND_MAX * 2.0f * PI);
@@ -770,7 +806,7 @@ public:
 				it = listEnemies.erase(it);
 			}
 			else {
-				++it; 
+				++it;
 			}
 		}
 
@@ -795,7 +831,7 @@ public:
 class IntroScreen : public Screen {
 public:
 	IntroScreen(olc::PixelGameEngine& pge) : pge(pge) {};
-	
+
 	olc::PixelGameEngine& pge;
 	int printIndex = 0;
 	float printSpeed = 30.0f; // 10 characters per second
@@ -812,7 +848,7 @@ public:
 	float fBlinkTimer = 0.0f;
 	bool bBlink = true;
 	float blinkInterval = 0.4f;
-	
+
 	void Create() {
 		lines.push_back("Welcome to Galactic Havoc: Deep Space Assault!");
 		lines.push_back("Take command of the last bastion against cosmic chaos.");
@@ -825,24 +861,24 @@ public:
 
 	bool Run(float fElapsedTime) {
 		pge.Clear(olc::BLACK);
-		
+
 		fStartDelayTimer += fElapsedTime;
 		if (fStartDelayTimer < fStartDelay) {
 			return true;
 		}
-		
+
 		typeWriter(fElapsedTime, offsetY);
-			
+
 		if (spacePressed) {
 			fEndDelayTimer += fElapsedTime;
-			if (fEndDelayTimer < fEndDelay) 
+			if (fEndDelayTimer < fEndDelay)
 				return true;
 			else
 				return false;
 		}
-		
+
 		InputHandling();
-		
+
 		fBlinkTimer += fElapsedTime;
 		if (fBlinkTimer > blinkInterval) {
 			fBlinkTimer -= blinkInterval;
@@ -870,7 +906,7 @@ public:
 
 	bool typeWriter(float fElapsedTime, int offsetY) {
 		timeAccumulator += fElapsedTime;
-		
+
 		// Print already typed lines
 		for (int i = 0; i < currentLine; ++i) {
 			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(lines[i]).x / 2), 10 + i * offsetY, lines[i], olc::WHITE);
@@ -896,7 +932,7 @@ public:
 			currentLine++;
 			printIndex = 0;
 		}
-		
+
 		return true;
 	}
 
@@ -909,75 +945,75 @@ public:
 };
 
 class GameOverScreen : public Screen {
-	public:
-		GameOverScreen(olc::PixelGameEngine& pge) : pge(pge) {};
+public:
+	GameOverScreen(olc::PixelGameEngine& pge) : pge(pge) {};
 
-		olc::PixelGameEngine& pge;
-		int offsetY = 50;
-		std::string textToPrint1 = "Game Over!";
-		std::string textToPrint2 = "Well Done, your score: ";
-		std::string textToPrint3 = "See you space cowboy...";
-		std::string textToPrint4 = "Press SPACEBAR to continue";
-		float fBlinkTimer = 0.0f;
-		bool bBlink = true;
-		float blinkInterval = 0.4f;
-		float fStartDelay = 2.0f;
-		bool spacePressed = false;
-		float fStartDelayTimer = 0.0;
+	olc::PixelGameEngine& pge;
+	int offsetY = 50;
+	std::string textToPrint1 = "Game Over!";
+	std::string textToPrint2 = "Well Done, your score: ";
+	std::string textToPrint3 = "See you space cowboy...";
+	std::string textToPrint4 = "Press SPACEBAR to continue";
+	float fBlinkTimer = 0.0f;
+	bool bBlink = true;
+	float blinkInterval = 0.4f;
+	float fStartDelay = 2.0f;
+	bool spacePressed = false;
+	float fStartDelayTimer = 0.0;
 
-		void Create() {
-			spacePressed = false;
-			fBlinkTimer = 0.0f;
-			bBlink = true;
-		};
+	void Create() {
+		spacePressed = false;
+		fBlinkTimer = 0.0f;
+		bBlink = true;
+	};
 
-		bool Run(float fElapsedTime) {
-			pge.Clear(olc::BLACK);
-			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint1).x), 100, textToPrint1, olc::WHITE, 2);
-			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint2).x / 2), 220, textToPrint2, olc::WHITE);
-			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(std::to_string(gloalScore)).x), 250, std::to_string(gloalScore), olc::WHITE, 2);
-			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint3).x / 2), pge.ScreenHeight() - 60, textToPrint3, olc::WHITE);
-			
-
-			fStartDelayTimer += fElapsedTime;
-			if (fStartDelayTimer < fStartDelay) {
-				return true;
-			}
-
-			InputHandling();
-
-			if (spacePressed) {
-				return false;
-			}
+	bool Run(float fElapsedTime) {
+		pge.Clear(olc::BLACK);
+		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint1).x), 100, textToPrint1, olc::WHITE, 2);
+		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint2).x / 2), 220, textToPrint2, olc::WHITE);
+		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(std::to_string(gloalScore)).x), 250, std::to_string(gloalScore), olc::WHITE, 2);
+		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint3).x / 2), pge.ScreenHeight() - 60, textToPrint3, olc::WHITE);
 
 
-			fBlinkTimer += fElapsedTime;
-			if (fBlinkTimer > blinkInterval) {
-				fBlinkTimer -= blinkInterval;
-				bBlink = !bBlink;
-			}
-
-			if (!bBlink)
-				pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint4).x / 2), pge.ScreenHeight() - 20, textToPrint4, olc::DARK_GREY);
-
-			return true;
-
-		};
-
-		void Destroy() {};
-
-		void Reset() {
-			bBlink = true;
-			fStartDelay = 2.0f;
-			spacePressed = false;
-			fStartDelayTimer = 0.0;
-		};
-
-		bool InputHandling() {
-			if (pge.GetKey(olc::SPACE).bPressed) 
-				spacePressed = true;
+		fStartDelayTimer += fElapsedTime;
+		if (fStartDelayTimer < fStartDelay) {
 			return true;
 		}
+
+		InputHandling();
+
+		if (spacePressed) {
+			return false;
+		}
+
+
+		fBlinkTimer += fElapsedTime;
+		if (fBlinkTimer > blinkInterval) {
+			fBlinkTimer -= blinkInterval;
+			bBlink = !bBlink;
+		}
+
+		if (!bBlink)
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint4).x / 2), pge.ScreenHeight() - 20, textToPrint4, olc::DARK_GREY);
+
+		return true;
+
+	};
+
+	void Destroy() {};
+
+	void Reset() {
+		bBlink = true;
+		fStartDelay = 2.0f;
+		spacePressed = false;
+		fStartDelayTimer = 0.0;
+	};
+
+	bool InputHandling() {
+		if (pge.GetKey(olc::SPACE).bPressed)
+			spacePressed = true;
+		return true;
+	}
 };
-	
+
 #endif //SCREEN_H

@@ -1,7 +1,7 @@
 #include "Player.h"
 
 
-Player::Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio) : pge(pge), miniAudio(miniAudio), lifeState(Player::ALIVE) {
+Player::Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio) : pge(pge), miniAudio(miniAudio), lifeState(Player::ALIVE), bSoundOn(true) {
 	sprPlayerSheet = new olc::Sprite("assets/images/PlayerSpritesheet.png");
 	pos = { (float)pge.ScreenWidth() / 2, (float)pge.ScreenHeight() / 2 };
 	speed = 200.f;
@@ -22,10 +22,10 @@ Player::Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio) : pge(pge),
 	listProjectileDef.push_back(ProjectileDef());
 	listProjectileDef.push_back({ new olc::Sprite("assets/images/projectile_1-small.png"), 1 });
 	listProjectileDef.push_back({ new olc::Sprite("assets/images/projectile_2.png"), 2 });
-	
+
 	for (int i = 0; i < listProjectileDef.size(); ++i) {
 		listProjectileDef[i].offsetX = ((int)fWidth / 2);
-		
+
 		if (listProjectileDef[i].spr) {
 			listProjectileDef[i].offsetX -= ((int)listProjectileDef[i].spr->width / 2);
 			listProjectileDef[i].offsetY = ((int)listProjectileDef[i].spr->height / 2);
@@ -39,14 +39,14 @@ void Player::Update(float fElapsedTime) {
 		lifeState = Player::DYING;
 		return;
 	}
-	
+
 	fGraphicTimer += fElapsedTime;
 	if (fGraphicTimer > 0.2f) {
 		fGraphicTimer -= 0.2f;
 		graphicCounter++;
 		graphicCounter %= 2;
 	}
-	
+
 	pos.y += (40.0f * fElapsedTime) * 0.5f;
 
 	if (pos.x <= 0) pos.x = 0;
@@ -77,7 +77,7 @@ void Player::Draw() {
 		break;
 	case Player::MOVING:
 		nSheetOffsetX = ((int)fWidth) * graphicCounter;
-		nSheetOffsetY = ((int)fHeight) *facingDirection;
+		nSheetOffsetY = ((int)fHeight) * facingDirection;
 		break;
 	case Player::DEAD:
 		break;
@@ -86,7 +86,7 @@ void Player::Draw() {
 	}
 	pge.SetPixelMode(olc::Pixel::MASK);
 	pge.DrawPartialSprite(((int)pos.x), ((int)pos.y), sprPlayerSheet, nSheetOffsetX, nSheetOffsetY, (int)fWidth, (int)fHeight, 1, 0);
-	
+
 
 	for (auto& b : listPlayerBullets)
 		if (ProjectileType != 0) {
@@ -95,7 +95,7 @@ void Player::Draw() {
 		else {
 			pge.FillCircle(b.pos, 3, olc::CYAN);
 		}
-	
+
 	pge.SetPixelMode(olc::Pixel::NORMAL);
 }
 

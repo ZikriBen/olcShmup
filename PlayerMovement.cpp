@@ -10,14 +10,15 @@ void PlayerMovement::ManageSpaceKey(float fElapsedTime)
 		int offsetY = player.listProjectileDef[player.ProjectileType].offsetY;
 
 		if (!player.bAutoFire)
-			player.miniAudio.Play(player.souLaserA1);
+			if (player.bSoundOn)
+				player.miniAudio.Play(player.souLaserA1);
 
 		if (player.powerUpLevel == 1) {
 			Bullet b;
 			b.pos = { player.pos.x + offsetX, player.pos.y - offsetY };
 			b.vel = { 0.0f, -200.0f };
 			player.listPlayerBullets.push_back(b);
-			
+
 		}
 		else if (player.powerUpLevel == 2) {
 			Bullet b;
@@ -71,7 +72,7 @@ void PlayerMovement::Update(float fElapsedTime)
 		player.graphicState = Player::MOVING;
 		player.facingDirection = Player::NORTH;
 		player.pos.y -= player.getSpeed() * fElapsedTime;
-		
+
 	}
 
 	// I left this is as you had it in your CommandFactory

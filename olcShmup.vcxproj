@@ -132,6 +132,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LevelGenerator.cpp" />
     <ClCompile Include="PlayerMovement.cpp" />
     <ClCompile Include="ScrollingStarsBG.cpp" />
     <ClCompile Include="Bullet.cpp" />
@@ -142,7 +143,7 @@
   <ItemGroup>
     <ClInclude Include="Artifact.h" />
     <ClInclude Include="Difficulty.h" />
-    <ClInclude Include="Level.h" />
+    <ClInclude Include="LevelGenerator.h" />
     <ClInclude Include="miniaudio.h" />
     <ClInclude Include="PlayerMovement.h" />
     <ClInclude Include="ScrollingStarsBG.h" />

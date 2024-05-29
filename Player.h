@@ -24,7 +24,7 @@ public:
 class Player
 {
 public:
-	Player(olc::PixelGameEngine& pge , olc::MiniAudio& miniAudio);
+	Player(olc::PixelGameEngine& pge, olc::MiniAudio& miniAudio);
 	olc::PixelGameEngine& pge;
 	olc::MiniAudio& miniAudio; // Johnnyg63: We need to inject the miniAudio so we can play the laser sounds when the player is shooting
 	void Update(float);
@@ -40,9 +40,11 @@ public:
 	float getSpeed() { return speed; };
 	void kill() { dead = false; };
 	bool isDead() { return dead; };
+	void setSoundOn(bool soundOn) { bSoundOn = soundOn; }
 	int ProjectileType = 1;
 	int powerUpLevel = 1;
 	bool bAutoFire = false;
+	bool bSoundOn = true;
 	olc::vf2d pos;
 	olc::Sprite* sprPlayerSheet;
 	float fGunReloadTimer;
@@ -56,18 +58,18 @@ public:
 	//CommandFactory* factory;
 	enum { STANDING, MOVING } graphicState;
 	enum { ALIVE, DYING, DEAD } lifeState;
-	enum { NORTH = 0, EAST = 1, WEST = 2} facingDirection;
+	enum { NORTH = 0, EAST = 1, WEST = 2 } facingDirection;
 
 	// Johnnyg63: Lasers sounds for when the user is shooting (Space bar)
 	std::string souLaserA1 = "./assets/sounds/laser_a1.mp3"; // Holds the full path to laser_a1.mp3
-	
+
 private:
 	int powerUpCap = 3;
 	bool dead;
 	float currentHealth;
 	float maxHealth;
 	float speed;
-	InputHandler *ih;
+	InputHandler* ih;
 	float fWidth;
 	float fHeight;
 };
