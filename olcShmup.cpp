@@ -54,7 +54,13 @@ public:
         screenMap["game"] = gameScreen.get();
         screenMap["game_over"] = gameOverScreen.get();
 
-        gameState = GameState::START;
+        gameState = GameState::GAME;
+
+        // For Debug mode
+        if (gameState == GameState::GAME) {
+            gameScreen->Reset();
+            gameScreen->CreateSpawns();
+        }
 
         return true;
     }
