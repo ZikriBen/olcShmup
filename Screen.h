@@ -363,7 +363,8 @@ public:
 
 	void CreateSpawns() {
 		lg.init(pge.ScreenWidth(), pge.ScreenHeight(), gameScreenDifficulty.diffMap["EnemyHealth"], gameScreenDifficulty.diffMap["BossHealth"]);
-		lg.lvlOneGeneate(listSprites, listSpawns);
+		//lg.lvlOneGeneate(listSprites, listSpawns);
+		lg.generateRandomLevel(listSprites, listSpawns, 20, 5, 50);
 	}
 
 	bool Run(float fElapsedTime) {

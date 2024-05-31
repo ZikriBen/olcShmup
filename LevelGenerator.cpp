@@ -1,4 +1,4 @@
-#include "LevelGenerator.h"
+﻿#include "LevelGenerator.h"
 #include "Enemy.h"
 
 void LevelGenerator::init(int32_t screenWidthNew, int32_t screenHeightNew, float enemyHealthNew, float bossHealthNew)
@@ -88,6 +88,19 @@ void LevelGenerator::init(int32_t screenWidthNew, int32_t screenHeightNew, float
 		}
 	};
 
+	Fire_Straigt5 = [&](sSpawn& s, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& listEnemyBullets) {
+		sEnemy& e = *dynamic_cast<sEnemy*>(&s);
+		constexpr float fDelay = 0.5f;
+		e.dataFire[0] += fElapsedTime;
+		if (e.dataFire[0] >= fDelay) {
+			e.dataFire[0] -= fDelay;
+			Bullet b;
+			b.pos = e.pos + (olc::vf2d(((float)e.def->iWidth / 2.0f), ((float)e.def->iHeight)));
+			b.vel = { 0.0f, 180.0f };
+			listEnemyBullets.push_back(b);
+		}
+	};
+
 	Fire_CirclePulse2 = [&](sSpawn& s, float fElapsedTime, float fScrollSpeed, std::list<Bullet>& listEnemyBullets) {
 		sEnemy& e = *dynamic_cast<sEnemy*>(&s);
 		constexpr float fDelay = 1.0f;
@@ -123,6 +136,9 @@ void LevelGenerator::init(int32_t screenWidthNew, int32_t screenHeightNew, float
 			listEnemyBullets.push_back(b);
 		}
 	};
+
+	movementFunctions = { Move_None, Move_Slow, Move_Fast, Move_SinusoidNarrow, Move_SinusoidWide, Move_SinusoidWideInf };
+	firingFunctions = { Fire_Straigt2, Fire_Straigt5, Fire_CirclePulse2 };
 }
 
 void LevelGenerator::lvlOneGeneate(const std::vector<std::unique_ptr<olc::Sprite>> &listSprites, std::list<Spawn*>& listSpawns)
@@ -153,3 +169,52 @@ void LevelGenerator::lvlOneGeneate(const std::vector<std::unique_ptr<olc::Sprite
 	listSpawns.push_back(new sEnemyDefinition(coldTime + 1080.0f, listSprites[2].get(), 0.9f, Move_Slow, Fire_Straigt2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
 	listSpawns.push_back(new sBossDefiniton(coldTime + 1500.0f, listSprites[3].get(), 0.5f, Move_SinusoidWideInf, Fire_CirclePulse2, 20.0f, (listSprites[3].get()->width / 5), listSprites[3].get()->height, 1000));
 }
+
+void LevelGenerator::generateRandomLevel(const std::vector<std::unique_ptr<olc::Sprite>>& listSprites, std::list<Spawn*>& listSpawns, int numEnemies, int numPowerUps, float maxTime) {
+	std::random_device rd;
+	std::mt19937 gen(rd());
+
+	std::uniform_real_distribution<> timeDist(0, maxTime);
+	std::uniform_int_distribution<> enemySpriteDist(0, 2); // Assuming 3 enemy sprites (index 0, 1, 2)
+	std::uniform_int_distribution<> powerUpSpriteDist(4, 6); // Assuming 4 power-up sprites (index 3, 4, 5, 6)
+	std::uniform_int_distribution<> powerUpTypeDist(0, 3);
+	std::uniform_int_distribution<> movementDist(0, movementFunctions.size() - 1);
+	std::uniform_int_distribution<> firingDist(0, firingFunctions.size() - 1);
+	std::uniform_real_distribution<> offsetNorm(0.2, 0.8);
+
+	// Generate enemies
+	for (int i = 0; i < numEnemies; ++i) {
+		float spawnTime = timeDist(gen);
+		spawnTime += i * 60;
+		int spriteIndex = enemySpriteDist(gen);
+		auto moveFunc = movementFunctions[movementDist(gen)];
+		auto fireFunc = firingFunctions[firingDist(gen)];
+		float offset = offsetNorm(gen);
+		int type = powerUpTypeDist(gen);
+		int powerUpSpritIndex = 4 + type;
+
+		listSpawns.push_back(new sEnemyDefinition(spawnTime, listSprites[spriteIndex].get(), offset, moveFunc, fireFunc, enemyHealth, (listSprites[spriteIndex].get()->width), listSprites[spriteIndex].get()->height, 300));
+
+		if (i % (numEnemies / numPowerUps + 1) == 0 && numPowerUps > 0) {
+			listSpawns.push_back(new sPowerUpDefinition(spawnTime, listSprites[powerUpSpritIndex].get(), 0.5f, Move_Bounce, Fire_None, static_cast<PowerUpType>(type), 100));
+			numPowerUps--;
+		}
+	}
+}
+
+	// Generate power-ups
+	/*for (int i = 0; i < numPowerUps; ++i) {
+		float spawnTime = timeDist(gen);
+		spawnTime += i * 60;
+		int spriteIndex = powerUpSpriteDist(gen);
+		auto moveFunc = movementFunctions[0];
+
+		listSpawns.push_back(new sPowerUpDefinition(spawnTime, listSprites[spriteIndex].get(), 0.5f, moveFunc, Fire_None, PowerUpType::DEFAULT, 100));
+	}
+}
+
+void sortSpawnsByTime(std::list<Spawn*>& listSpawns) {
+	listSpawns.sort([](const Spawn* a, const Spawn* b) {
+		return a->dTriggerTime < b->dTriggerTime;
+	});
+}*/
