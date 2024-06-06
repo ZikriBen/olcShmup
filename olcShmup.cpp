@@ -54,7 +54,7 @@ public:
         screenMap["game"] = gameScreen.get();
         screenMap["game_over"] = gameOverScreen.get();
 
-        gameState = GameState::GAME;
+        gameState = GameState::START;
 
         // For Debug mode
         if (gameState == GameState::GAME) {

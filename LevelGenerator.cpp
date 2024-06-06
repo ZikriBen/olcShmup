@@ -146,28 +146,28 @@ void LevelGenerator::lvlOneGeneate(const std::vector<std::unique_ptr<olc::Sprite
 	float coldTime = 120.0f;
 
 	listSpawns.push_back(new sEnemyDefinition(coldTime + 60.0f, listSprites[1].get(), 0.5f, Move_None, Fire_DeathSpiral, enemyHealth, (listSprites[1].get()->width), listSprites[1].get()->height, 300));
-	//listSpawns.push_back(new sPowerUpDefinition(coldTime + 120.0f, listSprites[5].get(), 0.5f, Move_Bounce, Fire_None, PowerUpType::GREEN, 100));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 180.0f, listSprites[1].get(), 0.2f, Move_None, Fire_CirclePulse2, enemyHealth, (listSprites[1].get()->width), listSprites[1].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 180.0f, listSprites[1].get(), 0.8f, Move_None, Fire_CirclePulse2, enemyHealth, (listSprites[1].get()->width), listSprites[1].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 240.0f, listSprites[1].get(), 0.5f, Move_SinusoidNarrow, Fire_Straigt2, enemyHealth, (listSprites[1].get()->width), listSprites[1].get()->height, 300));
-	//listSpawns.push_back(new sPowerUpDefinition(coldTime + 200.00f, listSprites[4].get(), 0.5f, Move_Bounce, Fire_None, PowerUpType::DEFAULT, 100));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 260.0f, listSprites[0].get(), 0.3f, Move_SinusoidWide, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 360.0f, listSprites[0].get(), 0.3f, Move_Fast, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 420.0f, listSprites[0].get(), 0.1f, Move_Fast, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 420.0f, listSprites[0].get(), 0.9f, Move_Fast, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 500.0f, listSprites[0].get(), 0.5f, Move_None, Fire_DeathSpiral, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 560.0f, listSprites[0].get(), 0.5f, Move_None, Fire_CirclePulse2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 600.0f, listSprites[0].get(), 0.6f, Move_Slow, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 720.0f, listSprites[0].get(), 0.4f, Move_Fast, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 780.0f, listSprites[0].get(), 0.7f, Move_SinusoidWide, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
-	//listSpawns.push_back(new sPowerUpDefinition(coldTime + 800.00f, listSprites[6].get(), 0.9f, Move_Bounce, Fire_None, PowerUpType::BLUE, 100));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 840.0f, listSprites[2].get(), 0.3f, Move_None, Fire_Straigt2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 900.0f, listSprites[2].get(), 0.8f, Move_None, Fire_CirclePulse2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
-	//listSpawns.push_back(new sPowerUpDefinition(coldTime + 930.00f, listSprites[7].get(), 0.5f, Move_Bounce, Fire_None, PowerUpType::HEALTH, 100));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 960.0f, listSprites[2].get(), 0.2f, Move_None, Fire_CirclePulse2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 1020.0f, listSprites[2].get(), 0.5f, Move_SinusoidNarrow, Fire_Straigt2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
-	//listSpawns.push_back(new sEnemyDefinition(coldTime + 1080.0f, listSprites[2].get(), 0.9f, Move_Slow, Fire_Straigt2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
-	//listSpawns.push_back(new sBossDefiniton(coldTime + 1500.0f, listSprites[3].get(), 0.5f, Move_SinusoidWideInf, Fire_CirclePulse2, 20.0f, (listSprites[3].get()->width / 5), listSprites[3].get()->height, 1000));
+	listSpawns.push_back(new sPowerUpDefinition(coldTime + 120.0f, listSprites[5].get(), 0.5f, Move_Bounce, Fire_None, PowerUpType::GREEN, 100));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 180.0f, listSprites[1].get(), 0.2f, Move_None, Fire_CirclePulse2, enemyHealth, (listSprites[1].get()->width), listSprites[1].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 180.0f, listSprites[1].get(), 0.8f, Move_None, Fire_CirclePulse2, enemyHealth, (listSprites[1].get()->width), listSprites[1].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 240.0f, listSprites[1].get(), 0.5f, Move_SinusoidNarrow, Fire_Straigt2, enemyHealth, (listSprites[1].get()->width), listSprites[1].get()->height, 300));
+	listSpawns.push_back(new sPowerUpDefinition(coldTime + 200.00f, listSprites[4].get(), 0.5f, Move_Bounce, Fire_None, PowerUpType::DEFAULT, 100));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 260.0f, listSprites[0].get(), 0.3f, Move_SinusoidWide, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 360.0f, listSprites[0].get(), 0.3f, Move_Fast, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 420.0f, listSprites[0].get(), 0.1f, Move_Fast, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 420.0f, listSprites[0].get(), 0.9f, Move_Fast, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 500.0f, listSprites[0].get(), 0.5f, Move_None, Fire_DeathSpiral, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 560.0f, listSprites[0].get(), 0.5f, Move_None, Fire_CirclePulse2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 600.0f, listSprites[0].get(), 0.6f, Move_Slow, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 720.0f, listSprites[0].get(), 0.4f, Move_Fast, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 780.0f, listSprites[0].get(), 0.7f, Move_SinusoidWide, Fire_Straigt2, enemyHealth, (listSprites[0].get()->width), listSprites[0].get()->height, 300));
+	listSpawns.push_back(new sPowerUpDefinition(coldTime + 800.00f, listSprites[6].get(), 0.9f, Move_Bounce, Fire_None, PowerUpType::BLUE, 100));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 840.0f, listSprites[2].get(), 0.3f, Move_None, Fire_Straigt2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 900.0f, listSprites[2].get(), 0.8f, Move_None, Fire_CirclePulse2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
+	listSpawns.push_back(new sPowerUpDefinition(coldTime + 930.00f, listSprites[7].get(), 0.5f, Move_Bounce, Fire_None, PowerUpType::HEALTH, 100));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 960.0f, listSprites[2].get(), 0.2f, Move_None, Fire_CirclePulse2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 1020.0f, listSprites[2].get(), 0.5f, Move_SinusoidNarrow, Fire_Straigt2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
+	listSpawns.push_back(new sEnemyDefinition(coldTime + 1080.0f, listSprites[2].get(), 0.9f, Move_Slow, Fire_Straigt2, enemyHealth, (listSprites[2].get()->width), listSprites[2].get()->height, 300));
+	listSpawns.push_back(new sBossDefiniton(coldTime + 1500.0f, listSprites[3].get(), 0.5f, Move_SinusoidWideInf, Fire_CirclePulse2, 20.0f, (listSprites[3].get()->width / 5), listSprites[3].get()->height, 1000));
 }
 
 void LevelGenerator::generateRandomLevel(const std::vector<std::unique_ptr<olc::Sprite>>& listSprites, std::list<Spawn*>& listSpawns, int numEnemies, int numPowerUps, float maxTime) {
