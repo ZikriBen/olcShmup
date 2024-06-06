@@ -21,7 +21,9 @@
 
 
 #pragma once
-static int gloalScore = 0;
+static int damageScore = 0;
+static int VitalScore = 0;
+static int globalScore = 0;
 static GameDifficulty globalGameDiff = GameDifficulty::NORMAL;
 static bool soundOn = true;
 static bool globalAutoFire = false;
@@ -327,7 +329,7 @@ public:
 	float fEndDelayTimer1 = 0.0f;
 	float fEndDelayTimer2 = 0.0f;
 	float fEndDelay1 = 1.0f;
-	float fEndDelay2 = 1.0f;
+	float fEndDelay2 = 3.0f;
 	bool bGameOn = true;
 	std::vector<std::unique_ptr<olc::Sprite>> listSprites;
 	std::list<Spawn*> listSpawns;
@@ -363,8 +365,8 @@ public:
 
 	void CreateSpawns() {
 		lg.init(pge.ScreenWidth(), pge.ScreenHeight(), gameScreenDifficulty.diffMap["EnemyHealth"], gameScreenDifficulty.diffMap["BossHealth"]);
-		//lg.lvlOneGeneate(listSprites, listSpawns);
-		lg.generateRandomLevel(listSprites, listSpawns, 20, 5, 50);
+		lg.lvlOneGeneate(listSprites, listSpawns);
+		//lg.generateRandomLevel(listSprites, listSpawns, 20, 5, 50);
 	}
 
 	bool Run(float fElapsedTime) {
@@ -451,14 +453,18 @@ public:
 		}
 
 		//HUD
-		pge.DrawString(4, 4, "HEALTH:");
-		pge.FillRect(60, 4, static_cast<int>((player.getCurrentHealth() / static_cast<float>(player.getMaxHealth()) * 576.0)), 8, olc::GREEN); // Scale player's health bar
-		pge.DrawString(4, 16, "SCORE: " + std::to_string(gloalScore));
 
+		if (player.getCurrentHealth() > 1) {
+			pge.DrawString(4, 4, "HEALTH:");
+			pge.FillRect(60, 4, static_cast<int>((player.getCurrentHealth() / static_cast<float>(player.getMaxHealth()) * 576.0)), 8, olc::GREEN); // Scale player's health bar
+			pge.DrawString(4, 16, "SCORE: " + std::to_string(damageScore));
+		}
+		
 		if (pBoss) {
 			pge.DrawString(4, 450, "BOSS:");
 			pge.FillRect(60, 450, static_cast<int>((pBoss.get()->def->fHealth / pBoss.get()->maxHealth) * 576.0f), 8, olc::RED);
 		}
+		
 
 		cleanUp();
 
@@ -472,6 +478,8 @@ public:
 			if (fEndDelayTimer1 < fEndDelay1) {
 				return true;
 			}
+			playerMovement.setEnable(false);
+			player.bResetToPos = true;
 
 			healthDecrementTimer += fElapsedTime;
 
@@ -480,13 +488,25 @@ public:
 
 				if (player.getCurrentHealth() > 1) {
 					player.setCurrentHealth(player.getCurrentHealth() - 1);
-					gloalScore += 100;
+					VitalScore += 100;
 					if (soundOn)
 						this->miniAudio.Play(this->souBeep);
 					fEndDelayTimer2 = 0.0f;
 				}
 			}
-
+			
+			globalScore = damageScore + VitalScore;
+			std::ostringstream sDamageScore;
+			std::ostringstream sVitalScore;
+			std::ostringstream sGlobalScore;
+			sDamageScore << std::setw(6) << std::setfill('0') << damageScore;
+			sVitalScore << std::setw(6) << std::setfill('0') << VitalScore;
+			sGlobalScore << std::setw(6) << std::setfill('0') << globalScore;
+			
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize("DAMAGE: " + sDamageScore.str()).x), 100, "DAMAGE: " + sDamageScore.str(), olc::WHITE, 2);
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize("VITAL : " + sVitalScore.str()).x), 120, "VITAL : " + sVitalScore.str(), olc::WHITE, 2);
+			pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize("SCORE : " + sGlobalScore.str()).x), 140, "SCORE : " + sGlobalScore.str(), olc::WHITE, 2);
+			
 			fEndDelayTimer2 += fElapsedTime;
 
 			if (fEndDelayTimer2 < fEndDelay2) {
@@ -548,12 +568,15 @@ public:
 		player.setMaxHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
 		player.setCurrentHealth(gameScreenDifficulty.diffMap["PlayerHealth"]);
 		player.setSoundOn(soundOn);
+		playerMovement.setEnable(true);
 		fWorldSpeed = gameScreenDifficulty.diffMap["WorldSpeed"];
 		bPlayerExp = false;
 		player.bAutoFire = globalAutoFire;
 		fDescTimer = 0.0f;
 		dWorldPos = 0;
-		gloalScore = 0;
+		VitalScore = 0;
+		damageScore = 0;
+		globalScore = 0;
 		fEndDelayTimer1 = 0.0f;
 		fEndDelayTimer2 = 0.0f;
 	};
@@ -606,7 +629,7 @@ public:
 					b.remove = true;
 					e->def->fHealth -= 1.0f;
 					if (e->def->fHealth <= 0) {
-						gloalScore += gameScreenDifficulty.diffMap["ScoreFactor"] * e->def->score;
+						damageScore += gameScreenDifficulty.diffMap["ScoreFactor"] * e->def->score;
 						// Johnngy63: Play explosion
 						if (soundOn)
 							this->miniAudio.Play(this->souBigExplosion);
@@ -646,7 +669,7 @@ public:
 				else if (p.def->type == PowerUpType::HEALTH) {
 					player.setCurrentHealth(std::min(player.getCurrentHealth() + (player.getMaxHealth() / 3), player.getMaxHealth()));
 				}
-				gloalScore += p.def->score;
+				damageScore += p.def->score;
 				p.remove = true;
 			}
 		}
@@ -825,7 +848,7 @@ public:
 		pge.Clear(olc::BLACK);
 		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint1).x), 100, textToPrint1, olc::WHITE, 2);
 		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint2).x / 2), 220, textToPrint2, olc::WHITE);
-		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(std::to_string(gloalScore)).x), 250, std::to_string(gloalScore), olc::WHITE, 2);
+		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(std::to_string(globalScore)).x), 250, std::to_string(globalScore), olc::WHITE, 2);
 		pge.DrawString((pge.ScreenWidth() / 2) - (pge.GetTextSize(textToPrint3).x / 2), pge.ScreenHeight() - 60, textToPrint3, olc::WHITE);
 
 

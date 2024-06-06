@@ -62,6 +62,9 @@ PlayerMovement::PlayerMovement(olc::PixelGameEngine& pge, Player& player) : pge(
 
 void PlayerMovement::Update(float fElapsedTime)
 {
+	if (!bEnable) {
+		return;
+	}
 	// Reset player to standing position
 	player.graphicState = Player::STANDING;
 	player.facingDirection = Player::NORTH;

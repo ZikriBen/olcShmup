@@ -9,8 +9,9 @@ class PlayerMovement
 {
 
 private:
-
+	bool bEnable = true;
 	void ManageSpaceKey(float fElapsedTime);
+	
 	
 public:
 	PlayerMovement(olc::PixelGameEngine& pge, Player& player);
@@ -23,5 +24,5 @@ public:
 	/// </summary>
 	/// <param name="fElapsedTime">fElapsedTime</param>
 	void Update(float fElapsedTime);
-
+	void setEnable(bool isEnable) { bEnable = isEnable; }
 };

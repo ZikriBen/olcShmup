@@ -34,6 +34,7 @@ public:
 	float getCurrentHealth() { return currentHealth; };
 	float getMaxHealth() { return maxHealth; };
 	void reset();
+	void resetToMid(float fElapsedTime);
 	void setMaxHealth(float newHealth) { maxHealth = newHealth; };
 	void setCurrentHealth(float newHealth) { currentHealth = newHealth; };
 	void setPowerUpLeve(int change) { powerUpLevel = std::max(1, std::min(powerUpCap, powerUpLevel + change)); };
@@ -45,6 +46,7 @@ public:
 	int powerUpLevel = 1;
 	bool bAutoFire = false;
 	bool bSoundOn = true;
+	bool bResetToPos = false;
 	olc::vf2d pos;
 	olc::Sprite* sprPlayerSheet;
 	float fGunReloadTimer;
