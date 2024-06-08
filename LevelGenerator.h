@@ -1,5 +1,6 @@
 #pragma once
 #include "Spawn.h"
+#include <random>
 
 constexpr float PI = 3.14159f;
 
@@ -9,7 +10,8 @@ public:
 	LevelGenerator() {};
 	void init(int32_t screenWidth, int32_t screenHeight, float enemyHealth, float bossHealth);
 	void lvlOneGeneate(const std::vector<std::unique_ptr<olc::Sprite>>& listSprites, std::list<Spawn*>& listSpawns);
-
+	void generateRandomLevel(const std::vector<std::unique_ptr<olc::Sprite>>& listSprites, std::list<Spawn*>& listSpawns, int numEnemies, int numPowerUps, float maxTime);
+	void sortSpawnsByTime(std::list<Spawn*>& listSpawns);
 private:
 	int screenWidth;
 	int screenHeight;
@@ -26,6 +28,10 @@ private:
 	std::function<void(sSpawn&, float, float, std::list<Bullet>&)> Fire_DeathSpiral;
 	std::function<void(sSpawn&, float, float, std::list<Bullet>&)> Fire_None;
 	std::function<void(sSpawn&, float, float, std::list<Bullet>&)> Fire_Straigt2;
+	std::function<void(sSpawn&, float, float, std::list<Bullet>&)> Fire_Straigt5;
 	std::function<void(sSpawn&, float, float, std::list<Bullet>&)> Fire_CirclePulse2;
+
+	std::vector<std::function<void(sSpawn&, float, float)>> movementFunctions;
+	std::vector<std::function<void(sSpawn&, float, float, std::list<Bullet>&)>> firingFunctions;
 };
 

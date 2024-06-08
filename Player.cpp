@@ -39,7 +39,10 @@ void Player::Update(float fElapsedTime) {
 		lifeState = Player::DYING;
 		return;
 	}
-
+	if (bResetToPos) {
+		resetToMid(fElapsedTime);
+		return;
+	}
 	fGraphicTimer += fElapsedTime;
 	if (fGraphicTimer > 0.2f) {
 		fGraphicTimer -= 0.2f;
@@ -87,7 +90,6 @@ void Player::Draw() {
 	pge.SetPixelMode(olc::Pixel::MASK);
 	pge.DrawPartialSprite(((int)pos.x), ((int)pos.y), sprPlayerSheet, nSheetOffsetX, nSheetOffsetY, (int)fWidth, (int)fHeight, 1, 0);
 
-
 	for (auto& b : listPlayerBullets)
 		if (ProjectileType != 0) {
 			pge.DrawSprite(b.pos, listProjectileDef[ProjectileType].spr);
@@ -113,4 +115,27 @@ void Player::reset()
 	dead = false;
 	ProjectileType = 1;
 	powerUpLevel = 1;
+	bResetToPos = false;
+}
+
+void Player::resetToMid(float fElapsedTime) {
+
+	if (pos.y <= ((float)pge.ScreenHeight() / 2.0f)) {
+		pos.y += speed * fElapsedTime;
+	}
+
+	if (pos.x >= (((float)pge.ScreenWidth() / 2.0f) - this->fWidth / 2.0f) + 1.0f) {
+		graphicState = Player::MOVING;
+		facingDirection = Player::WEST;
+		pos.x -= speed * fElapsedTime;
+	}
+	else if (pos.x <= (((float)pge.ScreenWidth() / 2.0f) - this->fWidth / 2.0f) - 1.0f) {
+		graphicState = Player::MOVING;
+		facingDirection = Player::EAST;
+		pos.x += speed * fElapsedTime;
+	}
+	else {
+		graphicState = Player::STANDING;
+		facingDirection = Player::NORTH;
+	}
 }
